@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nutriscan/config/firebase_config.dart';
 import 'package:nutriscan/models/food.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class CloudBackupService {
   static final CloudBackupService _instance = CloudBackupService._internal();
@@ -62,6 +63,31 @@ class CloudBackupService {
       await _updateAuthState();
 
       // Verify the sign-in was successful
+      final isSuccess =
+          userCredential.user != null && _isSignedIn && _userId != null;
+      return isSuccess;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> signInWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+
+      final userCredential = await _auth.signInWithCredential(oauthCredential);
+      await _updateAuthState();
+
       final isSuccess =
           userCredential.user != null && _isSignedIn && _userId != null;
       return isSuccess;

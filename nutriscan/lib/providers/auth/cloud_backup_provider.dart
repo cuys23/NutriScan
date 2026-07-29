@@ -108,6 +108,41 @@ class CloudBackupProvider with ChangeNotifier {
     }
   }
 
+  // Sign in with Apple
+  Future<bool> signInWithApple({String language = 'en'}) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _cloudBackupService.signInWithApple();
+
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      final isActuallySignedIn = _auth.currentUser != null;
+
+      if (isActuallySignedIn) {
+        _isSignedIn = true;
+        await _loadBackupInfo();
+        _error = null;
+        notifyListeners();
+        return true;
+      } else {
+        _error = AppLocalizations.getString('login_failed', language);
+        _isSignedIn = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _error = AppLocalizations.getString('login_failed', language);
+      _isSignedIn = false;
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // Sign out
   Future<void> signOut({String language = 'en'}) async {
     _isLoading = true;

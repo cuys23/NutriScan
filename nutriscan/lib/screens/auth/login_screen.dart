@@ -182,6 +182,110 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 },
               ),
+              const SizedBox(height: 14),
+
+              // Apple Sign In Button (Sleek Premium Black Button)
+              Consumer2<CloudBackupProvider, ThemeProvider>(
+                builder: (context, backupProvider, themeProvider, child) {
+                  final currentLanguage =
+                      context.read<LanguageProvider>().currentLanguage;
+
+                  return Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: backupProvider.isLoading
+                          ? null
+                          : () async {
+                              final success = await backupProvider
+                                  .signInWithApple(language: currentLanguage);
+
+                              if (success && mounted) {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setBool('has_logged_in', true);
+
+                                await Future.delayed(
+                                  const Duration(milliseconds: 500),
+                                );
+
+                                if (!context.mounted) return;
+                                if (backupProvider.isSignedIn) {
+                                  Navigator.of(context).pushReplacementNamed(
+                                    '/main',
+                                  );
+                                }
+                              } else {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      AppLocalizations.getString(
+                                        'login_failed',
+                                        currentLanguage,
+                                      ),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    duration: const Duration(seconds: 4),
+                                  ),
+                                );
+                              }
+                            },
+                      icon: backupProvider.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Icon(
+                              Icons.apple,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                      label: Text(
+                        backupProvider.isLoading
+                            ? AppLocalizations.getString(
+                                'signing_in',
+                                currentLanguage,
+                              )
+                            : AppLocalizations.getString(
+                                'sign_in_with_apple',
+                                currentLanguage,
+                              ),
+                        style: themeProvider.getFontForCurrentLanguage(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 24),
 
               // Skip Button

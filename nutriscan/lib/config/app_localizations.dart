@@ -337,6 +337,7 @@ class AppLocalizations {
       'login_description':
           'Sign in with your Google account to enable cloud backup and sync your data across all devices.',
       'sign_in_with_google': 'Sign in with Google',
+      'sign_in_with_apple': 'Sign in with Apple',
       'signing_in': 'Signing in...',
       'skip_for_now': 'Skip for now',
       'login_failed': 'Login failed. Please try again.',
