@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               }
                             },
-                      icon: backupProvider.isLoading
+                      icon: backupProvider.isGoogleLoading
                           ? const SizedBox(
                               width: 20,
                               height: 20,
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               height: 26,
                             ),
                       label: Text(
-                        backupProvider.isLoading
+                        backupProvider.isGoogleLoading
                             ? AppLocalizations.getString(
                                 'signing_in',
                                 currentLanguage,
@@ -241,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               }
                             },
-                      icon: backupProvider.isLoading
+                      icon: backupProvider.isAppleLoading
                           ? const SizedBox(
                               width: 20,
                               height: 20,
@@ -258,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               size: 28,
                             ),
                       label: Text(
-                        backupProvider.isLoading
+                        backupProvider.isAppleLoading
                             ? AppLocalizations.getString(
                                 'signing_in',
                                 currentLanguage,

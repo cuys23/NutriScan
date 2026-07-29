@@ -11,6 +11,8 @@ class CloudBackupProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
   bool _isSignedIn = false;
   String? _error;
   Map<String, dynamic>? _backupInfo;
@@ -19,6 +21,8 @@ class CloudBackupProvider with ChangeNotifier {
   bool _isRestoring = false;
 
   bool get isLoading => _isLoading;
+  bool get isGoogleLoading => _isGoogleLoading;
+  bool get isAppleLoading => _isAppleLoading;
   bool get isSignedIn => _isSignedIn;
   String? get error => _error;
   Map<String, dynamic>? get backupInfo => _backupInfo;
@@ -74,6 +78,7 @@ class CloudBackupProvider with ChangeNotifier {
   // Sign in with Google
   Future<bool> signInWithGoogle({String language = 'en'}) async {
     _isLoading = true;
+    _isGoogleLoading = true;
     _error = null;
     notifyListeners();
 
@@ -104,6 +109,7 @@ class CloudBackupProvider with ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
+      _isGoogleLoading = false;
       notifyListeners();
     }
   }
@@ -111,6 +117,7 @@ class CloudBackupProvider with ChangeNotifier {
   // Sign in with Apple
   Future<bool> signInWithApple({String language = 'en'}) async {
     _isLoading = true;
+    _isAppleLoading = true;
     _error = null;
     notifyListeners();
 
@@ -139,6 +146,7 @@ class CloudBackupProvider with ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
+      _isAppleLoading = false;
       notifyListeners();
     }
   }
