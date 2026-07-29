@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nutriscan/config/firebase_config.dart';
 import 'package:nutriscan/models/food.dart';
@@ -92,6 +93,7 @@ class CloudBackupService {
           userCredential.user != null && _isSignedIn && _userId != null;
       return isSuccess;
     } catch (e) {
+      debugPrint('SignInWithApple Error: $e');
       return false;
     }
   }
