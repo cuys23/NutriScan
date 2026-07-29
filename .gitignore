@@ -1,0 +1,7 @@
+.DS_Store
+.history
+**/build/
+**.dart_tool/
+**/ios/Pods/
+**/ios/.symlinks/
+**/android/.gradle/

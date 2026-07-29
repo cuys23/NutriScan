@@ -1,0 +1,243 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+
+/// ═══════════════════════════════════════════════════════════════════
+/// ADS & COIN CONFIGURATION
+/// ═══════════════════════════════════════════════════════════════════
+///
+/// This file contains all configurable settings for:
+/// • AdMob ads (Banner, Interstitial, Rewarded, App Open)
+/// • Coin system (Rewards, Costs, Initial balance)
+/// • Ad timing and frequency controls
+///
+/// QUICK CONFIGURATION GUIDE:
+/// ──────────────────────────────────────────────────────────────────
+///
+/// 💰 COIN SYSTEM (Lines 135-143):
+///    • initialCoins        → Starting coins for new users (default: 5)
+///    • coinsPerRewardedAd  → Coins earned per ad watch (default: 1)
+///    • coinsPerScan        → Cost per food scan (default: 5)
+///
+/// 🎯 INTERSTITIAL ADS (Lines 107-119):
+///    • interstitialMinCooldown    → Minutes between ads (default: 5)
+///    • scansBeforeInterstitial    → Scans before showing ad (default: 2)
+///
+/// 🎁 REWARDED ADS (Lines 145-150):
+///    • rewardedAdCooldown    → Minutes between ads (default: 3)
+///    • maxRewardedAdsPerDay  → Daily limit (default: 5)
+///
+/// 📱 BANNER ADS:
+///    • Size: 320x50 (standard, non-configurable)
+///    • Location: Footer of main screens
+///
+/// ═══════════════════════════════════════════════════════════════════
+
+class AdsConfig {
+  // Current environment (automatic based on build mode)
+  static const bool _isTestMode = kDebugMode;
+
+  // Global switch to enable/disable ads
+  static const bool adsEnabled = true;
+
+  // Test Ad Unit IDs (replace with your actual ad unit IDs for production)
+  static const String _androidTestInterstitialAdUnitId =
+      'ca-app-pub-3940256099942544/1033173712';
+  static const String _iosTestInterstitialAdUnitId =
+      'ca-app-pub-3940256099942544/4411468910';
+
+  // App Open Ad test IDs - these are the correct format for app open ads
+  static const String _androidTestOpenAdUnitId =
+      'ca-app-pub-3940256099942544/9257395921';
+  static const String _iosTestOpenAdUnitId =
+      'ca-app-pub-3940256099942544/5575463023';
+
+  // Rewarded Ad test IDs
+  static const String _androidTestRewardedAdUnitId =
+      'ca-app-pub-3940256099942544/5224354917';
+  static const String _iosTestRewardedAdUnitId =
+      'ca-app-pub-3940256099942544/1712485313';
+
+  // Banner Ad test IDs (Inline Adaptive)
+  static const String _androidTestBannerAdUnitId =
+      'ca-app-pub-3940256099942544/9214589741';
+  static const String _iosTestBannerAdUnitId =
+      'ca-app-pub-3940256099942544/2435281174';
+
+  // Production Ad Unit IDs (replace with your actual ad unit IDs)
+  static const String _androidProductionInterstitialAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static const String _iosProductionInterstitialAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static const String _androidProductionOpenAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static const String _iosProductionOpenAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static const String _androidProductionRewardedAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static const String _iosProductionRewardedAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static const String _androidProductionBannerAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  static const String _iosProductionBannerAdUnitId =
+      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+
+
+  // Get interstitial ad unit ID based on platform
+  static String get interstitialAdUnitId {
+    if (_isTestMode) {
+      return Platform.isAndroid
+          ? _androidTestInterstitialAdUnitId
+          : _iosTestInterstitialAdUnitId;
+    } else {
+      return Platform.isAndroid
+          ? _androidProductionInterstitialAdUnitId
+          : _iosProductionInterstitialAdUnitId;
+    }
+  }
+
+  // Get open ad unit ID based on platform
+  static String get openAdUnitId {
+    if (_isTestMode) {
+      return Platform.isAndroid
+          ? _androidTestOpenAdUnitId
+          : _iosTestOpenAdUnitId;
+    } else {
+      return Platform.isAndroid
+          ? _androidProductionOpenAdUnitId
+          : _iosProductionOpenAdUnitId;
+    }
+  }
+
+  // Get rewarded ad unit ID based on platform
+  static String get rewardedAdUnitId {
+    if (_isTestMode) {
+      return Platform.isAndroid
+          ? _androidTestRewardedAdUnitId
+          : _iosTestRewardedAdUnitId;
+    } else {
+      return Platform.isAndroid
+          ? _androidProductionRewardedAdUnitId
+          : _iosProductionRewardedAdUnitId;
+    }
+  }
+
+  // Get banner ad unit ID based on platform
+  static String get bannerAdUnitId {
+    if (_isTestMode) {
+      return Platform.isAndroid
+          ? _androidTestBannerAdUnitId
+          : _iosTestBannerAdUnitId;
+    } else {
+      return Platform.isAndroid
+          ? _androidProductionBannerAdUnitId
+          : _iosProductionBannerAdUnitId;
+    }
+  }
+
+  // ===== AD LOADING CONFIGURATION =====
+  static const int maxRetryAttempts = 3;
+  static const Duration retryDelay = Duration(seconds: 5);
+  static const Duration adLoadTimeout = Duration(seconds: 10);
+  static const Duration preloadDelay = Duration(milliseconds: 500);
+
+  // ===== INTERSTITIAL AD TIMING CONTROL =====
+  // Minimum time between interstitial ads (configurable: 1-60 minutes recommended)
+  static const Duration interstitialMinCooldown = Duration(
+    minutes: 5,
+  ); // Change this value to control ad frequency (e.g., Duration(minutes: 10))
+
+  // Number of scans before showing interstitial ad
+  static const int scansBeforeInterstitial =
+      2; // Shows ad after 2 scans in same day
+
+  static const Duration interstitialCooldown = Duration(minutes: 2);
+  static const int minActionsBeforeInterstitial = 3;
+  static const Duration interstitialShowDelay = Duration(milliseconds: 300);
+  static const Duration interstitialDismissCooldown = Duration(seconds: 5);
+
+  // Interstitial ad frequency control
+  static const int maxInterstitialsPerSession = 5;
+  static const Duration interstitialSessionReset = Duration(hours: 24);
+
+  // ===== APP OPEN AD TIMING CONTROL =====
+  static const Duration openAdCooldown = Duration(
+    minutes: 4,
+  ); // Standard cooldown
+  static const Duration openAdMinCooldown = Duration(
+    seconds: 30,
+  ); // Minimum between open ads
+  static const Duration openAdLoadTimeout = Duration(seconds: 5);
+  static const Duration openAdShowDelay = Duration(milliseconds: 500);
+  static const Duration openAdDismissCooldown = Duration(seconds: 10);
+
+  // App open ad frequency control
+  static const int maxOpenAdsPerSession = 3;
+  static const Duration openAdSessionReset = Duration(hours: 12);
+
+  // ===== COIN SYSTEM CONFIGURATION =====
+  // Initial coins given to new users
+  static const int initialCoins = 5; // Just 1 free scan initially
+
+  // Coins earned per rewarded ad
+  static const int coinsPerRewardedAd = 1; // Requires 5 ads for one scan
+
+  // Coins cost per food scan
+  static const int coinsPerScan = 5;
+
+  // ===== REWARDED AD TIMING CONTROL =====
+  static const Duration rewardedAdCooldown = Duration(minutes: 3);
+  static const Duration rewardedAdLoadTimeout = Duration(seconds: 10);
+  static const Duration rewardedAdShowDelay = Duration(milliseconds: 300);
+  static const int maxRewardedAdsPerDay = 5; // Only enough for 1 free scan per day
+  static const Duration rewardedAdDailyReset = Duration(hours: 24);
+
+  // ===== SESSION TIMING CONTROL =====
+  static const Duration sessionTimeout = Duration(
+    minutes: 30,
+  ); // App session timeout
+  static const Duration backgroundTimeThreshold = Duration(
+    seconds: 30,
+  ); // Time in background before showing open ad
+  static const Duration foregroundTimeRequired = Duration(
+    seconds: 5,
+  ); // Time in foreground before allowing ads
+
+  // ===== AD SHOWING CONDITIONS =====
+  static const Duration minimumAppUsageTime = Duration(
+    minutes: 1,
+  ); // Minimum app usage before showing ads
+  static const Duration maximumAdFrequency = Duration(
+    minutes: 15,
+  ); // Maximum frequency of any ad type
+  static const int maxTotalAdsPerHour = 8;
+  static const Duration hourlyAdReset = Duration(hours: 1);
+
+  // ===== HELPER METHODS =====
+
+  /// Get the appropriate cooldown duration
+  static Duration getInterstitialCooldown() {
+    return interstitialCooldown;
+  }
+
+  /// Get the appropriate open ad cooldown
+  static Duration getOpenAdCooldown() {
+    return openAdCooldown;
+  }
+
+  /// Check if we're in test mode
+  static bool get isTestMode => _isTestMode;
+
+  /// Get current environment name
+  static String get environment => _isTestMode ? 'TEST' : 'PRODUCTION';
+
+  /// Get total ads per hour limit
+  static int getMaxAdsPerHour() {
+    return maxTotalAdsPerHour;
+  }
+
+  /// Get minimum app usage time before showing ads
+  static Duration getMinimumUsageTime() {
+    return minimumAppUsageTime;
+  }
+}
+
