@@ -93,6 +93,11 @@ class CloudBackupService {
           userCredential.user != null && _isSignedIn && _userId != null;
       return isSuccess;
     } catch (e) {
+      if (e is SignInWithAppleAuthorizationException &&
+          e.code == AuthorizationErrorCode.canceled) {
+        debugPrint('User canceled Apple Sign In or Apple ID not signed in on device.');
+        return false;
+      }
       debugPrint('SignInWithApple Error: $e');
       return false;
     }
