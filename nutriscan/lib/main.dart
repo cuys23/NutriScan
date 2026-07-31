@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -44,6 +45,14 @@ Future<void> _bootstrap() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // ponytail: no Apple/Google IAP verification credentials yet — route
+    // Cloud Functions calls to the local emulator (`npm run serve` in
+    // functions/) instead of production during debug builds. Remove once a
+    // real Apple Developer / Play Console account is wired up.
+    if (kDebugMode) {
+      FirebaseFunctions.instance.useFunctionsEmulator('127.0.0.1', 5001);
+    }
 
     // Route Flutter framework errors and uncaught async errors to Crashlytics.
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;

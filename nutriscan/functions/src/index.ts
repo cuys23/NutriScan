@@ -266,8 +266,15 @@ export const verifyPurchase = onCall(
     const { platform, productId, verificationData } = request.data;
     const uid = request.auth.uid;
 
-    const result =
-      platform === "ios"
+    // ponytail: no Apple Developer / Play Console account yet, so the real
+    // App Store/Play server verification below can't authenticate. Trusts the
+    // client-reported purchase instead. Flip IAP_TEST_MODE to false once real
+    // APPLE_ISSUER_ID/KEY_ID/PRIVATE_KEY or GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+    // are set from a real account, and redeploy.
+    const IAP_TEST_MODE = true;
+    const result = IAP_TEST_MODE
+      ? { isActive: true, expiryDate: Date.now() + 30 * 24 * 60 * 60 * 1000 }
+      : platform === "ios"
         ? await verifyAppleTransaction(verificationData)
         : await verifyGooglePlaySubscription(productId, verificationData);
 
