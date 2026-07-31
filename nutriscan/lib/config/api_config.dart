@@ -1,11 +1,6 @@
 class ApiConfig {
-  static const String _groqApiKey = String.fromEnvironment('GROQ_API_KEY');
-
-  static String get groqApiKey => 
-      _groqApiKey.isEmpty ? 'YOUR_GROQ_API_KEY_HERE' : _groqApiKey;
-
+  // The Groq API key and base URL used to live here and ship inside the
+  // client binary — moved server-side into the `groqChatCompletion` Cloud
+  // Function (functions/src/index.ts) so the real key is never in the app.
   static const String groqModel = 'qwen/qwen3.6-27b';
-
-  static String get groqBaseUrl =>
-      'https://api.groq.com/openai/v1/chat/completions';
 }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 
 import 'package:image/image.dart' as img;
@@ -10,26 +10,25 @@ import 'package:nutriscan/models/chat_message.dart';
 import 'package:nutriscan/models/meal_plan.dart';
 
 class GroqService {
-  static String get _baseUrl => ApiConfig.groqBaseUrl;
-  static String get _apiKey => ApiConfig.groqApiKey;
   static String get _model => ApiConfig.groqModel;
 
-  late final Dio _dio;
+  final HttpsCallable _groqCallable = FirebaseFunctions.instance
+      .httpsCallable(
+        'groqChatCompletion',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 90)),
+      );
 
-  GroqService() {
-    _dio = Dio();
-    _dio.options.connectTimeout = const Duration(seconds: 30);
-    _dio.options.receiveTimeout = const Duration(seconds: 30);
-    _dio.options.sendTimeout = const Duration(seconds: 30);
-
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onError: (error, handler) {
-          debugPrint('GroqService API Error: ${error.message}');
-          handler.next(error);
-        },
-      ),
+  /// Sends a Groq chat-completion request through the `groqChatCompletion`
+  /// Cloud Function instead of calling api.groq.com directly — keeps the
+  /// Groq API key server-side and lets the function enforce a real per-user
+  /// daily rate limit (see functions/src/index.ts).
+  Future<Map<String, dynamic>> _callGroq(
+    Map<String, dynamic> requestBody,
+  ) async {
+    final result = await _groqCallable.call<Map<String, dynamic>>(
+      requestBody,
     );
+    return Map<String, dynamic>.from(result.data);
   }
 
   static String _mimeTypeFromFile(File file) {
@@ -153,21 +152,15 @@ class GroqService {
         "max_tokens": 256,
       };
 
-      final response = await _dio.post(
-        _baseUrl,
-        data: requestBody,
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'NutriScan/2.1.2',
-            'Authorization': 'Bearer $_apiKey',
-          },
-        ),
-      );
+      Map<String, dynamic> responseData;
+      try {
+        responseData = await _callGroq(requestBody);
+      } catch (e) {
+        debugPrint('groqChatCompletion error in isFoodImage: $e');
+        return _fallbackAllow(imageFile);
+      }
 
-      if (response.statusCode != 200) return _fallbackAllow(imageFile);
-
-      String content = _extractContentFromResponse(response.data);
+      String content = _extractContentFromResponse(responseData);
       if (content.isEmpty) return true;
 
       content = content
@@ -298,74 +291,43 @@ class GroqService {
         "max_tokens": 2048,
       };
 
-      final response = await _dio.post(
-        _baseUrl,
-        data: requestBody,
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'NutriScan/2.1.2',
-            'Authorization': 'Bearer $_apiKey',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        final content = _extractContentFromResponse(response.data);
-        if (content.isEmpty) {
-          throw Exception(getLocalizedErrorMessage('parse_error', language));
-        }
-        final jsonStart = content.indexOf('{');
-        final jsonEnd = content.lastIndexOf('}') + 1;
-        if (jsonStart != -1 && jsonEnd > jsonStart) {
-          final jsonString = content.substring(jsonStart, jsonEnd);
-          final Map<String, dynamic> result =
-              json.decode(jsonString) as Map<String, dynamic>;
-          return result;
-        }
+      final responseData = await _callGroq(requestBody);
+      final content = _extractContentFromResponse(responseData);
+      if (content.isEmpty) {
         throw Exception(getLocalizedErrorMessage('parse_error', language));
-      } else {
-        throw Exception(
-          getLocalizedErrorMessage('api_failed', language, {
-            'status': response.statusCode.toString(),
-          }),
-        );
       }
-    } on DioException catch (e) {
-      debugPrint('Dio error in analyzeFoodImage: ${e.message}');
-      String errorMessage = getLocalizedErrorMessage('network_error', language);
-
-      switch (e.type) {
-        case DioExceptionType.connectionTimeout:
-          errorMessage = getLocalizedErrorMessage('connection_timeout', language);
-          break;
-        case DioExceptionType.receiveTimeout:
+      final jsonStart = content.indexOf('{');
+      final jsonEnd = content.lastIndexOf('}') + 1;
+      if (jsonStart != -1 && jsonEnd > jsonStart) {
+        final jsonString = content.substring(jsonStart, jsonEnd);
+        final Map<String, dynamic> result =
+            json.decode(jsonString) as Map<String, dynamic>;
+        return result;
+      }
+      throw Exception(getLocalizedErrorMessage('parse_error', language));
+    } on FirebaseFunctionsException catch (e) {
+      debugPrint('groqChatCompletion error in analyzeFoodImage: ${e.code} ${e.message}');
+      String errorMessage;
+      switch (e.code) {
+        case 'deadline-exceeded':
           errorMessage = getLocalizedErrorMessage('response_timeout', language);
           break;
-        case DioExceptionType.connectionError:
+        case 'unavailable':
           errorMessage = getLocalizedErrorMessage('connection_failed', language);
           break;
-        case DioExceptionType.badResponse:
-          if (e.response?.statusCode == 400) {
-            errorMessage = getLocalizedErrorMessage('invalid_request', language);
-          } else if (e.response?.statusCode == 401) {
-            errorMessage = getLocalizedErrorMessage('invalid_api_key', language);
-          } else if (e.response?.statusCode == 403) {
-            errorMessage = getLocalizedErrorMessage('access_denied', language);
-          } else if (e.response?.statusCode == 429) {
-            errorMessage = getLocalizedErrorMessage('rate_limit', language);
-          } else {
-            errorMessage = getLocalizedErrorMessage('server_error', language, {
-              'status': e.response?.statusCode.toString() ?? 'unknown',
-            });
-          }
+        case 'invalid-argument':
+          errorMessage = getLocalizedErrorMessage('invalid_request', language);
+          break;
+        case 'unauthenticated':
+          errorMessage = getLocalizedErrorMessage('access_denied', language);
+          break;
+        case 'resource-exhausted':
+          errorMessage = getLocalizedErrorMessage('rate_limit', language);
           break;
         default:
-          errorMessage = getLocalizedErrorMessage(
-            'network_error_generic',
-            language,
-            {'message': e.message ?? 'unknown'},
-          );
+          errorMessage = getLocalizedErrorMessage('server_error', language, {
+            'status': e.code,
+          });
       }
       throw Exception(errorMessage);
     } catch (e) {
@@ -561,34 +523,20 @@ Rules:
         "temperature": 0.45,
         "top_p": 0.95,
         "max_tokens": 8192,
+        "receiveTimeoutMs": 90000,
       };
 
-      final response = await _dio.post(
-        _baseUrl,
-        data: requestBody,
-        options: Options(
-          receiveTimeout: const Duration(seconds: 90),
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'NutriScan/2.1.2',
-            'Authorization': 'Bearer $_apiKey',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        String content = _extractContentFromResponse(response.data);
-        if (content.isEmpty) throw Exception(getLocalizedErrorMessage('parse_error', language));
-        content = content.replaceAll(RegExp(r'^```(?:json)?\s*'), '').replaceAll(RegExp(r'\s*```\s*$'), '').trim();
-        final jsonStart = content.indexOf('{');
-        if (jsonStart == -1) throw Exception(getLocalizedErrorMessage('parse_error', language));
-        final jsonEnd = _findMatchingBraceEnd(content, jsonStart);
-        if (jsonEnd == null) throw Exception(getLocalizedErrorMessage('parse_error', language));
-        final jsonString = content.substring(jsonStart, jsonEnd);
-        final Map<String, dynamic> result = json.decode(jsonString) as Map<String, dynamic>;
-        return MealPlan.fromMap(result);
-      }
-      throw Exception("Failed to generate plan");
+      final responseData = await _callGroq(requestBody);
+      String content = _extractContentFromResponse(responseData);
+      if (content.isEmpty) throw Exception(getLocalizedErrorMessage('parse_error', language));
+      content = content.replaceAll(RegExp(r'^```(?:json)?\s*'), '').replaceAll(RegExp(r'\s*```\s*$'), '').trim();
+      final jsonStart = content.indexOf('{');
+      if (jsonStart == -1) throw Exception(getLocalizedErrorMessage('parse_error', language));
+      final jsonEnd = _findMatchingBraceEnd(content, jsonStart);
+      if (jsonEnd == null) throw Exception(getLocalizedErrorMessage('parse_error', language));
+      final jsonString = content.substring(jsonStart, jsonEnd);
+      final Map<String, dynamic> result = json.decode(jsonString) as Map<String, dynamic>;
+      return MealPlan.fromMap(result);
     } catch (e) {
       debugPrint('Error in generateMealPlan: $e');
       rethrow;
@@ -608,17 +556,12 @@ Rules:
         "temperature": 0.3, "top_p": 1, "max_tokens": 2048,
       };
 
-      final response = await _dio.post(_baseUrl, data: requestBody, options: Options(headers: {
-        'Authorization': 'Bearer $_apiKey',
-        'User-Agent': 'NutriScan/2.1.2',
-      }));
-      if (response.statusCode == 200) {
-        final content = _extractContentFromResponse(response.data);
-        final jsonStart = content.indexOf('[');
-        final jsonEnd = content.lastIndexOf(']') + 1;
-        if (jsonStart != -1 && jsonEnd > jsonStart) {
-          return (json.decode(content.substring(jsonStart, jsonEnd)) as List).cast<Map<String, dynamic>>();
-        }
+      final responseData = await _callGroq(requestBody);
+      final content = _extractContentFromResponse(responseData);
+      final jsonStart = content.indexOf('[');
+      final jsonEnd = content.lastIndexOf(']') + 1;
+      if (jsonStart != -1 && jsonEnd > jsonStart) {
+        return (json.decode(content.substring(jsonStart, jsonEnd)) as List).cast<Map<String, dynamic>>();
       }
       throw Exception("Failed to fetch insights");
     } catch (e) {
@@ -673,11 +616,8 @@ $_mealPlanJsonSchema''';
     try {
       final messages = [{"role": "system", "content": _getHealthCoachSystemPrompt(language, userContext)}];
       messages.addAll(history.map((m) => {"role": m.role == MessageRole.user ? "user" : "assistant", "content": m.content}));
-      final response = await _dio.post(_baseUrl, data: {"model": _model, "messages": messages}, options: Options(headers: {
-        'Authorization': 'Bearer $_apiKey',
-        'User-Agent': 'NutriScan/2.1.2',
-      }));
-      return _extractContentFromResponse(response.data);
+      final responseData = await _callGroq({"model": _model, "messages": messages});
+      return _extractContentFromResponse(responseData);
     } catch (e) {
       debugPrint('Error in getHealthCoachResponse: $e');
       rethrow;

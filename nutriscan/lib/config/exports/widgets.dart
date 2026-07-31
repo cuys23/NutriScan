@@ -10,11 +10,17 @@ export '../../widgets/analysis/trend_item.dart';
 export '../../widgets/auth/login_widgets.dart';
 export '../../widgets/cloud_backup/cloud_backup_widgets.dart';
 export '../../widgets/common/app_lifecycle_wrapper.dart';
+export '../../widgets/common/app_loading_indicator.dart';
+export '../../widgets/common/empty_state_view.dart';
+export '../../widgets/common/error_banner.dart';
 export '../../widgets/common/info_card.dart';
 // Common/Generic UI
 export '../../widgets/common/info_row.dart';
 export '../../widgets/common/language_dropdown.dart';
 export '../../widgets/common/section_header.dart';
+export '../../widgets/common/skeleton_loader.dart';
+export '../../widgets/common/surface_card.dart';
+export '../../widgets/common/tinted_icon_chip.dart';
 // Dialogs
 export '../../widgets/dialogs/coin_ad_dialogs.dart';
 export '../../widgets/dialogs/confirmation_dialog.dart';
