@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -14,14 +17,13 @@ class SubscriptionProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _subscriptionType;
   String? _error;
-  
-  /// ⚠️ PRODUCTION WARNING:
-  /// For production-grade security, subscription status SHOULD be verified 
-  /// server-side using App Store/Play Store Server Notifications or Receipt 
-  /// Validation. Local state is encrypted via Flutter Secure Storage but 
-  /// can still be targeted by advanced client-side manipulation tools.
-  /// Ensure you deploy a Firebase Cloud Function for robust validation.
-  
+
+  /// Purchase status is verified server-side by the `verifyPurchase` Cloud
+  /// Function (functions/src/index.ts), which checks the receipt with
+  /// Apple/Google and is the only writer of `subscription` on
+  /// `/users/{uid}` — firestore.rules blocks clients from writing that
+  /// field. `_onPurchaseSuccess` below calls that function and then re-reads
+  /// Firestore rather than trusting the client-side PurchaseDetails alone.
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   CloudBackupProvider? _backupProvider;
@@ -53,19 +55,32 @@ class SubscriptionProvider with ChangeNotifier {
   }
 
   void _onPurchaseSuccess(PurchaseDetails purchase) async {
-    _isSubscribed = true;
-    
-    // Determine type based on product ID
-    if (purchase.productID == IAPService.monthlySubscriptionId) {
-      _subscriptionType = 'monthly';
-    } else if (purchase.productID == IAPService.yearlySubscriptionId) {
-      _subscriptionType = 'yearly';
-    }
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
-    await _saveSubscriptionStatus();
-    
-    if (_notificationProvider != null) {
-      await _notificationProvider!.cancelPremiumPromotionForPremiumUser();
+    try {
+      final callable = FirebaseFunctions.instance.httpsCallable(
+        'verifyPurchase',
+      );
+      await callable.call<Map<String, dynamic>>({
+        'platform': Platform.isIOS ? 'ios' : 'android',
+        'productId': purchase.productID,
+        'verificationData': purchase.verificationData.serverVerificationData,
+      });
+
+      // The Cloud Function is the only writer of `subscription` on
+      // /users/{uid} — re-read from Firestore rather than trusting the
+      // client-side purchase event as the source of truth.
+      await _syncWithFirestore();
+
+      if (_notificationProvider != null) {
+        await _notificationProvider!.cancelPremiumPromotionForPremiumUser();
+      }
+    } catch (e) {
+      debugPrint('Purchase verification failed: $e');
+      _error =
+          'Failed to verify your purchase. Please try "Restore Purchases" or contact support if this continues.';
     }
 
     _isLoading = false;
@@ -107,33 +122,12 @@ class SubscriptionProvider with ChangeNotifier {
           _subscriptionType = sub[FirebaseConfig.subscriptionTypeField];
 
           // Save locally as well
-          await _saveSubscriptionStatus(syncToFirestore: false);
+          await _saveSubscriptionStatus();
           notifyListeners();
         }
       }
     } catch (e) {
       debugPrint('Firestore Sync Error: $e');
-    }
-  }
-
-  // Update subscription in Firestore
-  Future<void> _updateFirestoreSubscription() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    if (userId.isEmpty) return;
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      await _firestore.collection(FirebaseConfig.usersCollection).doc(userId).set({
-        'email': user?.email,
-        'displayName': user?.displayName,
-        FirebaseConfig.subscriptionField: {
-          FirebaseConfig.isSubscribedField: _isSubscribed,
-          FirebaseConfig.subscriptionTypeField: _subscriptionType,
-          FirebaseConfig.updatedAtField: FieldValue.serverTimestamp(),
-        }
-      }, SetOptions(merge: true));
-    } catch (e) {
-      debugPrint('Firestore Update Error: $e');
     }
   }
 
@@ -178,15 +172,12 @@ class SubscriptionProvider with ChangeNotifier {
     }
   }
 
-  // Save subscription status to secure storage
-  Future<void> _saveSubscriptionStatus({bool syncToFirestore = true}) async {
+  // Save subscription status to secure storage (local cache only — the
+  // server-verified copy lives in Firestore, written by verifyPurchase).
+  Future<void> _saveSubscriptionStatus() async {
     try {
       await _secureStorage.write(key: 'is_subscribed', value: _isSubscribed.toString());
       await _secureStorage.write(key: 'subscription_type', value: _subscriptionType ?? '');
-
-      if (syncToFirestore) {
-        await _updateFirestoreSubscription();
-      }
     } catch (e) {
       debugPrint('Error saving secure subscription status: $e');
       _error = 'Failed to save subscription status';

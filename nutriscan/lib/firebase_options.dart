@@ -29,19 +29,18 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyDyJZZEkmWI8lndY-ssMdvsZCiXlZ0JvJc',
+    appId: '1:1088441843381:android:f50f0a9dc5fb125474c8fc',
+    messagingSenderId: '1088441843381',
+    projectId: 'nutriscan-75d57',
+    storageBucket: 'nutriscan-75d57.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    iosBundleId: 'YOUR_IOS_BUNDLE_ID',
+    apiKey: 'AIzaSyCMAFZBfGe5-4ss07kXD9oH_Jw9wLZJ3Zw',
+    appId: '1:1088441843381:ios:c4d85183c6a959c674c8fc',
+    messagingSenderId: '1088441843381',
+    projectId: 'nutriscan-75d57',
+    storageBucket: 'nutriscan-75d57.firebasestorage.app',
+    iosBundleId: 'com.nutriscan.app',
   );
 }

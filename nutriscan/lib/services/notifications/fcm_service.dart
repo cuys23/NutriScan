@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -84,8 +85,8 @@ class FCMService {
       }
 
       _initialized = true;
-    } catch (e) {
-      // Handle initialization error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCMService.initialize failed');
     }
   }
 
@@ -100,8 +101,8 @@ class FCMService {
         provisional: false,
         sound: true,
       );
-    } catch (e) {
-      // Handle error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCM requestPermissions failed');
     }
   }
 
@@ -124,16 +125,16 @@ class FCMService {
         // Send token to backend server if needed
         await _sendTokenToServer(_fcmToken!);
       }
-    } catch (e) {
-      // Handle error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCM _getFCMToken failed');
     }
   }
 
   Future<void> _sendTokenToServer(String token) async {
     try {
       // Implement backend API call to save token
-    } catch (e) {
-      // Handle error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCM _sendTokenToServer failed');
     }
   }
 
@@ -264,8 +265,8 @@ class FCMService {
           _onFCMNotificationShown?.call();
         }
       }
-    } catch (e) {
-      // Handle error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCM _showLocalNotification failed');
     }
   }
 
@@ -303,16 +304,16 @@ class FCMService {
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _messaging.subscribeToTopic(topic);
-    } catch (e) {
-      // Handle error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCM subscribeToTopic($topic) failed');
     }
   }
 
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _messaging.unsubscribeFromTopic(topic);
-    } catch (e) {
-      // Handle error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCM unsubscribeFromTopic($topic) failed');
     }
   }
 
@@ -323,8 +324,8 @@ class FCMService {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('fcm_token');
-    } catch (e) {
-      // Handle error silently
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack, reason: 'FCM deleteToken failed');
     }
   }
 
