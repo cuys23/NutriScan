@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nutriscan/config/app_colors.dart';
-import 'package:nutriscan/config/radii.dart';
-import 'package:nutriscan/config/spacing.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -128,30 +126,6 @@ class ThemeProvider extends ChangeNotifier {
     );
   }
 
-  /// Shared type scale (Calm Wellness Minimal) — same size/weight/letter
-  /// spacing in light and dark, only the color differs by brightness. Feeds
-  /// into `_applyFontToTextTheme`, which still injects Poppins + the
-  /// per-language fallback chain on top of this.
-  TextTheme _typeScale({required Color primaryColor, required Color secondaryColor}) {
-    return TextTheme(
-      displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: primaryColor),
-      displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: primaryColor),
-      displaySmall: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: -0.25, color: primaryColor),
-      headlineLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: primaryColor),
-      headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: primaryColor),
-      headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: primaryColor),
-      titleLarge: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: primaryColor),
-      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.1, color: primaryColor),
-      titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.1, color: primaryColor),
-      bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, height: 1.5, color: primaryColor),
-      bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 1.4, color: secondaryColor),
-      bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, letterSpacing: 0.1, color: secondaryColor),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: primaryColor),
-      labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: secondaryColor),
-      labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: secondaryColor),
-    );
-  }
-
   TextStyle getFontForCurrentLanguage({
     double? fontSize,
     FontWeight? fontWeight,
@@ -215,20 +189,18 @@ class ThemeProvider extends ChangeNotifier {
       useMaterial3: true,
       fontFamily: currentFontFamily,
       fontFamilyFallback: _fontFallbacks,
-      textTheme: _applyFontToTextTheme(
-        _typeScale(primaryColor: AppColors.textPrimaryLight, secondaryColor: AppColors.textSecondaryLight),
-      ),
+      textTheme: _applyFontToTextTheme(ThemeData.light().textTheme),
       primaryTextTheme: _applyFontToTextTheme(ThemeData.light().primaryTextTheme),
       scaffoldBackgroundColor: AppColors.backgroundLight,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.backgroundLight,
-        foregroundColor: AppColors.textPrimaryLight,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryLight,
+          color: Colors.white,
           fontFamily: currentFontFamily,
           fontFamilyFallback: _fontFallbacks,
         ),
@@ -238,28 +210,24 @@ class ThemeProvider extends ChangeNotifier {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: Radii.smRadius,
+            borderRadius: BorderRadius.circular(10),
           ),
           textStyle: TextStyle(
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
             fontFamily: currentFontFamily,
             fontFamilyFallback: _fontFallbacks,
           ),
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: Radii.lgRadius,
-          side: const BorderSide(color: AppColors.borderLight),
-        ),
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         color: AppColors.surfaceLight,
       ),
       listTileTheme: ListTileThemeData(
         tileColor: AppColors.surfaceLight,
-        shape: RoundedRectangleBorder(borderRadius: Radii.smRadius),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
@@ -274,45 +242,6 @@ class ThemeProvider extends ChangeNotifier {
           }
           return Colors.grey.withValues(alpha: 0.5);
         }),
-      ),
-      inputDecorationTheme: InputDecorationThemeData(
-        filled: true,
-        fillColor: AppColors.surfaceLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
-        border: OutlineInputBorder(
-          borderRadius: Radii.smRadius,
-          borderSide: const BorderSide(color: AppColors.borderLight),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: Radii.smRadius,
-          borderSide: const BorderSide(color: AppColors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: Radii.smRadius,
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.surfaceLight,
-        shape: RoundedRectangleBorder(borderRadius: Radii.lgRadius),
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surfaceLight,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondaryLight,
-        type: BottomNavigationBarType.fixed,
-      ),
-      chipTheme: ChipThemeData(
-        backgroundColor: AppColors.primaryLight,
-        labelStyle: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
-        shape: RoundedRectangleBorder(borderRadius: Radii.smRadius),
-        side: BorderSide.none,
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.textPrimaryLight,
-        contentTextStyle: const TextStyle(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: Radii.smRadius),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -328,20 +257,23 @@ class ThemeProvider extends ChangeNotifier {
       useMaterial3: true,
       fontFamily: currentFontFamily,
       fontFamilyFallback: _fontFallbacks,
-      textTheme: _applyFontToTextTheme(
-        _typeScale(primaryColor: AppColors.textPrimaryDark, secondaryColor: AppColors.textSecondaryDark),
-      ),
+      textTheme: _applyFontToTextTheme(const TextTheme(
+        bodyLarge: TextStyle(color: AppColors.textPrimaryDark),
+        bodyMedium: TextStyle(color: AppColors.textSecondaryDark),
+        titleMedium: TextStyle(color: AppColors.textPrimaryDark),
+        titleSmall: TextStyle(color: AppColors.textSecondaryDark),
+      )),
       primaryTextTheme: _applyFontToTextTheme(ThemeData.dark().primaryTextTheme),
       scaffoldBackgroundColor: AppColors.backgroundDark,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.backgroundDark,
-        foregroundColor: AppColors.textPrimaryDark,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryDark,
+          color: Colors.white,
           fontFamily: currentFontFamily,
           fontFamilyFallback: _fontFallbacks,
         ),
@@ -351,27 +283,24 @@ class ThemeProvider extends ChangeNotifier {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: Radii.smRadius,
+            borderRadius: BorderRadius.circular(10),
           ),
-          textStyle: const TextStyle(
-            fontSize: 14,
+          textStyle: TextStyle(
+            fontSize: 16,
             fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
             fontFamily: 'Poppins',
+            fontFamilyFallback: _fontFallbacks,
           ),
         ),
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: Radii.lgRadius,
-          side: const BorderSide(color: AppColors.borderDark),
-        ),
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         color: AppColors.surfaceDark,
       ),
       listTileTheme: ListTileThemeData(
         tileColor: AppColors.surfaceDark,
-        shape: RoundedRectangleBorder(borderRadius: Radii.smRadius),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
@@ -386,45 +315,6 @@ class ThemeProvider extends ChangeNotifier {
           }
           return Colors.grey.withValues(alpha: 0.5);
         }),
-      ),
-      inputDecorationTheme: InputDecorationThemeData(
-        filled: true,
-        fillColor: AppColors.surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
-        border: OutlineInputBorder(
-          borderRadius: Radii.smRadius,
-          borderSide: const BorderSide(color: AppColors.borderDark),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: Radii.smRadius,
-          borderSide: const BorderSide(color: AppColors.borderDark),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: Radii.smRadius,
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.surfaceDark,
-        shape: RoundedRectangleBorder(borderRadius: Radii.lgRadius),
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surfaceDark,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondaryDark,
-        type: BottomNavigationBarType.fixed,
-      ),
-      chipTheme: ChipThemeData(
-        backgroundColor: AppColors.primary.withValues(alpha: 0.18),
-        labelStyle: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
-        shape: RoundedRectangleBorder(borderRadius: Radii.smRadius),
-        side: BorderSide.none,
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.surfaceDark,
-        contentTextStyle: TextStyle(color: AppColors.textPrimaryDark),
-        shape: RoundedRectangleBorder(borderRadius: Radii.smRadius),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }

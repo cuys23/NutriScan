@@ -12,7 +12,12 @@
           "package_name": "com.cuydev.nutriscan"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1088441843381-rt1ld7r10vucv57h6p0lpksqmi26uq5k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDyJZZEkmWI8lndY-ssMdvsZCiXlZ0JvJc"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1088441843381-rt1ld7r10vucv57h6p0lpksqmi26uq5k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1088441843381-6qj8lb9qdqta7eu0snfhqlrcohp4mq1a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nutriscan.app"
+              }
+            }
+          ]
         }
       }
     },
@@ -31,7 +48,20 @@
           "package_name": "com.nutriscan.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1088441843381-50jrunv1727ld6tndsp1p4dd3abpk3s5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nutriscan.app",
+            "certificate_hash": "215bdab0e288bad153b0825e7f2225c8bc3c803c"
+          }
+        },
+        {
+          "client_id": "1088441843381-rt1ld7r10vucv57h6p0lpksqmi26uq5k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDyJZZEkmWI8lndY-ssMdvsZCiXlZ0JvJc"
@@ -39,7 +69,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1088441843381-rt1ld7r10vucv57h6p0lpksqmi26uq5k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1088441843381-6qj8lb9qdqta7eu0snfhqlrcohp4mq1a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nutriscan.app"
+              }
+            }
+          ]
         }
       }
     }
