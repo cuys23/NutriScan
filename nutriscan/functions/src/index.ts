@@ -3,11 +3,14 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
+import { runUsdaSeedImport } from "./jobs/importUsdaSeed";
+import { runVnFctImport } from "./jobs/importVnFct";
 
 initializeApp();
 const db = getFirestore();
 
 const GROQ_API_KEY = defineSecret("GROQ_API_KEY");
+const USDA_FDC_API_KEY = defineSecret("USDA_FDC_API_KEY");
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 // Real backstop for AI-call abuse — the client's "coin" balance is only a UX gate,
@@ -302,5 +305,65 @@ export const verifyPurchase = onCall(
     );
 
     return { isSubscribed: true, subscriptionType, expiryDate: result.expiryDate };
+  },
+);
+
+// ---------------------------------------------------------------------------
+// FKB (Food Knowledge Base) import callables
+// ---------------------------------------------------------------------------
+
+/**
+ * Import seed foods from USDA FoodData Central into the `fkb_foods`
+ * Firestore collection. Should be run once to populate the initial FKB,
+ * then again whenever new seeds are added to the list.
+ *
+ * Requires authentication. In production, restrict to admin UIDs.
+ */
+export const importUsdaSeed = onCall(
+  {
+    secrets: [USDA_FDC_API_KEY],
+    timeoutSeconds: 300,
+    memory: "512MiB",
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    logger.info(`importUsdaSeed called by uid=${request.auth.uid}`);
+
+    try {
+      const result = await runUsdaSeedImport(USDA_FDC_API_KEY.value());
+      return { ok: true, data: result };
+    } catch (err) {
+      logger.error("importUsdaSeed failed", err);
+      throw new HttpsError("internal", `Import failed: ${err}`);
+    }
+  },
+);
+
+/**
+ * Import curated Vietnamese foods into the `fkb_foods` collection.
+ * These are hand-entered entries for common VN dishes.
+ */
+export const importVnFct = onCall(
+  {
+    timeoutSeconds: 60,
+    memory: "256MiB",
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    logger.info(`importVnFct called by uid=${request.auth.uid}`);
+
+    try {
+      const result = await runVnFctImport();
+      return { ok: true, data: result };
+    } catch (err) {
+      logger.error("importVnFct failed", err);
+      throw new HttpsError("internal", `Import failed: ${err}`);
+    }
   },
 );
