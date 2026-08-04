@@ -3,8 +3,11 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { logger } from "firebase-functions";
+import { z } from "zod";
 import { runUsdaSeedImport } from "./jobs/importUsdaSeed";
 import { runVnFctImport } from "./jobs/importVnFct";
+import { searchFkbFoods } from "./fkb/search";
+import { getFkbFood } from "./fkb/get";
 
 initializeApp();
 const db = getFirestore();
@@ -365,5 +368,67 @@ export const importVnFct = onCall(
       logger.error("importVnFct failed", err);
       throw new HttpsError("internal", `Import failed: ${err}`);
     }
+  },
+);
+
+// ---------------------------------------------------------------------------
+// FKB (Food Knowledge Base) query callables
+// ---------------------------------------------------------------------------
+
+const FkbSearchRequestSchema = z.object({
+  query: z.string().min(1),
+  locale: z.string().optional(),
+  limit: z.number().int().min(1).max(50).optional(),
+});
+
+/**
+ * Search verified foods in `fkb_foods` by name/alias. See
+ * `functions/src/fkb/search.ts` for the ranking algorithm.
+ */
+export const fkbSearch = onCall(
+  { timeoutSeconds: 15, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = FkbSearchRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed fkbSearch request.");
+    }
+
+    try {
+      const items = await searchFkbFoods(parsed.data.query, parsed.data.limit ?? 10);
+      return { ok: true, data: { items } };
+    } catch (err) {
+      logger.error("fkbSearch failed", err);
+      throw new HttpsError("internal", "FKB search failed.");
+    }
+  },
+);
+
+const FkbGetRequestSchema = z.object({
+  food_id: z.string().min(1),
+});
+
+/** Fetch a single verified food by `food_id` from `fkb_foods`. */
+export const fkbGet = onCall(
+  { timeoutSeconds: 15, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = FkbGetRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed fkbGet request.");
+    }
+
+    const food = await getFkbFood(parsed.data.food_id);
+    if (!food) {
+      throw new HttpsError("not-found", `No FKB food with id ${parsed.data.food_id}`);
+    }
+
+    return { ok: true, data: food };
   },
 );
