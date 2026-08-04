@@ -8,6 +8,8 @@ import { runUsdaSeedImport } from "./jobs/importUsdaSeed";
 import { runVnFctImport } from "./jobs/importVnFct";
 import { searchFkbFoods } from "./fkb/search";
 import { getFkbFood } from "./fkb/get";
+import { matchFood as matchFoodImpl } from "./fkb/match";
+import { NutrientsPer100gSchema } from "./fkb/types";
 
 initializeApp();
 const db = getFirestore();
@@ -430,5 +432,51 @@ export const fkbGet = onCall(
     }
 
     return { ok: true, data: food };
+  },
+);
+
+const MatchFoodRequestSchema = z.object({
+  food_name: z.string().min(1),
+  portion_grams: z.number().positive().nullable().optional(),
+  locale: z.string().optional(),
+  ai_nutrients: NutrientsPer100gSchema,
+});
+
+/**
+ * After AI vision identifies a food, decide verified (FKB per_100g × grams)
+ * vs estimated (AI passthrough). See functions/src/fkb/match.ts and
+ * docs/plan.md Phase 1C — the threshold/edge-case rules live there, not here.
+ */
+export const matchFood = onCall(
+  { timeoutSeconds: 15, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = MatchFoodRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed matchFood request.");
+    }
+
+    try {
+      const { food_name, portion_grams, ai_nutrients } = parsed.data;
+      const result = await matchFoodImpl(food_name, portion_grams, ai_nutrients);
+      return { ok: true, data: result };
+    } catch (err) {
+      // Fail soft to estimated rather than failing the whole scan — the AI
+      // macros are still usable even if the FKB lookup itself broke.
+      logger.error("matchFood failed, falling back to estimated", err);
+      return {
+        ok: true,
+        data: {
+          status: "estimated" as const,
+          food_id: null,
+          match_score: 0,
+          nutrients_total: parsed.data.ai_nutrients,
+          source_label: "AI estimate",
+        },
+      };
+    }
   },
 );

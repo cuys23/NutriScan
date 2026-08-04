@@ -16,6 +16,14 @@ class Food {
   final String imagePath; // Can contain either local path or Firebase URL
   final DateTime analyzedAt;
 
+  /// Trust label — 'verified' (FKB per_100g × grams), 'estimated' (raw AI),
+  /// or 'user_edited'. Never mark 'verified' without going through the FKB
+  /// matcher; see docs/MASTER_PLAN.md §2.3.
+  final String source;
+  final double? portionGrams;
+  final String? fkbFoodId;
+  final double? matchScore;
+
   Food({
     required this.id,
     required this.name,
@@ -33,6 +41,10 @@ class Food {
     required this.servingSize,
     required this.imagePath,
     required this.analyzedAt,
+    this.source = 'estimated',
+    this.portionGrams,
+    this.fkbFoodId,
+    this.matchScore,
   });
 
   factory Food.fromJson(Map<String, dynamic> json) {
@@ -72,6 +84,14 @@ class Food {
       servingSize: json['serving_size'] ?? '1 serving',
       imagePath: json['image_path'] ?? json['firebase_image_url'] ?? '',
       analyzedAt: DateTime.now(),
+      source: json['source'] ?? 'estimated',
+      portionGrams: json['portion_grams'] == null
+          ? null
+          : _parseDouble(json['portion_grams']),
+      fkbFoodId: json['fkb_food_id'],
+      matchScore: json['match_score'] == null
+          ? null
+          : _parseDouble(json['match_score']),
     );
   }
 
@@ -116,6 +136,10 @@ class Food {
       'serving_size': servingSize,
       'image_path': imagePath,
       'analyzed_at': analyzedAt.toIso8601String(),
+      'source': source,
+      'portion_grams': portionGrams,
+      'fkb_food_id': fkbFoodId,
+      'match_score': matchScore,
     };
   }
 
@@ -136,6 +160,10 @@ class Food {
     String? servingSize,
     String? imagePath,
     DateTime? analyzedAt,
+    String? source,
+    double? portionGrams,
+    String? fkbFoodId,
+    double? matchScore,
   }) {
     return Food(
       id: id ?? this.id,
@@ -154,6 +182,10 @@ class Food {
       servingSize: servingSize ?? this.servingSize,
       imagePath: imagePath ?? this.imagePath,
       analyzedAt: analyzedAt ?? this.analyzedAt,
+      source: source ?? this.source,
+      portionGrams: portionGrams ?? this.portionGrams,
+      fkbFoodId: fkbFoodId ?? this.fkbFoodId,
+      matchScore: matchScore ?? this.matchScore,
     );
   }
 }

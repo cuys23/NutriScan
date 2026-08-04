@@ -10,6 +10,7 @@ import 'package:nutriscan/providers/notifications/notification_provider.dart';
 import 'package:nutriscan/providers/payment/subscription_provider.dart';
 import 'package:nutriscan/services/ai/groq_service.dart';
 import 'package:nutriscan/services/database/database_helper.dart';
+import 'package:nutriscan/services/fkb/match_service.dart';
 import 'package:nutriscan/services/storage/firebase_storage_service.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -22,6 +23,7 @@ class FoodProvider with ChangeNotifier {
   final GroqService _groqService = GroqService();
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final FirebaseStorageService _storageService = FirebaseStorageService();
+  final MatchService _matchService = MatchService();
   AdMobProvider? _admobProvider;
   SubscriptionProvider? _subscriptionProvider;
   CoinProvider? _coinProvider;
@@ -98,6 +100,45 @@ class FoodProvider with ChangeNotifier {
     }
   }
 
+  /// Calls the FKB matcher and returns [food] with macros overridden to
+  /// FKB per_100g × grams and `source: verified` on a confident hit, or
+  /// `source: estimated` (AI macros unchanged) otherwise. Never throws —
+  /// a matcher outage must not fail the whole scan (docs/plan.md Phase 1C).
+  Future<Food> _resolveFoodSource(Food food, String language) async {
+    final match = await _matchService.match(
+      foodName: food.name,
+      portionGrams: food.portionGrams,
+      aiNutrients: {
+        'calories_kcal': food.calories,
+        'protein_g': food.protein,
+        'carbs_g': food.carbs,
+        'fat_g': food.fat,
+        'fiber_g': food.fiber,
+        'sugar_g': food.sugar,
+        'sodium_mg': food.sodium,
+      },
+      locale: language,
+    );
+
+    if (match == null || !match.isVerified) {
+      return food.copyWith(source: 'estimated');
+    }
+
+    final n = match.nutrientsTotal;
+    return food.copyWith(
+      calories: (n['calories_kcal'] as num?)?.toDouble(),
+      protein: (n['protein_g'] as num?)?.toDouble(),
+      carbs: (n['carbs_g'] as num?)?.toDouble(),
+      fat: (n['fat_g'] as num?)?.toDouble(),
+      fiber: (n['fiber_g'] as num?)?.toDouble(),
+      sugar: (n['sugar_g'] as num?)?.toDouble(),
+      sodium: (n['sodium_mg'] as num?)?.toDouble(),
+      source: 'verified',
+      fkbFoodId: match.foodId,
+      matchScore: match.matchScore,
+    );
+  }
+
   Future<void> analyzeFoodImage(
     File imageFile, {
     String language = 'en',
@@ -161,6 +202,8 @@ class FoodProvider with ChangeNotifier {
         ...analysisResult,
         'image_path': imagePath,
       });
+
+      newFood = await _resolveFoodSource(newFood, language);
 
       await _databaseHelper.insertFood(newFood, isPremiumUser: isPremiumUser);
 

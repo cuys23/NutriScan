@@ -420,7 +420,8 @@ Rules:
   "health_score": 0,
   "health_benefits": ["benefit 1", "benefit 2"],
   "health_warnings": ["warning 1", "warning 2"],
-  "serving_size": "string"
+  "serving_size": "string",
+  "portion_grams": 0
 }''';
 
   static const String _mealPlanJsonSchema = '''
@@ -490,6 +491,7 @@ Rules:
 - Set "is_food": true if the image contains any food, dish, meal, drink, tea, coffee, snack, packaged food, or fruit/vegetable.
 - Set "is_food": false ONLY if the image contains clearly NO food (e.g. only person, animal, vehicle, landscape, furniture).
 - healthScore: integer 1–10 based on nutrition.
+- "portion_grams": your best-effort estimate of the total edible weight in grams (a number, e.g. 118), independent of "serving_size"'s free text. Always provide your best estimate, never 0 or null, unless the amount truly cannot be judged from the image.
 - Respond with ONLY one valid JSON object. No markdown.''';
   }
 
