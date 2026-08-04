@@ -3,8 +3,8 @@
 
 **Document type:** Technical Design Document (TDD) / Software Design Document (SDD)  
 **Status:** Blueprint — single source of truth  
-**Version:** 1.0.0  
-**Last updated:** 2026-08-03  
+**Version:** 1.1.0  
+**Last updated:** 2026-08-04  
 **Product codename:** NutriScan  
 **Platforms:** iOS · Android (Flutter)  
 **Audience:** Founders, engineers, AI coding agents (Claude / Cursor / GPT)
@@ -18,6 +18,20 @@
 3. Product decisions change only via ADR append (never silent rewrite).
 4. Implementation details live in `docs/0x_*.md` children; this file is the spine.
 5. Existing codebase: Flutter app under `nutriscan/` with scan flow already production-capable. This plan **evolves** that app into a verified-nutrition platform — it does not throw it away.
+
+## Document set
+
+| Document | Owns |
+|----------|------|
+| `CLAUDE.md` (repo root) | Agent entry point — hard rules, extension points, who-does-what |
+| **`MASTER_PLAN.md`** (this) | Product vision, architecture, ADRs, truth model |
+| `docs/plan.md` | Phase-by-phase implementation instructions + verify tables |
+| `docs/15_IOS_RELEASE_PLAN.md` | Shipping: Apple accounts, signing, compliance, TestFlight, submission, rollback |
+
+**Precedence.** Product and architecture questions resolve here. Shipping and
+compliance questions resolve in `15_IOS_RELEASE_PLAN.md` — Part 13 and Part 17
+below are the summary, that document is the executable runbook. Implementation
+detail resolves in `plan.md`.
 
 ---
 
@@ -494,13 +508,13 @@ main → build Android + iOS artifacts → deploy Functions → tag
 
 ## 11.1 Hard requirements
 
-- [ ] No provider API keys in app binary (already).
-- [ ] App Check enforced on sensitive callables.
+- [x] No provider API keys in app binary (already).
+- [ ] App Check enforced on sensitive callables. *(activated client-side in `main.dart`; console enforcement still to be switched on)*
 - [ ] Auth required on AI and FKB write-ish paths.
 - [ ] Rate limit per uid (AI).
-- [ ] Image access: user-scoped storage paths.
+- [x] Image access: user-scoped storage paths. *(`storage.rules`, added 2026-08-04 — previously console-only, now versioned in repo)*
 - [ ] PII minimized in AI prompts (no full legal name required).
-- [ ] Account deletion wipes cloud user data path (App Store).
+- [x] Account deletion wipes cloud user data path (App Store). *(`lib/services/auth/account_deletion_service.dart`, 2026-08-04 — see ADR-011 for the ordering constraint)*
 
 ## 11.2 Threat notes
 
@@ -543,16 +557,34 @@ main → build Android + iOS artifacts → deploy Functions → tag
 
 # PART 13 — Apple Review & Store Checklist
 
+> **This part is a summary.** The executable runbook — Apple account setup,
+> signing, App Privacy labels, ATT, SKAdNetwork, IAP sandbox matrix, TestFlight,
+> submission and rollback — lives in `docs/15_IOS_RELEASE_PLAN.md`. Where the two
+> disagree, that document wins.
+
 ## 13.1 Mandatory product behaviors
 
-- [ ] **Delete account** in-app (not only email support).
-- [ ] **Restore purchases** working.
-- [ ] Privacy Policy URL + in-app access.
+- [x] **Delete account** in-app (not only email support). *(2026-08-04)*
+- [x] **Restore purchases** working. *(exists in `iap_service.dart`; sandbox verification still pending)*
+- [ ] Privacy Policy URL + in-app access. *(in-app screens exist; the public HTTPS URL does not)*
 - [ ] Terms of Use.
 - [ ] Subscription terms clear (length, price, cancel).
 - [ ] No misleading “medical” claims in screenshots/subtitle.
 - [ ] Nutrition / health **disclaimer** visible (onboarding + settings).
-- [ ] Sign in with Apple if other third-party login offered.
+- [x] Sign in with Apple if other third-party login offered. *(entitlement + login button present)*
+
+## 13.5 iOS technical compliance (added 1.1.0)
+
+Requirements that Part 13 originally omitted and that are enforced at upload or
+review time. Detail and verification steps in `15_IOS_RELEASE_PLAN.md` § 6.
+
+- [x] `NSUserTrackingUsageDescription` + ATT prompt requested before AdMob init
+- [x] `SKAdNetworkItems` populated from Google's published list
+- [x] `ITSAppUsesNonExemptEncryption` declared
+- [x] No Google sample AdMob ad unit IDs reachable from a release build (ADR-009)
+- [ ] Real AdMob App ID in `Info.plist` — **still the Google sample value**
+- [ ] `PrivacyInfo.xcprivacy` / Privacy Report reviewed at archive time
+- [ ] Built with the Xcode / iOS SDK version Apple currently mandates for upload
 
 ## 13.2 Copy guidelines
 
@@ -719,6 +751,42 @@ Rules:
 **Reason:** Safe rollout and instant rollback.  
 **Status:** Accepted.
 
+### ADR-009 — Ads fail closed when unconfigured
+**Decision:** `AdsConfig.adsEnabled` is a computed getter, not a constant. In a
+release build it returns `false` unless every production ad unit ID for the
+platform is filled in.  
+**Reason:** The repo previously carried Google's public sample ad unit IDs as the
+only working values. Shipping those violates AdMob policy and earns nothing,
+while placeholder production IDs render broken ad slots. A build that forgets
+this step should degrade to "no ads", which is harmless, rather than to "test
+ads in production", which is not.  
+**Consequence:** Enabling ads is now an explicit, verifiable act —
+`AdsConfig.configurationReport()` states which mode a build is in. The
+`GADApplicationIdentifier` in `Info.plist` is *not* covered by this guard and
+must still be replaced by hand.  
+**Status:** Accepted.
+
+### ADR-010 — Security rules live in the repo, not the console
+**Decision:** `storage.rules` is versioned alongside `firestore.rules` and
+registered in `firebase.json`. Rule changes go through git.  
+**Reason:** Storage rules existed only in the Firebase console — unreviewable,
+unversioned, and free to drift from what the app assumes. Rules are security
+posture; security posture belongs under review.  
+**Status:** Accepted.
+
+### ADR-011 — Account deletion order is cloud-first
+**Decision:** Deletion removes Storage objects, then Firestore documents, then
+the Firebase Auth user, then local data. Never the reverse.  
+**Reason:** Firestore and Storage rules authorise on `request.auth.uid`. Deleting
+the Auth user first permanently revokes the caller's ability to delete the data
+it owns, orphaning it — which converts a privacy feature into a privacy problem
+and cannot be repaired from the client.  
+**Consequence:** `firestore.rules` requires `allow delete` on `users/{userId}`;
+without it the flow fails with `PERMISSION_DENIED` after the cloud wipe has
+partially run. Any future user-scoped collection must be added to the deletion
+service and granted a matching delete rule in the same change.  
+**Status:** Accepted.
+
 ---
 
 # PART 17 — Release Checklist
@@ -782,34 +850,47 @@ Rules:
 
 ---
 
-# Appendix C — Next documents (Phase 2 of docs)
+# Appendix C — Document status
 
-After this MASTER_PLAN is accepted, split deep-dives:
+Originally a wish list of splits. Updated 1.1.0 to record what actually exists.
+
+**Exists:**
 
 ```
+CLAUDE.md                      ← repo root; agent entry point
 docs/
-  README.md
-  MASTER_PLAN.md          ← this file
-  00_PROJECT_VISION.md    (extract Part 1)
-  01_PRODUCT_REQUIREMENTS.md
-  02_TECH_STACK.md
-  03_SYSTEM_ARCHITECTURE.md
-  04_DATABASE_DESIGN.md
-  05_BACKEND_ARCHITECTURE.md
-  06_AI_ARCHITECTURE.md
-  07_MOBILE_ARCHITECTURE.md
-  08_SECURITY.md
-  09_INFRASTRUCTURE.md
-  10_DEVOPS.md
-  11_APP_STORE_GUIDELINE.md
-  12_ROADMAP.md
-  13_CODING_STANDARD.md
-  14_ADR/                 (ADR-001…)
-  CLAUDE.md               (agent rules short form)
+  MASTER_PLAN.md               ← this file
+  plan.md                      ← implementation phases + verify tables
+  15_IOS_RELEASE_PLAN.md       ← shipping runbook (supersedes the planned 11_APP_STORE_GUIDELINE.md)
+  PHASE0_INVENTORY.md
 ```
+
+**Not written, and not currently blocking anything:**
+
+```
+00_PROJECT_VISION.md · 01_PRODUCT_REQUIREMENTS.md · 02_TECH_STACK.md
+03_SYSTEM_ARCHITECTURE.md · 04_DATABASE_DESIGN.md · 05_BACKEND_ARCHITECTURE.md
+06_AI_ARCHITECTURE.md · 07_MOBILE_ARCHITECTURE.md · 08_SECURITY.md
+09_INFRASTRUCTURE.md · 10_DEVOPS.md · 12_ROADMAP.md · 13_CODING_STANDARD.md
+14_ADR/
+```
+
+Those are extracts of Parts 1–15 of this file. Splitting them out costs
+maintenance and buys nothing while the team is small — do it when a section
+starts getting edited by people who do not read the rest. ADRs stay inline in
+Part 16 for the same reason.
 
 ---
 
-**End of MASTER_PLAN.md v1.0.0**
+---
+
+# Document control
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | 2026-08-03 | Initial blueprint, ADR-001…008 |
+| 1.1.0 | 2026-08-04 | Added document-set precedence table; Part 13.5 iOS technical compliance; ticked completed Part 11 / Part 13 items; ADR-009 (ads fail closed), ADR-010 (rules in repo), ADR-011 (deletion order); Appendix C rewritten as status rather than wish list |
+
+**End of MASTER_PLAN.md v1.1.0**
 
 This document is the spine. Implementation without updating ADRs for contradictory decisions is considered out of process.

@@ -3,9 +3,26 @@
 
 **Product:** NutriScan → Personal AI Nutrition Assistant  
 **Spine architecture:** [MASTER_PLAN.md](./MASTER_PLAN.md)  
+**Shipping runbook:** [15_IOS_RELEASE_PLAN.md](./15_IOS_RELEASE_PLAN.md)  
+**Agent entry point:** [CLAUDE.md](../CLAUDE.md)  
 **This document:** Exhaustive phase instructions so a human or AI coding agent can implement **without guessing**.  
-**Version:** 2.0.0  
-**Last updated:** 2026-08-03  
+**Version:** 2.1.0  
+**Last updated:** 2026-08-04  
+
+## Status at 2026-08-04
+
+| Phase | State |
+|-------|-------|
+| 0 — Architecture lock | Done |
+| 1A — FKB schema & import | Done (78 verified foods) |
+| 1B → 6 | Not started |
+| Release compliance | Partially done ahead of schedule — see § "Phase 5" |
+
+Phase 5 was originally sequenced last. Several of its items were pulled forward
+on 2026-08-04 because they are hard App Store rejection causes and blocked any
+submission regardless of feature progress. What remains in Phase 5 is listed
+there. **The release track can run in parallel with Phases 1B–4** — nothing in
+`15_IOS_RELEASE_PLAN.md` depends on the FKB existing.
 
 ---
 
@@ -881,24 +898,42 @@ Ship-ready compliance and operational safety.
 
 Phases 1–4 feature-complete on staging.
 
+> **Operational detail lives in `15_IOS_RELEASE_PLAN.md`.** This section tracks
+> what the *code* must contain. Apple account setup, signing, App Privacy labels,
+> store listing and submission are in that runbook, and several of them are human
+> tasks an agent cannot perform (see `CLAUDE.md` § 6).
+
 ## Work checklist
 
 ### Account & legal
 
-- [ ] In-app **Delete account** (Firebase Auth delete + delete user cloud docs/storage paths per policy)
-- [ ] Privacy Policy URL live + link in app
-- [ ] Terms of Use live + link
+- [x] In-app **Delete account** — `lib/services/auth/account_deletion_service.dart` + `lib/widgets/settings/delete_account_dialog.dart` (2026-08-04)
+  - Order is fixed by ADR-011: Storage → Firestore → Auth user → local. Do not reorder.
+  - Requires `allow delete` on `users/{userId}` in `firestore.rules` — deployed together or the flow fails mid-wipe.
+- [ ] Privacy Policy **public HTTPS URL** live + link in app *(in-app screens exist; the URL does not)*
+- [ ] Terms of Use URL live + link
 - [ ] Nutrition/health disclaimer screens
+
+### iOS technical compliance
+
+- [x] `NSUserTrackingUsageDescription` + ATT requested before `MobileAds.initialize()`
+- [x] `SKAdNetworkItems` from Google's published list
+- [x] `ITSAppUsesNonExemptEncryption` declared
+- [x] Release builds cannot serve Google sample ad units (ADR-009)
+- [x] `storage.rules` versioned in repo and registered in `firebase.json` (ADR-010)
+- [ ] Real AdMob App ID in `ios/Runner/Info.plist` — **still the Google sample value**
+- [ ] Production ad unit IDs in `lib/config/ads_config.dart`, **or** `_adsEnabledByConfig = false` for v1.0
+- [ ] Privacy Report reviewed at archive time
 
 ### Monetization
 
 - [ ] Restore purchases (iOS/Android sandbox)
-- [ ] Subscription terms visible
+- [ ] Subscription terms visible on the paywall itself, with Terms + Privacy links
 - [ ] Coin economy still coherent with premium bypass
 
 ### Auth
 
-- [ ] Sign in with Apple if Google (or other) third-party login is offered
+- [x] Sign in with Apple if Google (or other) third-party login is offered
 
 ### Ops
 
@@ -906,16 +941,26 @@ Phases 1–4 feature-complete on staging.
 - [ ] Crashlytics verified on staging builds
 - [ ] Basic AI error + latency logging retained
 
+### Debt carried into this phase
+
+- [ ] `delete_account_*` localization keys exist in `en` only; 14 locales fall back to English
+- [ ] No `test/` directory exists anywhere in the repo
+
 ## Verify — Phase 5
 
 | ID | Procedure | Pass criteria |
 |----|-----------|---------------|
-| V5.1 | Delete account E2E | Cannot login as same user; cloud user root gone |
+| V5.1 | Delete account E2E — full matrix D1–D6 in `15_IOS_RELEASE_PLAN.md` § 2 | Cannot login as same user; Firestore, Storage and Auth records all gone; stale-token re-auth path works |
 | V5.2 | Restore IAP | Entitlements return |
 | V5.3 | Disclaimer reachable | ≤ 2 taps from Settings |
 | V5.4 | App Privacy nutrition | Data collection declarations match behavior |
 | V5.5 | 48h staging bake | Crash-free meets internal SLO |
-| V5.6 | MASTER_PLAN Part 17 checklist | All items checked |
+| V5.6 | MASTER_PLAN Part 17 + Part 13.5 | All items checked |
+| V5.7 | `AdsConfig.configurationReport()` on a release build | Output matches intent — no sample IDs |
+| V5.8 | ATT prompt on a physical device | Appears once; declining leaves every feature working |
+
+**V5.1, V5.2 and V5.8 require a physical device.** An agent can prepare and
+document them but cannot execute them.
 
 ## Definition of done
 
@@ -968,19 +1013,33 @@ Run on a staging build signed-in with test account that has coins or premium.
 
 All S* must pass before merging scan/FKB PRs.
 
+For a **release** build the wider suite applies — sign-in, IAP sandbox, account
+deletion, ATT, push, dark mode, localization, cold-launch timing. That is
+`15_IOS_RELEASE_PLAN.md` § 9.3 (S1–S16). This table is the scan-path subset run
+on every feature PR; that one is run before every submission.
+
 ---
 
 # Suggested implementation order for an AI agent (tickets)
 
-1. `feat(fkb): types + firestore upsert + usda seed import` — Phase 1A  
-2. `feat(fkb): callables search/get + dart FkbService` — Phase 1B  
-3. `feat(scan): matchFood + integrate analyzeFoodImage + Food fields` — Phase 1C  
-4. `feat(ui): source badge + localization keys` — Phase 1D  
-5. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2  
-6. `feat(eval): golden_set + mape runner` — Phase 3A/B  
-7. `feat(eval): online validation_logs sampling` — Phase 3C  
-8. `feat(plan): ground prompts on log summary` — Phase 4  
-9. `feat(compliance): delete account + restore QA checklist` — Phase 5  
+~~1. `feat(fkb): types + firestore upsert + usda seed import` — Phase 1A~~ **done**
+~~9a. `feat(compliance): delete account + iOS store blockers` — Phase 5 (partial)~~ **done 2026-08-04**
+
+Remaining, in order:
+
+1. `feat(fkb): callables search/get + dart FkbService` — Phase 1B
+2. `feat(scan): matchFood + integrate analyzeFoodImage + Food fields` — Phase 1C
+3. `feat(ui): source badge + localization keys` — Phase 1D
+4. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2
+5. `feat(eval): golden_set + mape runner` — Phase 3A/B
+6. `feat(eval): online validation_logs sampling` — Phase 3C
+7. `feat(plan): ground prompts on log summary` — Phase 4
+8. `feat(compliance): finish release checklist` — Phase 5 (remainder)
+
+Pickable at any time, independent of the chain above:
+
+- `test: nutrient scaling + Food round-trip + migration path` — closes the "no `test/` directory" debt
+- `chore(i18n): translate delete_account_* to the 14 non-English locales`
 
 Each ticket closes only when its Verify table is executed and notes pasted in PR.
 
@@ -1018,5 +1077,6 @@ Extend these; do not replace call chains ad hoc.
 |---------|------|---------|
 | 1.0.0 | 2026-08-03 | Initial plan + verify tables |
 | 2.0.0 | 2026-08-03 | Agent-detailed contracts, insertion points, edge cases, ticket order |
+| 2.1.0 | 2026-08-04 | Status table added; Phase 5 expanded with the iOS technical-compliance items it previously omitted and marked with what shipped; V5.7/V5.8 added; smoke suite cross-referenced to the release runbook; ticket order updated |
 
-**End of plan.md v2.0.0**
+**End of plan.md v2.1.0**

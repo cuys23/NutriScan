@@ -1,0 +1,176 @@
+# CLAUDE.md
+
+Agent entry point for the NutriScan repository. Read this first, every session.
+
+---
+
+## 1. What this is
+
+A Flutter + Firebase iOS/Android app that photographs a meal, identifies it with a
+vision model, and logs nutrition. The product is being evolved from "AI scan demo"
+into a verified-nutrition platform backed by a Food Knowledge Base (FKB) sourced
+from USDA and the Vietnamese Food Composition Table.
+
+```
+NutriScan/
+  docs/              ← plans; read before touching architecture
+  nutriscan/         ← the Flutter app + Firebase Functions
+    lib/
+    functions/src/   ← TypeScript Cloud Functions
+    eval/            ← golden set + import tooling
+    firestore.rules
+    storage.rules
+```
+
+## 2. Document map
+
+| File | Read it when |
+|------|--------------|
+| `CLAUDE.md` (this) | Always, first |
+| `docs/MASTER_PLAN.md` | Architecture, ADRs, product truth model |
+| `docs/plan.md` | Implementing a feature phase — read **your assigned phase end to end** |
+| `docs/15_IOS_RELEASE_PLAN.md` | Anything about shipping, compliance, signing, store |
+| `docs/PHASE0_INVENTORY.md` | Locating existing scan-path code |
+
+Precedence when documents disagree:
+
+- Product / architecture → `MASTER_PLAN.md`
+- Shipping / compliance → `15_IOS_RELEASE_PLAN.md`
+- Implementation detail → `plan.md`
+
+Contradicting an accepted ADR requires appending a new ADR, not editing the old one.
+
+## 3. Hard rules
+
+Violating any of these means the change gets reverted.
+
+| Never | Why |
+|-------|-----|
+| Put Groq / OpenAI / USDA API keys in the Flutter tree | Keys live in Functions + Secret Manager only |
+| Label a macro `verified` from raw AI output | `verified` means FKB per-100g × grams. Nothing else. |
+| Propose a React Native / Kotlin rewrite | ADR-001, settled |
+| Remove or bypass coin / IAP / ad gates while "cleaning up" | That is live monetization |
+| Change a SQLite schema without an `onUpgrade` migration | User history must survive the update |
+| Write medical claims into UI strings | "diagnose", "treat", "cure", "clinically proven" → App Store rejection |
+| Build a second scan pipeline | Extend `FoodProvider.analyzeFoodImage`; do not fork it |
+| Delete the Firebase Auth user before its cloud data | Security rules key off `request.auth.uid`; the data becomes unreachable |
+
+Canonical nutrient keys, everywhere, no variants:
+
+```
+calories_kcal  protein_g  carbs_g  fat_g  fiber_g  sugar_g  sodium_mg
+```
+
+Scaling formula:
+
+```
+nutrient_total = nutrient_per_100g * (portion_grams / 100.0)
+```
+
+If `portion_grams` is null or ≤ 0, the log is `estimated` — never `verified`.
+
+## 4. Extension points
+
+Do not go looking; these are the files that matter.
+
+| Concern | File |
+|---------|------|
+| Scan orchestration | `lib/providers/food/food_provider.dart` → `analyzeFoodImage` |
+| Vision AI client | `lib/services/ai/groq_service.dart` |
+| AI proxy + rate limit | `functions/src/index.ts` → `groqChatCompletion` |
+| Food model | `lib/models/food.dart` |
+| Local DB | `lib/services/database/database_helper.dart` |
+| FKB (server) | `functions/src/fkb/`, `functions/src/usda/`, `functions/src/jobs/` |
+| Coins | `lib/providers/coins/coin_provider.dart` |
+| Subscription / IAP | `lib/providers/payment/subscription_provider.dart`, `lib/services/payment/iap_service.dart` |
+| Account deletion | `lib/services/auth/account_deletion_service.dart` |
+| Localization | `lib/config/app_localizations.dart` (15 locales, English fallback) |
+
+## 5. Current state — 2026-08-04
+
+**Done:** Phase 0, Phase 1A (78 verified foods imported), and the iOS compliance
+fixes (delete account, ATT, SKAdNetwork, export compliance, AdMob release guard,
+storage rules).
+
+**Not started:** `plan.md` Phases 1B → 6.
+
+Next tickets, in order. Each closes only when its Verify table in `plan.md` has
+been executed and the results pasted into the PR.
+
+1. `feat(fkb): callables search/get + dart FkbService` — Phase 1B
+2. `feat(scan): matchFood + integrate analyzeFoodImage + Food fields` — Phase 1C
+3. `feat(ui): source badge + localization keys` — Phase 1D
+4. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2
+5. `feat(eval): golden_set + mape runner` — Phase 3A/B
+6. `feat(eval): online validation_logs sampling` — Phase 3C
+7. `feat(plan): ground prompts on log summary` — Phase 4
+8. `feat(compliance): finish release checklist` — Phase 5
+
+Known debt, safe to pick up any time:
+
+- No `test/` directory exists. Highest value first: nutrient scaling math,
+  `Food.toMap`/`fromMap` round-trip, the Phase 2 migration path.
+- Delete-account localization keys exist in `en` only; 14 locales fall back to
+  English. Keys are prefixed `delete_account_`.
+- `app_version_subtitle` in `app_localizations.dart` is hardcoded and must be
+  updated in the same commit as any `pubspec.yaml` version bump.
+
+## 6. Who does what
+
+An agent cannot do console work. Do not attempt these, and do not report a task
+blocked on them as failed — flag it and move on.
+
+| Agent does | Human does |
+|------------|------------|
+| All Dart / TypeScript code | Apple Developer + App Store Connect account |
+| Firestore + Storage rules edits | Agreements, tax, banking |
+| Local test runs, `flutter analyze` | Creating IAP products in ASC |
+| Docs and localization | AdMob console → real App ID + ad unit IDs |
+| `firebase deploy` **if credentials are present** | APNs `.p8` key upload to Firebase |
+| Migration scripts | Physical-device testing (delete account, IAP sandbox, ATT) |
+| CI config | Screenshots, description, demo account |
+| | Xcode archive + upload |
+
+Verification steps that require a physical device are listed in
+`15_IOS_RELEASE_PLAN.md` § 9.3 (S1–S16) and § 2 (D1–D6). An agent may write them
+up and prepare the build; it cannot execute them.
+
+## 7. Commands
+
+```bash
+cd nutriscan
+
+flutter pub get
+flutter analyze                 # must be clean before any PR
+flutter test                    # once tests exist
+
+cd ios && pod install && cd ..  # after any pubspec change
+
+# Backend — always deploy before the client that depends on it
+firebase deploy --only firestore:rules,storage
+firebase deploy --only functions
+
+# Functions
+cd functions && npm run build && npm run serve   # local emulator
+```
+
+`lib/main.dart` redirects Cloud Functions to a local emulator under `kDebugMode`.
+That is intentional. Do not remove it, and do not let it leak into release builds.
+
+## 8. Conventions
+
+- Conventional commits: `feat(scan):`, `fix(fkb):`, `chore(ai):`
+- Providers over direct service calls from widgets; repositories for new features
+- Zod-validate every callable input in Functions; no unjustified `any`
+- All user-facing strings go through `AppLocalizations`
+- PR checklist: tests, feature-flag plan, screenshot if UI changed, cost note if
+  the change touches AI usage
+
+## 9. Before you finish a task
+
+- [ ] `flutter analyze` clean
+- [ ] No secret committed — `git grep -nE "(gsk_|AIza[0-9A-Za-z_-]{20,})" -- nutriscan/lib`
+- [ ] New user-facing strings localized (English at minimum)
+- [ ] If nutrition display changed: `source` is handled and no AI value is shown as `verified`
+- [ ] If the schema changed: migration written and the upgrade path tested
+- [ ] The Verify table for your phase in `plan.md` executed, results in the PR

@@ -21,6 +21,25 @@ class AppLocalizations {
       'logout_title': 'Logout',
       'logout_description':
           'Are you sure you want to sign out from your Google account? You will need to sign in again to use cloud backup features.',
+
+      // Delete Account (App Store Guideline 5.1.1(v))
+      'delete_account': 'Delete Account',
+      'delete_account_subtitle':
+          'Permanently delete your account and all data',
+      'delete_account_title': 'Delete Account?',
+      'delete_account_description':
+          'This permanently deletes your account and all associated data: food history, cloud backups, saved images and settings. This cannot be undone.',
+      'delete_account_confirm_hint': 'Type DELETE to confirm',
+      'delete_account_confirm_word': 'DELETE',
+      'delete_account_button': 'Delete Permanently',
+      'delete_account_deleting': 'Deleting your account...',
+      'delete_account_success': 'Your account and data have been deleted.',
+      'delete_account_failed':
+          'Could not delete your account. Please check your connection and try again.',
+      'delete_account_requires_login':
+          'For your security, please sign in again and then retry deleting your account.',
+      'delete_account_purchase_note':
+          'Active subscriptions are managed by the App Store and are not cancelled by deleting your account. Cancel them in your device Settings.',
       'about': 'About',
       'privacy_policy': 'Privacy Policy',
       'privacy_policy_subtitle': 'Read our privacy guidelines',

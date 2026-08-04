@@ -1,18 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nutriscan/config/app_localizations.dart';
+import 'package:nutriscan/services/auth/account_deletion_service.dart';
 import 'package:nutriscan/services/auth/cloud_backup_service.dart';
 import 'package:nutriscan/services/database/database_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CloudBackupProvider with ChangeNotifier {
   final CloudBackupService _cloudBackupService = CloudBackupService();
+  final AccountDeletionService _accountDeletionService =
+      AccountDeletionService();
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
   bool _isGoogleLoading = false;
   bool _isAppleLoading = false;
+  bool _isDeletingAccount = false;
   bool _isSignedIn = false;
   String? _error;
   Map<String, dynamic>? _backupInfo;
@@ -23,6 +27,7 @@ class CloudBackupProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isGoogleLoading => _isGoogleLoading;
   bool get isAppleLoading => _isAppleLoading;
+  bool get isDeletingAccount => _isDeletingAccount;
   bool get isSignedIn => _isSignedIn;
   String? get error => _error;
   Map<String, dynamic>? get backupInfo => _backupInfo;
@@ -173,6 +178,46 @@ class CloudBackupProvider with ChangeNotifier {
     } catch (e) {
       _error = AppLocalizations.getString('login_failed', language);
     } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Permanently deletes the account and every piece of data tied to it.
+  ///
+  /// Required by App Store Review Guideline 5.1.1(v). Returns the raw result so
+  /// the UI can distinguish "needs to sign in again" from a hard failure.
+  Future<AccountDeletionResult> deleteAccount({String language = 'en'}) async {
+    _isDeletingAccount = true;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await _accountDeletionService.deleteAccount();
+
+      if (result.isSuccess) {
+        _isSignedIn = false;
+        _backupInfo = null;
+        _error = null;
+      } else if (result.status == AccountDeletionStatus.requiresRecentLogin) {
+        _error = AppLocalizations.getString(
+          'delete_account_requires_login',
+          language,
+        );
+      } else if (result.status != AccountDeletionStatus.notSignedIn) {
+        _error = AppLocalizations.getString('delete_account_failed', language);
+      }
+
+      return result;
+    } catch (e) {
+      _error = AppLocalizations.getString('delete_account_failed', language);
+      return AccountDeletionResult(
+        AccountDeletionStatus.failed,
+        message: e.toString(),
+      );
+    } finally {
+      _isDeletingAccount = false;
       _isLoading = false;
       notifyListeners();
     }

@@ -30,6 +30,9 @@ dependencies:
   iconly: ^1.0.1
   flutter_secure_storage: ^9.2.2
   google_mobile_ads: ^6.0.0
+  # iOS App Tracking Transparency prompt. Required before the Google Mobile Ads
+  # SDK is allowed to read the IDFA (App Store Guideline 5.1.2).
+  app_tracking_transparency: ^2.0.7
   in_app_purchase: ^3.2.0
   firebase_core: ^4.1.1
   cloud_firestore: ^6.0.2
