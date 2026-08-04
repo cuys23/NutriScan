@@ -20,7 +20,12 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'calories.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -41,9 +46,31 @@ class DatabaseHelper {
         health_warnings TEXT,
         serving_size TEXT,
         image_path TEXT,
-        analyzed_at TEXT NOT NULL
+        analyzed_at TEXT NOT NULL,
+        portion_grams REAL,
+        source TEXT NOT NULL DEFAULT 'estimated',
+        fkb_food_id TEXT,
+        match_score REAL,
+        model_id TEXT,
+        prompt_version TEXT
       )
     ''');
+  }
+
+  /// v1 -> v2 (docs/plan.md Phase 2): FKB trust metadata. `source` backfills
+  /// existing rows to 'estimated' via the column default — they were all AI
+  /// output before the matcher existed, so that's the honest label.
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE foods ADD COLUMN portion_grams REAL');
+      await db.execute(
+        "ALTER TABLE foods ADD COLUMN source TEXT NOT NULL DEFAULT 'estimated'",
+      );
+      await db.execute('ALTER TABLE foods ADD COLUMN fkb_food_id TEXT');
+      await db.execute('ALTER TABLE foods ADD COLUMN match_score REAL');
+      await db.execute('ALTER TABLE foods ADD COLUMN model_id TEXT');
+      await db.execute('ALTER TABLE foods ADD COLUMN prompt_version TEXT');
+    }
   }
 
   Future<int> insertFood(Food food, {bool isPremiumUser = false}) async {
@@ -65,6 +92,10 @@ class DatabaseHelper {
       'serving_size': food.servingSize,
       'image_path': food.imagePath,
       'analyzed_at': food.analyzedAt.toIso8601String(),
+      'portion_grams': food.portionGrams,
+      'source': food.source,
+      'fkb_food_id': food.fkbFoodId,
+      'match_score': food.matchScore,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     // Auto backup to cloud ONLY for premium users
@@ -111,6 +142,10 @@ class DatabaseHelper {
         servingSize: maps[i]['serving_size'] ?? '1 serving',
         imagePath: maps[i]['image_path'] ?? '',
         analyzedAt: DateTime.parse(maps[i]['analyzed_at']),
+        source: maps[i]['source'] ?? 'estimated',
+        portionGrams: (maps[i]['portion_grams'] as num?)?.toDouble(),
+        fkbFoodId: maps[i]['fkb_food_id'],
+        matchScore: (maps[i]['match_score'] as num?)?.toDouble(),
       );
     });
   }
@@ -155,6 +190,10 @@ class DatabaseHelper {
         servingSize: maps[i]['serving_size'] ?? '1 serving',
         imagePath: maps[i]['image_path'] ?? '',
         analyzedAt: DateTime.parse(maps[i]['analyzed_at']),
+        source: maps[i]['source'] ?? 'estimated',
+        portionGrams: (maps[i]['portion_grams'] as num?)?.toDouble(),
+        fkbFoodId: maps[i]['fkb_food_id'],
+        matchScore: (maps[i]['match_score'] as num?)?.toDouble(),
       );
     });
   }
@@ -261,6 +300,10 @@ class DatabaseHelper {
         servingSize: maps[i]['serving_size'] ?? '1 serving',
         imagePath: maps[i]['image_path'] ?? '',
         analyzedAt: DateTime.parse(maps[i]['analyzed_at']),
+        source: maps[i]['source'] ?? 'estimated',
+        portionGrams: (maps[i]['portion_grams'] as num?)?.toDouble(),
+        fkbFoodId: maps[i]['fkb_food_id'],
+        matchScore: (maps[i]['match_score'] as num?)?.toDouble(),
       );
     });
   }
@@ -309,6 +352,10 @@ class DatabaseHelper {
         servingSize: maps[i]['serving_size'] ?? '1 serving',
         imagePath: maps[i]['image_path'] ?? '',
         analyzedAt: DateTime.parse(maps[i]['analyzed_at']),
+        source: maps[i]['source'] ?? 'estimated',
+        portionGrams: (maps[i]['portion_grams'] as num?)?.toDouble(),
+        fkbFoodId: maps[i]['fkb_food_id'],
+        matchScore: (maps[i]['match_score'] as num?)?.toDouble(),
       );
     });
   }
