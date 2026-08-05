@@ -1034,7 +1034,29 @@ Phases 1–4 feature-complete on staging.
   Still debt: same string in the other 14 locales still has the old, softer
   wording — needs accurate legal translation, not a mechanical one, so left
   alone rather than risk a wrong translation of compliance-relevant text.
-- [ ] Coin economy still coherent with premium bypass
+- [x] Coin economy still coherent with premium bypass — audited 2026-08-05,
+  code-review only, no changes needed:
+  - Premium bypasses the coin gate at both check sites
+    (`home_screen.dart` camera + gallery entry points) and the spend site
+    (`food_provider.dart` — `!hasPremiumFeatures && ... spendCoins(...)`).
+  - No path exists to buy coins outside StoreKit — `CoinProvider.addCoins`
+    is only ever called from the rewarded-ad `onRewardEarned` callback
+    (`home_screen.dart`, `settings_screen.dart`), which itself only fires
+    from `RewardedAd`'s own `onUserEarnedReward` (`admob_provider.dart`) —
+    there's no separate "buy coins" UI/SKU at all.
+  - Subscription status can't be spoofed by editing local storage: `flutter_secure_storage`
+    is a read cache only, the source of truth is `/users/{uid}.subscription`
+    in Firestore, written exclusively by the server-verified `verifyPurchase`
+    Cloud Function (client writes to that field are blocked by
+    `firestore.rules`).
+  - Coin *balance* itself is local-only (`SharedPreferences`, unencrypted) with
+    no server validation — a user with device-level access could inflate it
+    to skip paying attention to the "5 coins/scan" friction for free. This is
+    an accepted, coherent trade-off, not a gap: `groqChatCompletion`'s
+    `enforceDailyRateLimit` (100 Groq calls/day per Firebase uid) is the real
+    cost backstop and applies regardless of coin balance — see that function's
+    own comment in `functions/src/index.ts`. Worst case from coin tampering is
+    skipping the soft per-scan gate, still capped at 100 free AI calls/day/account.
 
 ### Auth
 
