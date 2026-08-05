@@ -49,3 +49,6 @@ app.*.symbols
 # docs/plan.md instead.
 eval/reports/
 
+# Firebase CLI local deploy cache
+.firebase/
+

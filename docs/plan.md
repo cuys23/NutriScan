@@ -992,8 +992,11 @@ Phases 1–4 feature-complete on staging.
 - [x] In-app **Delete account** — `lib/services/auth/account_deletion_service.dart` + `lib/widgets/settings/delete_account_dialog.dart` (2026-08-04)
   - Order is fixed by ADR-011: Storage → Firestore → Auth user → local. Do not reorder.
   - Requires `allow delete` on `users/{userId}` in `firestore.rules` — deployed together or the flow fails mid-wipe.
-- [ ] Privacy Policy **public HTTPS URL** live + link in app *(in-app screens exist; the URL does not — human task, needs hosting, see `15_IOS_RELEASE_PLAN.md` § 6.1)*
-- [ ] Terms of Use URL live + link *(same as above — human task)*
+- [x] Privacy Policy **public HTTPS URL** live + link in app — done 2026-08-05,
+  hosted on Firebase Hosting (`nutriscan/public/`), see `15_IOS_RELEASE_PLAN.md`
+  § 6.1 for the live URL. Still needs pasting into App Store Connect
+  (human step).
+- [x] Terms of Use URL live + link — same, done 2026-08-05
 - [x] Nutrition/health disclaimer screens — already satisfied: `nutrition_disclaimer_short`
   is directly on the main Settings screen body (`_buildAboutSection()`), which
   meets V5.3 (≤ 2 taps from Settings) as written in `15_IOS_RELEASE_PLAN.md` § 6.7.

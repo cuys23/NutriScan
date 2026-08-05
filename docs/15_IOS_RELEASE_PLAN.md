@@ -79,7 +79,7 @@ Audited 2026-08-04 against commit on `main`.
 |-----|-----------|---------|
 | Real AdMob App ID + ad unit IDs | **Done 2026-08-05 (iOS)** — Android still open | § 6.4 |
 | App Store Connect app record + IAP products | Yes | § 3, § 7 |
-| Public Privacy Policy / Terms **URLs** | Yes | § 6.1 |
+| Public Privacy Policy / Terms **URLs** | **Done 2026-08-05** — live, see § 6.1 / P0-3 | § 6.1 |
 | App Privacy nutrition labels filled in | Yes | § 6.2 |
 | APNs authentication key uploaded to Firebase | Yes (push is wired) | § 3.4 |
 | Screenshots, description, keywords | Yes | § 10 |
@@ -143,9 +143,20 @@ The Dart side is now fail-safe: `AdsConfig.adsEnabled` returns `false` in releas
 
 **Alternative:** ship v1.0 with `_adsEnabledByConfig = false`. This removes the entire ATT / advertising-data surface from review, and ads can be enabled in v1.1 once the AdMob account is approved. Given that AdMob account approval can take days and is a common launch delay, this is the lower-risk path.
 
-## P0-3 — Legal URLs must be publicly reachable ⚠️ OPEN
+## P0-3 — Legal URLs must be publicly reachable ✅ RESOLVED 2026-08-05
 
-The app has in-app Privacy Policy and Terms screens, but App Store Connect requires a **public HTTPS URL** for the privacy policy — reviewers and the store listing both need it. In-app screens do not satisfy this.
+Live at:
+- Privacy Policy: https://nutriscan-75d57.web.app/privacy-policy.html
+- Terms of Service: https://nutriscan-75d57.web.app/terms-of-service.html
+
+Hosted via Firebase Hosting (`nutriscan/public/`, `firebase.json` `hosting`
+block, deployed with `firebase deploy --only hosting`) — content mirrors
+`lib/screens/legal/privacy_policy_screen.dart` /
+`terms_of_service_screen.dart` verbatim, plus an explicit Analytics/Crashlytics
+section the in-app version only covered implicitly. **Remaining human step:**
+paste these URLs into App Store Connect → App Privacy, and confirm
+`support@nutriscan.ai` is a real, monitored inbox before submission — Apple
+review does sometimes send a test email there.
 
 See § 6.1.
 
@@ -296,13 +307,17 @@ The `RunnerTests` target bundle ID was originally `com.example.nutriscan.RunnerT
 
 # 6. Compliance & privacy
 
-## 6.1 Legal URLs
+## 6.1 Legal URLs ✅ RESOLVED 2026-08-05
 
-You need two publicly reachable HTTPS pages. GitHub Pages, a Notion public page, or Firebase Hosting are all acceptable — content matters, hosting does not.
+Live via Firebase Hosting:
+- https://nutriscan-75d57.web.app/privacy-policy.html
+- https://nutriscan-75d57.web.app/terms-of-service.html
 
-- [ ] Privacy Policy URL — entered in App Store Connect → App Privacy, **required**
-- [ ] Terms of Use URL — required in the listing if you sell subscriptions
-- [ ] Both URLs also linked from inside the app (already satisfied by `lib/screens/legal/`)
+- [x] Privacy Policy URL live
+- [x] Terms of Use URL live
+- [x] Both URLs also linked from inside the app (already satisfied by `lib/screens/legal/`)
+- [ ] **Human step remaining:** paste both URLs into App Store Connect → App
+  Privacy / App Information
 
 The privacy policy must actually describe what this app does, which is more than the template default:
 
