@@ -88,16 +88,20 @@ Do not go looking; these are the files that matter.
 
 ## 5. Current state — 2026-08-05
 
-**Done:** Phase 0, Phase 1A (78 verified foods imported), Phase 1B (fkbSearch/fkbGet),
-Phase 1C (matchFood wired into analyzeFoodImage), Phase 2 (SQLite migration for
+**Done:** Phase 0, Phase 1A (78 verified foods imported — but see the critical
+data-integrity debt item below before trusting any USDA-sourced `verified`
+macro), Phase 1B (fkbSearch/fkbGet), Phase 1C (matchFood wired into
+analyzeFoodImage), Phase 2 (SQLite migration for
 portion_grams/source/fkb_food_id/match_score — landed ahead of 1D), Phase 1D
-(source badge + localization keys, English only — see debt below), and the iOS
-compliance fixes (delete account, ATT, SKAdNetwork, export compliance, AdMob
-release guard, storage rules).
+(source badge + localization keys, English only — see debt below), Phase 3A
+(golden set, executed), Phase 3B (offline MAPE runner, executed — surfaced and
+fixed a real `fkb/search.ts` tokenizer bug: match_rate 0.26 → 0.88, deployed),
+and the iOS compliance fixes (delete account, ATT, SKAdNetwork, export
+compliance, AdMob release guard, storage rules).
 
-**Code done, execution/verification pending (needs credentials or a staging
-deploy — see `plan.md` for the exact blockers):** Phase 3A (golden set), Phase
-3B (offline MAPE runner), Phase 3C (online validation_logs sampling).
+**Code done + deployed, staging verification pending:** Phase 3C (online
+validation_logs sampling) — needs a real scan on staging to confirm rows land;
+see `plan.md`.
 
 **Not started:** `plan.md` Phases 4 → 6.
 
@@ -107,8 +111,27 @@ been executed and the results pasted into the PR.
 1. `feat(plan): ground prompts on log summary` — Phase 4
 2. `feat(compliance): finish release checklist` — Phase 5
 
-Known debt, safe to pick up any time:
+Known debt, **highest priority first — the first item below is a live
+data-correctness bug, not routine cleanup:**
 
+- **CRITICAL — 19 of 78 imported FKB foods have the wrong `fdcId`, so their
+  `name_en`/`nutrients_per_100g` are a completely unrelated food** (found via
+  `eval/run_mape.mjs` 2026-08-05, full list in `docs/plan.md` Phase 3A/3B
+  section). Examples: `usda_174608` (aliased "honey") actually holds "Chicken
+  breast, roll, oven-roasted"; `usda_174833` ("olive oil") holds "Alcoholic
+  Beverage, wine, table, red". A `matchFood` hit on any of these returns a
+  `verified` badge with wrong macros — this is the exact failure `verified`
+  is supposed to rule out. The import code itself is correct (keys off
+  USDA's real returned `fdcId`); the bug is in the hand-typed `fdcId`s in
+  `SEED_FOODS` (`functions/src/jobs/importUsdaSeed.ts`) and
+  `eval/usda_seed_ids.json`. Fix: look up the correct `fdcId` per food at
+  fdc.nal.usda.gov, update both files, re-run `importUsdaSeed`. `gs_039` in
+  `eval/golden_set.json` (`usda_174814`) is a separate, smaller gap — that
+  fdcId was never imported at all (404 on `fkbGet`).
+- `eval/get_eval_token.mjs` (untracked, not committed) hardcodes a real
+  password for the `eval_test@nutriscan.com` account in plaintext. Don't
+  `git add` it as-is — move the password to an env var first, or delete it
+  now that a token can be pasted manually.
 - No `test/` directory exists. Highest value first: nutrient scaling math,
   `Food.toMap`/`fromMap` round-trip, the Phase 2 migration path.
 - Delete-account localization keys exist in `en` only; 14 locales fall back to

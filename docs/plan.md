@@ -19,29 +19,52 @@
 | 1C — Matcher + scan wiring | Done |
 | 2 — SQLite migration | Done (landed ahead of 1D) |
 | 1D — UI source badge & copy | Done 2026-08-05 |
-| 3A — Golden set | Code done 2026-08-05; V3A.2 blocked, see note below |
-| 3B — Offline MAPE job | Code done 2026-08-05; V3B.1 blocked, see note below |
-| 3C — Online validation sampling | Code done 2026-08-05; V3C.1/V3C.2/V3C.4 need a staging run, see note below |
+| 3A — Golden set | Done 2026-08-05 — executed, V3A.2 passed |
+| 3B — Offline MAPE job | Done 2026-08-05 — executed, match_rate 0.26→0.88 after fixing a real search.ts bug it found; see note below |
+| 3C — Online validation sampling | Code done + deployed 2026-08-05; V3C.1/V3C.2/V3C.4 need a staging run, see note below |
 | 4 → 6 | Not started |
 
-**Phase 3A/3B execution blocker:** `eval/run_mape.mjs` (and V3A.2's per-item
-resolve check) needs a real Firebase Auth ID token to call the deployed
-`fkbGet`/`matchFood` callables — a gcloud identity token does not populate
-`request.auth` the way a Firebase Auth ID token does. No agent session has
-gcloud, a service account, or a signed-in test-user token, and fabricating
-reference nutrition numbers instead of reading the real FKB would defeat the
-point of the eval. Needs a human to supply `EVAL_ID_TOKEN` (or a test account)
-before V3A.2/V3B.1 can run. See `eval/run_mape.mjs` header for how to obtain
-one, and `--validate-only` for the schema-only check that already passes.
+**Phase 3A/3B — executed 2026-08-05** with a real Firebase Auth ID token from
+a dedicated `eval_test@nutriscan.com` account (V3A.2/V3B.1 pass — see
+`eval/run_mape.mjs` header for how to get a token). First run against
+production surfaced two real bugs, not eval artifacts:
 
-**Phase 3C execution note:** `maybeLogValidationSample` (`functions/src/fkb/validationLog.ts`)
-is deployed-pending — needs `firebase deploy --only functions` and then a real
-scan (or a direct `matchFood` call) to produce a `validation_logs` row. V3C.1/
-V3C.2 (rate=1 / rate=0 via the `VALIDATION_SAMPLE_RATE` param) and V3C.4
-(group by `prompt_version`) need that staging run. V3C.3 (matcher exception
-doesn't fail the scan) is true by construction — the whole function body is
-wrapped in one `try/catch` that only logs — but wasn't forced end-to-end on
-live infra. The pure APE math has its own check: `eval/selfcheck_validation_log.mjs`.
+1. **`fkb/search.ts` tokenizer bug (fixed & deployed 2026-08-05).** `scoreFood`
+   tokenized on raw whitespace with no punctuation stripping, so `"Bananas,
+   raw"` became `{"bananas,", "raw"}` — the trailing comma blocked almost
+   every Jaccard match. Pooling name_en + name_vi + all aliases into one set
+   before scoring also let an unrelated field (the Vietnamese name, a plural
+   variant) inflate the union and drag down a field that was actually an
+   exact match. First run: `match_rate=0.26`. Fixed (punctuation-stripped
+   tokenizer, per-field max instead of pooled Jaccard) and deployed
+   (`firebase deploy --only functions:matchFood,functions:fkbSearch`).
+   Re-run: `match_rate=0.88`, `food_id_accuracy=0.86`,
+   `mape.calories_kcal=11.62`. Self-check: `eval/selfcheck_search_score.mjs`.
+2. **Corrupted Phase 1A seed data — NOT fixed, see debt in `CLAUDE.md`.**
+   19 of 40 USDA golden-set entries resolve to a completely unrelated food
+   (e.g. `usda_174608` tagged "honey" in `SEED_FOODS`/aliases is actually
+   USDA's "Chicken breast, roll, oven-roasted"; `usda_174833` "olive oil" is
+   "Alcoholic Beverage, wine, table, red"). The import code itself is
+   correct — it keys off the real `detail.fdcId` from USDA's response, no
+   batch-order bug — the `fdcId`s hand-entered into `SEED_FOODS` in
+   `functions/src/jobs/importUsdaSeed.ts` (and duplicated in
+   `eval/usda_seed_ids.json`) just don't point at the foods their `hint`
+   claims. This is worse than a low match rate: a "verified" badge on these
+   would show real, wrong, confidently-labeled nutrition. **Do not treat any
+   `verified` USDA-sourced macro as trustworthy until this is re-imported
+   with confirmed fdcIds.** `eval/golden_set.json`'s `gs_039` (orange juice,
+   `usda_174814`) also 404s — that fdcId was never imported at all, a third,
+   smaller gap. User is re-deriving correct fdcIds; re-import once supplied.
+
+**Phase 3C — code done 2026-08-05, deployed, not yet staging-verified.**
+`maybeLogValidationSample` (`functions/src/fkb/validationLog.ts`) is live
+(deployed alongside the search.ts fix above). V3C.1/V3C.2 (rate=1 / rate=0 via
+the `VALIDATION_SAMPLE_RATE` param, currently `0.05` — see
+`functions/.env.nutriscan-75d57`, gitignored) and V3C.4 (group by
+`prompt_version`) still need a real scan on staging to produce rows. V3C.3
+(matcher exception doesn't fail the scan) is true by construction — the whole
+function body is wrapped in one `try/catch` that only logs. Pure APE math has
+its own check: `eval/selfcheck_validation_log.mjs`.
 | Release compliance | Partially done ahead of schedule — see § "Phase 5" |
 
 Phase 5 was originally sequenced last. Several of its items were pulled forward
@@ -1055,8 +1078,9 @@ on every feature PR; that one is run before every submission.
 ~~4. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2~~ **done** (landed ahead of 1D)
 ~~3. `feat(ui): source badge + localization keys` — Phase 1D~~ **done 2026-08-05** (English locale only; other 15 locales fall back to English per `getString`, same debt pattern as `delete_account_*`)
 
-~~5. `feat(eval): golden_set + mape runner` — Phase 3A/B~~ **code done 2026-08-05, execution blocked on `EVAL_ID_TOKEN` — see note above**
-~~6. `feat(eval): online validation_logs sampling` — Phase 3C~~ **code done 2026-08-05, needs a deploy + staging run to verify — see note above**
+~~5. `feat(eval): golden_set + mape runner` — Phase 3A/B~~ **done 2026-08-05 — found + fixed a real search.ts bug, found a critical seed-data bug (open) — see note above**
+~~6. `feat(eval): online validation_logs sampling` — Phase 3C~~ **code done + deployed 2026-08-05, needs a staging run to verify — see note above**
+~~7. `fix(fkb): search.ts tokenizer` — unplanned, found via Phase 3B~~ **done 2026-08-05**
 
 Remaining, in order:
 7. `feat(plan): ground prompts on log summary` — Phase 4

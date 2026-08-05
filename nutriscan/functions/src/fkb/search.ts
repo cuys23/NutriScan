@@ -29,8 +29,16 @@ function normalize(text: string): string {
   return text.toLowerCase().trim().replace(/\s+/g, " ");
 }
 
-function tokenize(text: string): Set<string> {
-  return new Set(normalize(text).split(" ").filter((w) => w.length >= 2));
+/**
+ * Strip punctuation before splitting into words — without this, "Bananas,
+ * raw" tokenizes to {"bananas,", "raw"} and the trailing comma silently
+ * blocks every Jaccard match against a punctuation-free query. Mirrors the
+ * word-extraction step in `buildSearchTokens` (./types.ts) so a name and a
+ * query normalize to the same token shape.
+ */
+export function tokenize(text: string): Set<string> {
+  const stripped = normalize(text).replace(/[^a-z0-9À-ɏḀ-ỿ\s]/g, "");
+  return new Set(stripped.split(/\s+/).filter((w) => w.length >= 2));
 }
 
 function jaccard(a: Set<string>, b: Set<string>): number {
@@ -46,8 +54,14 @@ function jaccard(a: Set<string>, b: Set<string>): number {
  *   exact name_en or name_vi = 1.0
  *   alias exact               = 0.95
  *   token Jaccard on names     = 0.0–0.9
+ *
+ * Jaccard is scored per-field (name_en, name_vi, each alias) and the best
+ * one wins, rather than pooling every field into one token set — pooling
+ * let an unrelated field (e.g. the Vietnamese name, or a plural variant in
+ * name_en) inflate the union and silently drag down a field that was
+ * actually an exact word-for-word match.
  */
-function scoreFood(food: FkbFood, normalizedQuery: string, queryTokens: Set<string>): number {
+export function scoreFood(food: FkbFood, normalizedQuery: string, queryTokens: Set<string>): number {
   if (
     normalize(food.name_en) === normalizedQuery ||
     normalize(food.name_vi) === normalizedQuery
@@ -59,13 +73,14 @@ function scoreFood(food: FkbFood, normalizedQuery: string, queryTokens: Set<stri
     return 0.95;
   }
 
-  const nameTokens = new Set<string>([
-    ...tokenize(food.name_en),
-    ...tokenize(food.name_vi),
-    ...food.aliases.flatMap((a) => [...tokenize(a)]),
-  ]);
+  const candidateFields = [food.name_en, food.name_vi, ...food.aliases];
+  let best = 0;
+  for (const field of candidateFields) {
+    const score = jaccard(queryTokens, tokenize(field));
+    if (score > best) best = score;
+  }
 
-  return jaccard(queryTokens, nameTokens) * 0.9;
+  return best * 0.9;
 }
 
 /**
