@@ -14,6 +14,12 @@ service cloud.firestore {
       // Prevent updating the subscription field entirely to block free premium hacks
       allow update: if request.auth != null && request.auth.uid == userId
                     && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscription']));
+
+      // Account deletion (App Store Guideline 5.1.1(v)). A user must be able to
+      // erase their own profile document. Without this rule the in-app
+      // "Delete Account" flow fails with PERMISSION_DENIED and leaves the
+      // Firestore record orphaned after the Auth user is removed.
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
     
     // Backups collection: Users can fully manage their own backups

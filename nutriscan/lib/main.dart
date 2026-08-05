@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,7 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:nutriscan/config/ads_config.dart';
 import 'package:nutriscan/config/app_config.dart';
+import 'package:nutriscan/config/feature_flags.dart';
 import 'package:nutriscan/firebase_options.dart';
 import 'package:nutriscan/providers/ads/admob_provider.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
@@ -37,6 +41,30 @@ void main() async {
   });
 }
 
+/// Shows the iOS App Tracking Transparency prompt once, if the system has not
+/// already recorded an answer.
+///
+/// Apple requires this prompt before any SDK reads the IDFA; the Google Mobile
+/// Ads SDK does. Android and older iOS versions are no-ops. Any failure here is
+/// swallowed: ads fall back to non-personalised, which is a valid state.
+Future<void> _requestTrackingAuthorization() async {
+  if (!Platform.isIOS) return;
+
+  try {
+    final status =
+        await AppTrackingTransparency.trackingAuthorizationStatus;
+
+    if (status == TrackingStatus.notDetermined) {
+      // Small delay so the prompt does not collide with the launch animation,
+      // which can cause iOS to drop the dialog silently.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      await AppTrackingTransparency.requestTrackingAuthorization();
+    }
+  } catch (e) {
+    debugPrint('ATT request skipped: $e');
+  }
+}
+
 Future<void> _bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -50,9 +78,21 @@ Future<void> _bootstrap() async {
     // Cloud Functions calls to the local emulator (`npm run serve` in
     // functions/) instead of production during debug builds. Remove once a
     // real Apple Developer / Play Console account is wired up.
-    if (kDebugMode) {
-      FirebaseFunctions.instance.useFunctionsEmulator('127.0.0.1', 5001);
-    }
+    // LOCAL DEV ONLY — do not commit disabled. Re-enable
+    // (`FirebaseFunctions.instance.useFunctionsEmulator(...)`, host =
+    // Mac's LAN IP for a physical device, `127.0.0.1` for Simulator, from
+    // `ipconfig getifaddr en0`) when testing IAP against
+    // `npm run serve` in functions/. Left off so scan/FKB testing hits
+    // production directly without needing the Mac + device on the same
+    // Wi-Fi.
+    // if (kDebugMode) {
+    //   FirebaseFunctions.instance.useFunctionsEmulator('192.168.68.34', 5001);
+    // }
+
+    // Ops kill switches / live-tunable values (docs/plan.md Phase 5) —
+    // fire-and-forget, defaults match hardcoded behavior so a slow or failed
+    // fetch never blocks or changes startup.
+    unawaited(FeatureFlags().init());
 
     // Route Flutter framework errors and uncaught async errors to Crashlytics.
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -64,13 +104,26 @@ Future<void> _bootstrap() async {
     // Verifies calls to our Cloud Functions (groqChatCompletion, verifyPurchase)
     // come from this genuine app build, not a script replaying a stolen token.
     await FirebaseAppCheck.instance.activate(
-      providerAndroid: const AndroidPlayIntegrityProvider(),
-      providerApple: const AppleAppAttestProvider(),
+      providerAndroid: kDebugMode
+          ? const AndroidDebugProvider()
+          : const AndroidPlayIntegrityProvider(),
+      providerApple: kDebugMode
+          ? const AppleDebugProvider()
+          : const AppleAppAttestProvider(),
     );
+
+    // iOS App Tracking Transparency must be resolved BEFORE AdMob initializes,
+    // otherwise the SDK sends its first requests without the IDFA even when the
+    // user would have granted permission. Never fatal — a declined or errored
+    // prompt simply means non-personalised ads.
+    await _requestTrackingAuthorization();
 
     // Initialize AdMob
     await MobileAds.instance.initialize();
 
+    if (kDebugMode) {
+      debugPrint(AdsConfig.configurationReport());
+    }
   } catch (e) {
     // Continue app startup even if some services fail
   }

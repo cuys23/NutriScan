@@ -36,8 +36,23 @@ class AdsConfig {
   // Current environment (automatic based on build mode)
   static const bool _isTestMode = kDebugMode;
 
-  // Global switch to enable/disable ads
-  static const bool adsEnabled = true;
+  // Master switch set by the developer. The effective value is [adsEnabled],
+  // which additionally refuses to serve ads in release builds that still carry
+  // placeholder AdMob IDs.
+  static const bool _adsEnabledByConfig = true;
+
+  /// Whether ads should actually be served.
+  ///
+  /// FAIL-SAFE: shipping Google's sample/test ad unit IDs to the App Store is an
+  /// AdMob policy violation and invalid production IDs only produce broken ad
+  /// slots. So in a release build with unconfigured IDs we silently disable ads
+  /// instead of requesting them. Fill in the `_*Production*` constants below to
+  /// turn ads back on.
+  static bool get adsEnabled {
+    if (!_adsEnabledByConfig) return false;
+    if (_isTestMode) return true;
+    return hasProductionAdUnitIds;
+  }
 
   // Test Ad Unit IDs (replace with your actual ad unit IDs for production)
   static const String _androidTestInterstitialAdUnitId =
@@ -63,23 +78,79 @@ class AdsConfig {
   static const String _iosTestBannerAdUnitId =
       'ca-app-pub-3940256099942544/2435281174';
 
-  // Production Ad Unit IDs (replace with your actual ad unit IDs)
-  static const String _androidProductionInterstitialAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+  // ═══════════════════════════════════════════════════════════════════
+  // PRODUCTION AD UNIT IDs — FILL THESE BEFORE SUBMITTING TO THE STORES
+  // ═══════════════════════════════════════════════════════════════════
+  //
+  // 1. AdMob console → Apps → NutriScan (iOS) → Ad units → copy each ID.
+  // 2. Paste below. Format: 'ca-app-pub-<16 digits>/<10 digits>'.
+  // 3. ALSO update `GADApplicationIdentifier` in ios/Runner/Info.plist and
+  //    `com.google.android.gms.ads.APPLICATION_ID` in AndroidManifest.xml —
+  //    those are the App IDs (with `~`), not the ad unit IDs (with `/`).
+  // 4. Verify with `AdsConfig.configurationReport()`.
+  //
+  // While any of these is empty, release builds run with ads disabled.
+  static const String _placeholder = '';
+
+  static const String _androidProductionInterstitialAdUnitId = _placeholder;
   static const String _iosProductionInterstitialAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-  static const String _androidProductionOpenAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+      'ca-app-pub-5770727176247801/5510536452';
+  static const String _androidProductionOpenAdUnitId = _placeholder;
   static const String _iosProductionOpenAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-  static const String _androidProductionRewardedAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+      'ca-app-pub-5770727176247801/2884373116';
+  static const String _androidProductionRewardedAdUnitId = _placeholder;
   static const String _iosProductionRewardedAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-  static const String _androidProductionBannerAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+      'ca-app-pub-5770727176247801/8369855276';
+  static const String _androidProductionBannerAdUnitId = _placeholder;
   static const String _iosProductionBannerAdUnitId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+      'ca-app-pub-5770727176247801/6104332746';
+
+  /// AdMob **App IDs** (the `~` form). Kept here only so the release checklist
+  /// has one place to look; the values that actually matter at runtime live in
+  /// Info.plist (iOS) and AndroidManifest.xml (Android).
+  static const String productionAdMobAppIdIos =
+      'ca-app-pub-5770727176247801~9874508638';
+  static const String productionAdMobAppIdAndroid = _placeholder;
+
+  static const List<String> _iosProductionIds = [
+    _iosProductionInterstitialAdUnitId,
+    _iosProductionOpenAdUnitId,
+    _iosProductionRewardedAdUnitId,
+    _iosProductionBannerAdUnitId,
+  ];
+
+  static const List<String> _androidProductionIds = [
+    _androidProductionInterstitialAdUnitId,
+    _androidProductionOpenAdUnitId,
+    _androidProductionRewardedAdUnitId,
+    _androidProductionBannerAdUnitId,
+  ];
+
+  static bool _isConfigured(String id) =>
+      id.isNotEmpty && !id.contains('X') && id.startsWith('ca-app-pub-');
+
+  /// True when every production ad unit ID for the current platform is filled in
+  /// with a real value.
+  static bool get hasProductionAdUnitIds {
+    final ids = Platform.isAndroid ? _androidProductionIds : _iosProductionIds;
+    return ids.every(_isConfigured);
+  }
+
+  /// Human-readable status for the pre-submit checklist and debug logs.
+  static String configurationReport() {
+    if (_isTestMode) {
+      return 'AdsConfig: TEST mode (debug build) — Google sample ad units in use.';
+    }
+    if (!_adsEnabledByConfig) {
+      return 'AdsConfig: ads disabled by configuration.';
+    }
+    if (!hasProductionAdUnitIds) {
+      return 'AdsConfig: RELEASE build with unconfigured production ad unit IDs '
+          '— ads are DISABLED. Fill the _*Production*AdUnitId constants in '
+          'lib/config/ads_config.dart before submitting.';
+    }
+    return 'AdsConfig: PRODUCTION ad units configured.';
+  }
 
 
   // Get interstitial ad unit ID based on platform

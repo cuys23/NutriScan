@@ -44,3 +44,11 @@ app.*.symbols
 **/ios/Flutter/Flutter.podspec
 **/android/.gradle/
 
+# Generated eval MAPE reports (eval/run_mape.mjs) — timestamped local output,
+# not meant to accumulate in git. Quote numbers you want to keep in
+# docs/plan.md instead.
+eval/reports/
+
+# Firebase CLI local deploy cache
+.firebase/
+

@@ -21,6 +21,25 @@ class AppLocalizations {
       'logout_title': 'Logout',
       'logout_description':
           'Are you sure you want to sign out from your Google account? You will need to sign in again to use cloud backup features.',
+
+      // Delete Account (App Store Guideline 5.1.1(v))
+      'delete_account': 'Delete Account',
+      'delete_account_subtitle':
+          'Permanently delete your account and all data',
+      'delete_account_title': 'Delete Account?',
+      'delete_account_description':
+          'This permanently deletes your account and all associated data: food history, cloud backups, saved images and settings. This cannot be undone.',
+      'delete_account_confirm_hint': 'Type DELETE to confirm',
+      'delete_account_confirm_word': 'DELETE',
+      'delete_account_button': 'Delete Permanently',
+      'delete_account_deleting': 'Deleting your account...',
+      'delete_account_success': 'Your account and data have been deleted.',
+      'delete_account_failed':
+          'Could not delete your account. Please check your connection and try again.',
+      'delete_account_requires_login':
+          'For your security, please sign in again and then retry deleting your account.',
+      'delete_account_purchase_note':
+          'Active subscriptions are managed by the App Store and are not cancelled by deleting your account. Cancel them in your device Settings.',
       'about': 'About',
       'privacy_policy': 'Privacy Policy',
       'privacy_policy_subtitle': 'Read our privacy guidelines',
@@ -63,6 +82,12 @@ class AppLocalizations {
       'description': 'Description',
       'no_description_available': 'No description available',
       'nutrition': 'Nutrition',
+      'source_verified': 'Verified',
+      'source_estimated': 'AI estimate',
+      'source_user_edited': 'Edited by you',
+      'source_verified_subtitle': 'Based on verified food database data',
+      'nutrition_disclaimer_short':
+          'Nutrition values are estimates for informational purposes only, not medical advice.',
       'calories': 'Calories',
       'protein': 'Protein',
       'carbs': 'Carbs',
@@ -442,7 +467,7 @@ class AppLocalizations {
       'save_percentage': 'Save 17%',
       'subscription_successful': 'Subscription successful! Welcome to Premium!',
       'subscription_terms_detailed':
-          'By subscribing, you agree to our Terms of Service and Privacy Policy. Subscription will be charged to your payment method. You can cancel anytime in your account settings.',
+          'Payment will be charged to your account at confirmation of purchase. Subscription automatically renews unless it is cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage or cancel your subscription anytime in your App Store account settings. By subscribing, you agree to our Terms of Service and Privacy Policy.',
       'active_premium_subscription': 'Active Premium Subscription',
       'billed_monthly_desc': 'Billed monthly',
       'billed_annually_desc': 'Billed annually',

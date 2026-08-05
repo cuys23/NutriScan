@@ -459,7 +459,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
           color: Colors.red,
           onTap: () => _showClearDataDialog(),
         ),
+        // Account deletion — required by App Store Guideline 5.1.1(v).
+        // Only shown when an account actually exists.
+        Consumer<CloudBackupProvider>(
+          builder: (context, backupProvider, child) {
+            if (!backupProvider.isSignedIn) return const SizedBox.shrink();
+            return Column(
+              children: [
+                const SizedBox(height: 12),
+                SettingsCard(
+                  icon: Icons.person_remove_alt_1,
+                  title: AppLocalizations.getString(
+                    'delete_account',
+                    currentLanguage,
+                  ),
+                  subtitle: AppLocalizations.getString(
+                    'delete_account_subtitle',
+                    currentLanguage,
+                  ),
+                  color: Colors.red[800]!,
+                  onTap: () => _showDeleteAccountDialog(currentLanguage),
+                ),
+              ],
+            );
+          },
+        ),
       ],
+    );
+  }
+
+  Future<void> _showDeleteAccountDialog(String currentLanguage) async {
+    final deleted = await DeleteAccountDialog.show(context, currentLanguage);
+    if (!deleted || !mounted) return;
+
+    // Local history was wiped by the deletion service; refresh in-memory state
+    // so the UI does not keep showing data belonging to the deleted account.
+    final foodProvider = context.read<FoodProvider>();
+    await foodProvider.loadFoods();
+
+    if (!mounted) return;
+    await context.read<SubscriptionProvider>().reloadSubscriptionStatus();
+
+    if (!mounted) return;
+    await context.read<CoinProvider>().reloadCoins();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.getString(
+            'delete_account_success',
+            currentLanguage,
+          ),
+        ),
+        backgroundColor: Colors.green[600],
+      ),
     );
   }
 
@@ -541,6 +595,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }
             return const SizedBox.shrink();
           },
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            AppLocalizations.getString(
+              'nutrition_disclaimer_short',
+              currentLanguage,
+            ),
+            style: TextStyle(
+              fontSize: 11,
+              color: Provider.of<ThemeProvider>(context).isDarkMode
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+            ),
+          ),
         ),
       ],
     );

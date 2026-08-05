@@ -1,14 +1,31 @@
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions";
+import { z } from "zod";
+import { runUsdaSeedImport } from "./jobs/importUsdaSeed";
+import { searchFoods as searchUsdaFdc } from "./usda/client";
+import { runVnFctImport } from "./jobs/importVnFct";
+import { searchFkbFoods } from "./fkb/search";
+import { getFkbFood } from "./fkb/get";
+import { matchFood as matchFoodImpl } from "./fkb/match";
+import { NutrientsPer100gSchema } from "./fkb/types";
+import { maybeLogValidationSample } from "./fkb/validationLog";
 
 initializeApp();
 const db = getFirestore();
 
 const GROQ_API_KEY = defineSecret("GROQ_API_KEY");
+const USDA_FDC_API_KEY = defineSecret("USDA_FDC_API_KEY");
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+// Fraction of successful matchFood calls sampled into `validation_logs` for
+// offline drift monitoring (docs/plan.md Phase 3C). Override per-environment
+// via the VALIDATION_SAMPLE_RATE functions param, not by editing this default.
+const VALIDATION_SAMPLE_RATE = defineString("VALIDATION_SAMPLE_RATE", {
+  default: "0.05",
+});
 
 // Real backstop for AI-call abuse — the client's "coin" balance is only a UX gate,
 // this is what actually stops someone from running unlimited billed Groq requests.
@@ -81,6 +98,7 @@ export const groqChatCompletion = onCall(
       receiveTimeoutMs ?? 30_000,
     );
 
+    const startTime = Date.now();
     try {
       const response = await fetch(GROQ_BASE_URL, {
         method: "POST",
@@ -92,21 +110,57 @@ export const groqChatCompletion = onCall(
         signal: controller.signal,
       });
 
-      const json = await response.json();
+      const latencyMs = Date.now() - startTime;
+      const json = (await response.json()) as { usage?: unknown; [key: string]: unknown };
+
       if (!response.ok) {
-        logger.warn("Groq API error", { status: response.status, json });
+        logger.warn("Groq API error", {
+          uid: request.auth.uid,
+          model: groqBody.model,
+          latencyMs,
+          status: response.status,
+          json,
+        });
         throw new HttpsError(
           response.status === 429 ? "resource-exhausted" : "internal",
           `Groq API request failed with status ${response.status}`,
         );
       }
+
+      logger.info("Groq API success", {
+        uid: request.auth.uid,
+        model: groqBody.model,
+        latencyMs,
+        usage: json.usage,
+      });
+
       return json;
     } catch (err) {
-      if (err instanceof HttpsError) throw err;
+      const latencyMs = Date.now() - startTime;
+      if (err instanceof HttpsError) {
+        logger.warn("Groq request failed with HttpsError", {
+          uid: request.auth.uid,
+          model: groqBody.model,
+          latencyMs,
+          code: err.code,
+          message: err.message,
+        });
+        throw err;
+      }
       if ((err as Error).name === "AbortError") {
+        logger.error("Groq request timeout", {
+          uid: request.auth.uid,
+          model: groqBody.model,
+          latencyMs,
+        });
         throw new HttpsError("deadline-exceeded", "Groq request timed out.");
       }
-      logger.error("Unexpected error calling Groq", err);
+      logger.error("Unexpected error calling Groq", {
+        uid: request.auth.uid,
+        model: groqBody.model,
+        latencyMs,
+        error: String(err),
+      });
       throw new HttpsError("internal", "Failed to reach the AI service.");
     } finally {
       clearTimeout(timeout);
@@ -126,7 +180,7 @@ export const groqChatCompletion = onCall(
 const APPLE_ISSUER_ID = defineSecret("APPLE_ISSUER_ID");
 const APPLE_KEY_ID = defineSecret("APPLE_KEY_ID");
 const APPLE_PRIVATE_KEY = defineSecret("APPLE_PRIVATE_KEY");
-const APPLE_BUNDLE_ID = "com.nutriscan.app";
+const APPLE_BUNDLE_ID = "com.vin.nutrisnap";
 
 /**
  * NOTE: fill this in with a Google Cloud service-account JSON that has the
@@ -302,5 +356,228 @@ export const verifyPurchase = onCall(
     );
 
     return { isSubscribed: true, subscriptionType, expiryDate: result.expiryDate };
+  },
+);
+
+// ---------------------------------------------------------------------------
+// FKB (Food Knowledge Base) import callables
+// ---------------------------------------------------------------------------
+
+/**
+ * Import seed foods from USDA FoodData Central into the `fkb_foods`
+ * Firestore collection. Should be run once to populate the initial FKB,
+ * then again whenever new seeds are added to the list.
+ *
+ * Requires authentication. In production, restrict to admin UIDs.
+ */
+export const importUsdaSeed = onCall(
+  {
+    secrets: [USDA_FDC_API_KEY],
+    timeoutSeconds: 300,
+    memory: "512MiB",
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    logger.info(`importUsdaSeed called by uid=${request.auth.uid}`);
+
+    try {
+      const result = await runUsdaSeedImport(USDA_FDC_API_KEY.value());
+      return { ok: true, data: result };
+    } catch (err) {
+      logger.error("importUsdaSeed failed", err);
+      throw new HttpsError("internal", `Import failed: ${err}`);
+    }
+  },
+);
+
+const UsdaFdcSearchDebugRequestSchema = z.object({
+  query: z.string().min(1),
+});
+
+/**
+ * TEMPORARY — re-verifying SEED_FOODS fdcIds after discovering most of the
+ * Phase 1A USDA import points at the wrong food (see CLAUDE.md known debt).
+ * Thin passthrough to USDA FDC search using the existing Secret Manager key,
+ * so this never needs the raw key outside Functions. Remove once SEED_FOODS
+ * is corrected and re-imported.
+ */
+export const usdaFdcSearchDebug = onCall(
+  { secrets: [USDA_FDC_API_KEY], timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = UsdaFdcSearchDebugRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed usdaFdcSearchDebug request.");
+    }
+
+    try {
+      const result = await searchUsdaFdc(parsed.data.query, USDA_FDC_API_KEY.value());
+      const foods = result.foods.map((f) => ({
+        fdcId: f.fdcId,
+        description: f.description,
+        dataType: f.dataType,
+      }));
+      return { ok: true, data: { foods } };
+    } catch (err) {
+      logger.error("usdaFdcSearchDebug failed", err);
+      throw new HttpsError("internal", `USDA search failed: ${err}`);
+    }
+  },
+);
+
+/**
+ * Import curated Vietnamese foods into the `fkb_foods` collection.
+ * These are hand-entered entries for common VN dishes.
+ */
+export const importVnFct = onCall(
+  {
+    timeoutSeconds: 60,
+    memory: "256MiB",
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    logger.info(`importVnFct called by uid=${request.auth.uid}`);
+
+    try {
+      const result = await runVnFctImport();
+      return { ok: true, data: result };
+    } catch (err) {
+      logger.error("importVnFct failed", err);
+      throw new HttpsError("internal", `Import failed: ${err}`);
+    }
+  },
+);
+
+// ---------------------------------------------------------------------------
+// FKB (Food Knowledge Base) query callables
+// ---------------------------------------------------------------------------
+
+const FkbSearchRequestSchema = z.object({
+  query: z.string().min(1),
+  locale: z.string().optional(),
+  limit: z.number().int().min(1).max(50).optional(),
+});
+
+/**
+ * Search verified foods in `fkb_foods` by name/alias. See
+ * `functions/src/fkb/search.ts` for the ranking algorithm.
+ */
+export const fkbSearch = onCall(
+  { timeoutSeconds: 15, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = FkbSearchRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed fkbSearch request.");
+    }
+
+    try {
+      const items = await searchFkbFoods(parsed.data.query, parsed.data.limit ?? 10);
+      return { ok: true, data: { items } };
+    } catch (err) {
+      logger.error("fkbSearch failed", err);
+      throw new HttpsError("internal", "FKB search failed.");
+    }
+  },
+);
+
+const FkbGetRequestSchema = z.object({
+  food_id: z.string().min(1),
+});
+
+/** Fetch a single verified food by `food_id` from `fkb_foods`. */
+export const fkbGet = onCall(
+  { timeoutSeconds: 15, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = FkbGetRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed fkbGet request.");
+    }
+
+    const food = await getFkbFood(parsed.data.food_id);
+    if (!food) {
+      throw new HttpsError("not-found", `No FKB food with id ${parsed.data.food_id}`);
+    }
+
+    return { ok: true, data: food };
+  },
+);
+
+const MatchFoodRequestSchema = z.object({
+  food_name: z.string().min(1),
+  portion_grams: z.number().positive().nullable().optional(),
+  locale: z.string().optional(),
+  ai_nutrients: NutrientsPer100gSchema,
+  model_id: z.string().optional(),
+  prompt_version: z.string().optional(),
+});
+
+/**
+ * After AI vision identifies a food, decide verified (FKB per_100g × grams)
+ * vs estimated (AI passthrough). See functions/src/fkb/match.ts and
+ * docs/plan.md Phase 1C — the threshold/edge-case rules live there, not here.
+ */
+export const matchFood = onCall(
+  { timeoutSeconds: 15, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = MatchFoodRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed matchFood request.");
+    }
+
+    try {
+      const { food_name, portion_grams, ai_nutrients, model_id, prompt_version } = parsed.data;
+      const result = await matchFoodImpl(food_name, portion_grams, ai_nutrients);
+
+      await maybeLogValidationSample({
+        uid: request.auth.uid,
+        sampleRate: parseFloat(VALIDATION_SAMPLE_RATE.value()) || 0,
+        foodName: food_name,
+        status: result.status,
+        foodId: result.food_id,
+        matchScore: result.match_score,
+        portionGrams: portion_grams,
+        aiNutrients: ai_nutrients,
+        nutrientsTotal: result.nutrients_total,
+        modelId: model_id,
+        promptVersion: prompt_version,
+      });
+
+      return { ok: true, data: result };
+    } catch (err) {
+      // Fail soft to estimated rather than failing the whole scan — the AI
+      // macros are still usable even if the FKB lookup itself broke.
+      logger.error("matchFood failed, falling back to estimated", err);
+      return {
+        ok: true,
+        data: {
+          status: "estimated" as const,
+          food_id: null,
+          match_score: 0,
+          nutrients_total: parsed.data.ai_nutrients,
+          source_label: "AI estimate",
+        },
+      };
+    }
   },
 );
