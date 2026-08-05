@@ -596,6 +596,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             return const SizedBox.shrink();
           },
         ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            AppLocalizations.getString(
+              'nutrition_disclaimer_short',
+              currentLanguage,
+            ),
+            style: TextStyle(
+              fontSize: 11,
+              color: Provider.of<ThemeProvider>(context).isDarkMode
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+            ),
+          ),
+        ),
       ],
     );
   }

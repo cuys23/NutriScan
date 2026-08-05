@@ -8,6 +8,7 @@ import 'package:nutriscan/providers/food/food_provider.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/utils/image_helper.dart';
+import 'package:nutriscan/widgets/food/source_badge.dart';
 import 'package:provider/provider.dart';
 
 class FoodDetailCard extends StatefulWidget {
@@ -203,16 +204,43 @@ class _FoodDetailCardState extends State<FoodDetailCard> {
                 ),
 
                 // Nutrition Grid
-                Text(
-                  AppLocalizations.getString('nutrition', currentLanguage),
-                  style: _getStyledText(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.getString(
+                        'nutrition',
+                        currentLanguage,
+                      ),
+                      style: _getStyledText(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight,
+                      ),
+                    ),
+                    SourceBadge(
+                      source: widget.food.source,
+                      currentLanguage: currentLanguage,
+                    ),
+                  ],
                 ),
+                if (widget.food.source == 'verified') ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    AppLocalizations.getString(
+                      'source_verified_subtitle',
+                      currentLanguage,
+                    ),
+                    style: _getStyledText(
+                      fontSize: 11,
+                      color: isDarkMode
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 GridView.count(
                   shrinkWrap: true,

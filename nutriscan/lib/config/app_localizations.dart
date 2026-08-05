@@ -82,6 +82,12 @@ class AppLocalizations {
       'description': 'Description',
       'no_description_available': 'No description available',
       'nutrition': 'Nutrition',
+      'source_verified': 'Verified',
+      'source_estimated': 'AI estimate',
+      'source_user_edited': 'Edited by you',
+      'source_verified_subtitle': 'Based on verified food database data',
+      'nutrition_disclaimer_short':
+          'Nutrition values are estimates for informational purposes only, not medical advice.',
       'calories': 'Calories',
       'protein': 'Protein',
       'carbs': 'Carbs',

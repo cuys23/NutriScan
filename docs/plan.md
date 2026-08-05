@@ -15,7 +15,11 @@
 |-------|-------|
 | 0 — Architecture lock | Done |
 | 1A — FKB schema & import | Done (78 verified foods) |
-| 1B → 6 | Not started |
+| 1B — FKB callable API | Done |
+| 1C — Matcher + scan wiring | Done |
+| 2 — SQLite migration | Done (landed ahead of 1D) |
+| 1D — UI source badge & copy | Done 2026-08-05 |
+| 3A → 6 | Not started |
 | Release compliance | Partially done ahead of schedule — see § "Phase 5" |
 
 Phase 5 was originally sequenced last. Several of its items were pulled forward
@@ -1024,13 +1028,13 @@ on every feature PR; that one is run before every submission.
 
 ~~1. `feat(fkb): types + firestore upsert + usda seed import` — Phase 1A~~ **done**
 ~~9a. `feat(compliance): delete account + iOS store blockers` — Phase 5 (partial)~~ **done 2026-08-04**
+~~1. `feat(fkb): callables search/get + dart FkbService` — Phase 1B~~ **done**
+~~2. `feat(scan): matchFood + integrate analyzeFoodImage + Food fields` — Phase 1C~~ **done**
+~~4. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2~~ **done** (landed ahead of 1D)
+~~3. `feat(ui): source badge + localization keys` — Phase 1D~~ **done 2026-08-05** (English locale only; other 15 locales fall back to English per `getString`, same debt pattern as `delete_account_*`)
 
 Remaining, in order:
 
-1. `feat(fkb): callables search/get + dart FkbService` — Phase 1B
-2. `feat(scan): matchFood + integrate analyzeFoodImage + Food fields` — Phase 1C
-3. `feat(ui): source badge + localization keys` — Phase 1D
-4. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2
 5. `feat(eval): golden_set + mape runner` — Phase 3A/B
 6. `feat(eval): online validation_logs sampling` — Phase 3C
 7. `feat(plan): ground prompts on log summary` — Phase 4

@@ -86,25 +86,24 @@ Do not go looking; these are the files that matter.
 | Account deletion | `lib/services/auth/account_deletion_service.dart` |
 | Localization | `lib/config/app_localizations.dart` (15 locales, English fallback) |
 
-## 5. Current state — 2026-08-04
+## 5. Current state — 2026-08-05
 
-**Done:** Phase 0, Phase 1A (78 verified foods imported), and the iOS compliance
-fixes (delete account, ATT, SKAdNetwork, export compliance, AdMob release guard,
-storage rules).
+**Done:** Phase 0, Phase 1A (78 verified foods imported), Phase 1B (fkbSearch/fkbGet),
+Phase 1C (matchFood wired into analyzeFoodImage), Phase 2 (SQLite migration for
+portion_grams/source/fkb_food_id/match_score — landed ahead of 1D), Phase 1D
+(source badge + localization keys, English only — see debt below), and the iOS
+compliance fixes (delete account, ATT, SKAdNetwork, export compliance, AdMob
+release guard, storage rules).
 
-**Not started:** `plan.md` Phases 1B → 6.
+**Not started:** `plan.md` Phases 3A → 6.
 
 Next tickets, in order. Each closes only when its Verify table in `plan.md` has
 been executed and the results pasted into the PR.
 
-1. `feat(fkb): callables search/get + dart FkbService` — Phase 1B
-2. `feat(scan): matchFood + integrate analyzeFoodImage + Food fields` — Phase 1C
-3. `feat(ui): source badge + localization keys` — Phase 1D
-4. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2
-5. `feat(eval): golden_set + mape runner` — Phase 3A/B
-6. `feat(eval): online validation_logs sampling` — Phase 3C
-7. `feat(plan): ground prompts on log summary` — Phase 4
-8. `feat(compliance): finish release checklist` — Phase 5
+1. `feat(eval): golden_set + mape runner` — Phase 3A/B
+2. `feat(eval): online validation_logs sampling` — Phase 3C
+3. `feat(plan): ground prompts on log summary` — Phase 4
+4. `feat(compliance): finish release checklist` — Phase 5
 
 Known debt, safe to pick up any time:
 
@@ -112,6 +111,9 @@ Known debt, safe to pick up any time:
   `Food.toMap`/`fromMap` round-trip, the Phase 2 migration path.
 - Delete-account localization keys exist in `en` only; 14 locales fall back to
   English. Keys are prefixed `delete_account_`.
+- Source-badge localization keys (`source_verified`, `source_estimated`,
+  `source_user_edited`, `source_verified_subtitle`, `nutrition_disclaimer_short`)
+  exist in `en` only; 15 locales fall back to English. Same pattern as above.
 - `app_version_subtitle` in `app_localizations.dart` is hardcoded and must be
   updated in the same commit as any `pubspec.yaml` version bump.
 
