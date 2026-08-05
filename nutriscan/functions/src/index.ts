@@ -5,6 +5,7 @@ import { defineSecret, defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import { z } from "zod";
 import { runUsdaSeedImport } from "./jobs/importUsdaSeed";
+import { searchFoods as searchUsdaFdc } from "./usda/client";
 import { runVnFctImport } from "./jobs/importVnFct";
 import { searchFkbFoods } from "./fkb/search";
 import { getFkbFood } from "./fkb/get";
@@ -351,6 +352,44 @@ export const importUsdaSeed = onCall(
     } catch (err) {
       logger.error("importUsdaSeed failed", err);
       throw new HttpsError("internal", `Import failed: ${err}`);
+    }
+  },
+);
+
+const UsdaFdcSearchDebugRequestSchema = z.object({
+  query: z.string().min(1),
+});
+
+/**
+ * TEMPORARY — re-verifying SEED_FOODS fdcIds after discovering most of the
+ * Phase 1A USDA import points at the wrong food (see CLAUDE.md known debt).
+ * Thin passthrough to USDA FDC search using the existing Secret Manager key,
+ * so this never needs the raw key outside Functions. Remove once SEED_FOODS
+ * is corrected and re-imported.
+ */
+export const usdaFdcSearchDebug = onCall(
+  { secrets: [USDA_FDC_API_KEY], timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+
+    const parsed = UsdaFdcSearchDebugRequestSchema.safeParse(request.data);
+    if (!parsed.success) {
+      throw new HttpsError("invalid-argument", "Malformed usdaFdcSearchDebug request.");
+    }
+
+    try {
+      const result = await searchUsdaFdc(parsed.data.query, USDA_FDC_API_KEY.value());
+      const foods = result.foods.map((f) => ({
+        fdcId: f.fdcId,
+        description: f.description,
+        dataType: f.dataType,
+      }));
+      return { ok: true, data: { foods } };
+    } catch (err) {
+      logger.error("usdaFdcSearchDebug failed", err);
+      throw new HttpsError("internal", `USDA search failed: ${err}`);
     }
   },
 );

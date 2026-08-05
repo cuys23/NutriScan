@@ -114,20 +114,28 @@ been executed and the results pasted into the PR.
 Known debt, **highest priority first — the first item below is a live
 data-correctness bug, not routine cleanup:**
 
-- **CRITICAL — 19 of 78 imported FKB foods have the wrong `fdcId`, so their
-  `name_en`/`nutrients_per_100g` are a completely unrelated food** (found via
-  `eval/run_mape.mjs` 2026-08-05, full list in `docs/plan.md` Phase 3A/3B
-  section). Examples: `usda_174608` (aliased "honey") actually holds "Chicken
-  breast, roll, oven-roasted"; `usda_174833` ("olive oil") holds "Alcoholic
-  Beverage, wine, table, red". A `matchFood` hit on any of these returns a
-  `verified` badge with wrong macros — this is the exact failure `verified`
-  is supposed to rule out. The import code itself is correct (keys off
-  USDA's real returned `fdcId`); the bug is in the hand-typed `fdcId`s in
+- **CRITICAL — most imported USDA FKB foods have the wrong `fdcId`, so their
+  `name_en`/`nutrients_per_100g` are a completely unrelated food.** First pass
+  (`eval/run_mape.mjs`, 2026-08-05) flagged 19/40 golden-set entries; a
+  stricter re-check (excluding generic words like "raw"/"cooked" from the
+  match heuristic) found the real number is closer to **all but 2–4 of the 40
+  checked** — this looks systemic (the whole `fdcId` column misaligned against
+  `hint`), not isolated typos. Examples: `usda_174608` (aliased "honey")
+  actually holds "Chicken breast, roll, oven-roasted"; `usda_174833` ("olive
+  oil") holds "Alcoholic Beverage, wine, table, red". A `matchFood` hit on any
+  of these returns a `verified` badge with wrong macros — the exact failure
+  `verified` is supposed to rule out. The import code itself is correct (keys
+  off USDA's real returned `fdcId`); the bug is in the hand-typed `fdcId`s in
   `SEED_FOODS` (`functions/src/jobs/importUsdaSeed.ts`) and
-  `eval/usda_seed_ids.json`. Fix: look up the correct `fdcId` per food at
-  fdc.nal.usda.gov, update both files, re-run `importUsdaSeed`. `gs_039` in
-  `eval/golden_set.json` (`usda_174814`) is a separate, smaller gap — that
-  fdcId was never imported at all (404 on `fkbGet`).
+  `eval/usda_seed_ids.json`. **Research done, production data not yet
+  touched** — full status, a reusable `usdaFdcSearchDebug` lookup callable
+  (already deployed, uses the existing Secret Manager key, never needs the
+  raw key outside Functions), 9 confirmed correct-fdcId cross-references, and
+  real USDA candidate results for all 68 seed entries are in
+  `eval/USDA_FDC_FIX_NOTES.md` — read that file before resuming this, don't
+  redo the lookups. `gs_039` in `eval/golden_set.json` (`usda_174814`) is a
+  separate, smaller gap — that fdcId was never imported at all (404 on
+  `fkbGet`).
 - `eval/get_eval_token.mjs` (untracked, not committed) hardcodes a real
   password for the `eval_test@nutriscan.com` account in plaintext. Don't
   `git add` it as-is — move the password to an env var first, or delete it
