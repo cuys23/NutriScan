@@ -1007,13 +1007,14 @@ Phases 1–4 feature-complete on staging.
   (`ca-app-pub-5770727176247801~9874508638`), also mirrored into
   `AdsConfig.productionAdMobAppIdIos`. Android App ID still the Google sample
   value — no Android AdMob account set up yet.
-- [ ] Production ad unit IDs in `lib/config/ads_config.dart` — iOS rewarded
-  done 2026-08-05 (`ca-app-pub-5770727176247801/8369855276`); iOS
-  interstitial/open/banner and all Android units still placeholders. The
-  existing fail-safe (`AdsConfig.hasProductionAdUnitIds`) already keeps ads
-  off in release builds until every unit for the current platform is filled
-  in, so this is safe to ship partially configured — no `_adsEnabledByConfig
-  = false` override needed for v1.0.
+- [x] Production ad unit IDs (iOS) in `lib/config/ads_config.dart` — all 4 done
+  2026-08-05: rewarded `.../8369855276`, interstitial `.../5510536452`, app
+  open `.../2884373116`, banner `.../6104332746` (all under
+  `ca-app-pub-5770727176247801`). `AdsConfig.hasProductionAdUnitIds` is now
+  true for iOS release builds — ads switch on for real. Android units still
+  all placeholders (no Android AdMob account yet); the existing fail-safe
+  keeps Android ads off until they're filled in too, so this ships safely
+  iOS-only for now.
 - [ ] Privacy Report reviewed at archive time
 
 ### Monetization

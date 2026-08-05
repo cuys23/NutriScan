@@ -93,14 +93,17 @@ class AdsConfig {
   static const String _placeholder = '';
 
   static const String _androidProductionInterstitialAdUnitId = _placeholder;
-  static const String _iosProductionInterstitialAdUnitId = _placeholder;
+  static const String _iosProductionInterstitialAdUnitId =
+      'ca-app-pub-5770727176247801/5510536452';
   static const String _androidProductionOpenAdUnitId = _placeholder;
-  static const String _iosProductionOpenAdUnitId = _placeholder;
+  static const String _iosProductionOpenAdUnitId =
+      'ca-app-pub-5770727176247801/2884373116';
   static const String _androidProductionRewardedAdUnitId = _placeholder;
   static const String _iosProductionRewardedAdUnitId =
       'ca-app-pub-5770727176247801/8369855276';
   static const String _androidProductionBannerAdUnitId = _placeholder;
-  static const String _iosProductionBannerAdUnitId = _placeholder;
+  static const String _iosProductionBannerAdUnitId =
+      'ca-app-pub-5770727176247801/6104332746';
 
   /// AdMob **App IDs** (the `~` form). Kept here only so the release checklist
   /// has one place to look; the values that actually matter at runtime live in
