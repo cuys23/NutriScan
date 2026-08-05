@@ -517,32 +517,64 @@ Rules:
         userNutritionContext: userNutritionContext,
       );
 
-      final requestBody = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-          {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.45,
-        "top_p": 0.95,
-        "max_tokens": 8192,
-        "receiveTimeoutMs": 90000,
-      };
+      final messages = [
+        {"role": "user", "content": prompt},
+      ];
 
-      final responseData = await _callGroq(requestBody);
-      String content = _extractContentFromResponse(responseData);
-      if (content.isEmpty) throw Exception(getLocalizedErrorMessage('parse_error', language));
-      content = content.replaceAll(RegExp(r'^```(?:json)?\s*'), '').replaceAll(RegExp(r'\s*```\s*$'), '').trim();
-      final jsonStart = content.indexOf('{');
-      if (jsonStart == -1) throw Exception(getLocalizedErrorMessage('parse_error', language));
-      final jsonEnd = _findMatchingBraceEnd(content, jsonStart);
-      if (jsonEnd == null) throw Exception(getLocalizedErrorMessage('parse_error', language));
-      final jsonString = content.substring(jsonStart, jsonEnd);
-      final Map<String, dynamic> result = json.decode(jsonString) as Map<String, dynamic>;
-      return MealPlan.fromMap(result);
+      String content = await _requestMealPlanContent(messages, language);
+      try {
+        return _parseMealPlan(content, language);
+      } catch (e) {
+        // One repair retry: show the model its own invalid output and ask
+        // it to fix it, instead of failing generation on a single bad reply.
+        debugPrint('Meal plan parse failed, retrying with repair prompt: $e');
+        messages.add({"role": "assistant", "content": content});
+        messages.add({
+          "role": "user",
+          "content":
+              "That response was not valid JSON matching the schema. "
+              "Return ONLY the corrected JSON object, no markdown, no explanation.",
+        });
+        content = await _requestMealPlanContent(messages, language);
+        return _parseMealPlan(content, language);
+      }
     } catch (e) {
       debugPrint('Error in generateMealPlan: $e');
       rethrow;
     }
+  }
+
+  Future<String> _requestMealPlanContent(
+    List<Map<String, String>> messages,
+    String language,
+  ) async {
+    final requestBody = {
+      "model": "llama-3.3-70b-versatile",
+      "messages": messages,
+      "temperature": 0.45,
+      "top_p": 0.95,
+      "max_tokens": 8192,
+      "receiveTimeoutMs": 90000,
+    };
+
+    final responseData = await _callGroq(requestBody);
+    final content = _extractContentFromResponse(responseData);
+    if (content.isEmpty) throw Exception(getLocalizedErrorMessage('parse_error', language));
+    return content;
+  }
+
+  MealPlan _parseMealPlan(String rawContent, String language) {
+    final content = rawContent
+        .replaceAll(RegExp(r'^```(?:json)?\s*'), '')
+        .replaceAll(RegExp(r'\s*```\s*$'), '')
+        .trim();
+    final jsonStart = content.indexOf('{');
+    if (jsonStart == -1) throw Exception(getLocalizedErrorMessage('parse_error', language));
+    final jsonEnd = _findMatchingBraceEnd(content, jsonStart);
+    if (jsonEnd == null) throw Exception(getLocalizedErrorMessage('parse_error', language));
+    final jsonString = content.substring(jsonStart, jsonEnd);
+    final Map<String, dynamic> result = json.decode(jsonString) as Map<String, dynamic>;
+    return MealPlan.fromMap(result);
   }
 
   Future<List<Map<String, dynamic>>> fetchInsights(
@@ -627,6 +659,10 @@ $_mealPlanJsonSchema''';
   }
 
   String _getHealthCoachSystemPrompt(String language, String userContext) {
-    return "You are a professional nutrition coach in ${_languageNameForModel(language)}. Context: $userContext. Provide empathetic, scientifically-grounded advice.";
+    return "You are a professional nutrition coach in ${_languageNameForModel(language)}, not a doctor. "
+        "Context: $userContext. Provide empathetic, scientifically-grounded nutrition advice and education. "
+        "Never diagnose, treat, or claim to cure any medical condition or disease. If asked to diagnose "
+        "symptoms or a condition (e.g. 'do I have diabetes'), give general nutrition education only and "
+        "recommend the user consult a doctor or registered dietitian.";
   }
 }

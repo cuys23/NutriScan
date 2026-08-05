@@ -136,15 +136,32 @@ class MealPlanProvider extends ChangeNotifier {
         gaps.add('high fat intake (avg ${avgFat.toStringAsFixed(0)}g/day)');
       }
 
-      String contextForPrompt = '';
+      final recentFoods = await _databaseHelper.getFoodsForLastWeek();
+      final foodCounts = <String, int>{};
+      for (final food in recentFoods) {
+        foodCounts[food.name] = (foodCounts[food.name] ?? 0) + 1;
+      }
+      final topFoods = (foodCounts.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value)))
+          .take(5)
+          .map((e) => e.key)
+          .toList();
+
+      final avgCarbs = (summary['avg_carbs_per_day'] as num?)?.toDouble() ?? 0.0;
+
+      String contextForPrompt =
+          "User's recent diet (last $_analysisDays days) averages "
+          "${avgCalories.toStringAsFixed(0)} kcal, ${avgProtein.toStringAsFixed(0)}g protein, "
+          "${avgCarbs.toStringAsFixed(0)}g carbs, ${avgFat.toStringAsFixed(0)}g fat, "
+          "${avgFiber.toStringAsFixed(0)}g fiber per day.";
       if (gaps.isNotEmpty) {
-        contextForPrompt =
-            "User's recent diet (last $_analysisDays days, avg ${avgCalories.toStringAsFixed(0)} kcal/day) "
-            "shows: ${gaps.join('; ')}. Create a plan that helps balance their diet and address these needs.";
+        contextForPrompt +=
+            " Gaps: ${gaps.join('; ')}. Create a plan that helps balance their diet and address these needs.";
       } else {
-        contextForPrompt =
-            "User's recent diet (last $_analysisDays days) is relatively balanced. "
-            "Create a varied plan that maintains balance.";
+        contextForPrompt += " This is relatively balanced; create a varied plan that maintains balance.";
+      }
+      if (topFoods.isNotEmpty) {
+        contextForPrompt += " Frequently logged foods: ${topFoods.join(', ')}.";
       }
 
       _lastInsight = UserNutritionInsight(

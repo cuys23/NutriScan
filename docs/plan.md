@@ -22,7 +22,8 @@
 | 3A — Golden set | Done 2026-08-05 — executed, V3A.2 passed |
 | 3B — Offline MAPE job | Done 2026-08-05 — executed, found + fixed a search.ts bug and a critical USDA seed data bug; final match_rate=food_id_accuracy=0.878; see note below |
 | 3C — Online validation sampling | Code done + deployed 2026-08-05; V3C.1/V3C.2/V3C.4 need a staging run, see note below |
-| 4 → 6 | Not started |
+| 4 — Plan/coach grounding | Done 2026-08-05 — executed against prod, see note below |
+| 5 → 6 | Not started |
 
 **Phase 3A/3B — executed 2026-08-05** with a real Firebase Auth ID token from
 a dedicated `eval_test@nutriscan.com` account (V3A.2/V3B.1 pass — see
@@ -74,6 +75,30 @@ the `VALIDATION_SAMPLE_RATE` param, currently `0.05` — see
 function body is wrapped in one `try/catch` that only logs. Pure APE math has
 its own check: `eval/selfcheck_validation_log.mjs`.
 | Release compliance | Partially done ahead of schedule — see § "Phase 5" |
+
+**Phase 4 — executed 2026-08-05.** `MealPlanProvider.analyzeUserNutrition`
+(`lib/providers/food/meal_plan_provider.dart`) now always builds a full
+`balanceContextForPrompt` (avg calories/protein/carbs/fat/fiber, not just
+gap-triggered) plus top-5 frequently logged food names from
+`getFoodsForLastWeek()`; restrictions were already threaded into the prompt
+separately and are unchanged. `GroqService.generateMealPlan`
+(`lib/services/ai/groq_service.dart`) now retries once on JSON-parse failure:
+the invalid assistant response is replayed back to the model with a repair
+instruction before giving up (`_requestMealPlanContent` / `_parseMealPlan`
+extracted so both attempts share the same path). `_getHealthCoachSystemPrompt`
+now explicitly states the coach is not a doctor and must not diagnose/treat/
+cure, redirecting diagnosis-shaped questions to a professional. Verified
+directly against the deployed `groqChatCompletion` callable with a real
+Firebase Auth ID token (same technique as Phase 3B) — production Groq API
+rate-limited the synthetic 10-in-a-row burst (429s unrelated to app code, the
+per-call JSON logic was never exercised on those), but of the calls that went
+through: **6/6 parsed to valid JSON, 6/6 landed within ±15% of the 2000 kcal
+target** (V4.1/V4.2), and the coach correctly refused to diagnose diabetes
+from a "felt dizzy after rice" prompt while giving general education and a
+referral to a doctor (V4.4). V4.3 (localization) holds by construction — the
+`language` param and prompt structure are unchanged. V4.5 (smoke suite) not
+re-run — no scan-path file (`food_provider.dart`, `groq_service.dart`'s
+`analyzeFoodImage`, `database_helper.dart`) was touched by this phase.
 
 Phase 5 was originally sequenced last. Several of its items were pulled forward
 on 2026-08-04 because they are hard App Store rejection causes and blocked any
@@ -1090,8 +1115,9 @@ on every feature PR; that one is run before every submission.
 ~~6. `feat(eval): online validation_logs sampling` — Phase 3C~~ **code done + deployed 2026-08-05, needs a staging run to verify — see note above**
 ~~7. `fix(fkb): search.ts tokenizer` — unplanned, found via Phase 3B~~ **done 2026-08-05**
 
+~~7. `feat(plan): ground prompts on log summary` — Phase 4~~ **done 2026-08-05**
+
 Remaining, in order:
-7. `feat(plan): ground prompts on log summary` — Phase 4
 8. `feat(compliance): finish release checklist` — Phase 5 (remainder)
 
 Pickable at any time, independent of the chain above:

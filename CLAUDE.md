@@ -97,20 +97,22 @@ portion_grams/source/fkb_food_id/match_score — landed ahead of 1D), Phase 1D
 (golden set, executed), Phase 3B (offline MAPE runner, executed — surfaced and
 fixed a real `fkb/search.ts` tokenizer bug, then a much bigger USDA seed
 data-integrity bug; final verified numbers: match_rate = food_id_accuracy =
-0.878), and the iOS compliance fixes (delete account, ATT, SKAdNetwork, export
+0.878), Phase 4 (meal plan context grounded with full avg macros + top logged
+foods, JSON-parse repair retry, coach system prompt explicitly refuses
+diagnosis — verified against deployed `groqChatCompletion`, see `plan.md`),
+and the iOS compliance fixes (delete account, ATT, SKAdNetwork, export
 compliance, AdMob release guard, storage rules).
 
 **Code done + deployed, staging verification pending:** Phase 3C (online
 validation_logs sampling) — needs a real scan on staging to confirm rows land;
 see `plan.md`.
 
-**Not started:** `plan.md` Phases 4 → 6.
+**Not started:** `plan.md` Phases 5 (remainder) → 6.
 
 Next tickets, in order. Each closes only when its Verify table in `plan.md` has
 been executed and the results pasted into the PR.
 
-1. `feat(plan): ground prompts on log summary` — Phase 4
-2. `feat(compliance): finish release checklist` — Phase 5
+1. `feat(compliance): finish release checklist` — Phase 5
 
 Known debt, **highest priority first — the first item below is a live
 data-correctness bug, not routine cleanup:**
