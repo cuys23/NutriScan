@@ -6,7 +6,13 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
-  final CloudBackupService _cloudBackupService = CloudBackupService();
+  // Lazy: touching Firebase (via CloudBackupService's field initializers)
+  // on every DatabaseHelper() construction broke local-only sqlite usage
+  // for free users who never hit a cloud-backup path, and made this class
+  // impossible to unit test without a full Firebase app. CloudBackupService
+  // is itself a cached singleton, so this getter only pays the Firebase
+  // init cost the first time a cloud-backup method actually runs.
+  CloudBackupService get _cloudBackupService => CloudBackupService();
 
   factory DatabaseHelper() => _instance;
 

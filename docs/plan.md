@@ -1120,9 +1120,10 @@ on every feature PR; that one is run before every submission.
 Remaining, in order:
 8. `feat(compliance): finish release checklist` — Phase 5 (remainder)
 
+~~`test: nutrient scaling + Food round-trip + migration path` — closes the "no `test/` directory" debt~~ **done 2026-08-05** (see `CLAUDE.md` § 5)
+
 Pickable at any time, independent of the chain above:
 
-- `test: nutrient scaling + Food round-trip + migration path` — closes the "no `test/` directory" debt
 - `chore(i18n): translate delete_account_* to the 14 non-English locales`
 
 Each ticket closes only when its Verify table is executed and notes pasted in PR.

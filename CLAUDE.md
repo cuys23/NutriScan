@@ -146,8 +146,27 @@ data-correctness bug, not routine cleanup:**
   password for the `eval_test@nutriscan.com` account in plaintext. Don't
   `git add` it as-is — move the password to an env var first, or delete it
   now that a token can be pasted manually.
-- No `test/` directory exists. Highest value first: nutrient scaling math,
-  `Food.toMap`/`fromMap` round-trip, the Phase 2 migration path.
+- **FIXED 2026-08-05** — `test/` directory added: `Food.fromJson`/`toJson`
+  round-trip (`test/models/food_test.dart`), `DatabaseHelper` insert/read/
+  delete against a real sqlite engine via `sqflite_common_ffi`
+  (`test/database/food_crud_test.dart`), and the v1→v2 Phase 2 migration
+  path exercised through the real `onUpgrade` code path — pre-seed a v1
+  schema db, open it through `DatabaseHelper`, assert the new columns exist
+  and old rows backfill `source='estimated'` (`test/database/migration_test.dart`).
+  No client-side nutrient-scaling function exists to test — scaling only
+  happens server-side in `matchFood` (already covered by
+  `eval/run_mape.mjs` / `eval/selfcheck_validation_log.mjs`). Getting
+  `DatabaseHelper` testable required one production fix: its constructor
+  eagerly built `CloudBackupService()`, which touches
+  `FirebaseFirestore.instance`/`FirebaseAuth.instance` in its own field
+  initializers — this crashed outside a real Firebase app and, more
+  importantly, meant every local-only sqlite operation for a free user paid
+  a Firebase init cost it never needed. Changed to a lazy getter
+  (`CloudBackupService` is itself a cached singleton, so this is free after
+  first real use). `flutter_test` was also missing from `dev_dependencies`
+  despite `test/widget_test.dart` already existing — added, which incidentally
+  fixed the `depend_on_referenced_packages` warning `flutter analyze` had been
+  emitting for it.
 - Delete-account localization keys exist in `en` only; 14 locales fall back to
   English. Keys are prefixed `delete_account_`.
 - Source-badge localization keys (`source_verified`, `source_estimated`,
