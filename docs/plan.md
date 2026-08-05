@@ -21,7 +21,8 @@
 | 1D — UI source badge & copy | Done 2026-08-05 |
 | 3A — Golden set | Code done 2026-08-05; V3A.2 blocked, see note below |
 | 3B — Offline MAPE job | Code done 2026-08-05; V3B.1 blocked, see note below |
-| 3C → 6 | Not started |
+| 3C — Online validation sampling | Code done 2026-08-05; V3C.1/V3C.2/V3C.4 need a staging run, see note below |
+| 4 → 6 | Not started |
 
 **Phase 3A/3B execution blocker:** `eval/run_mape.mjs` (and V3A.2's per-item
 resolve check) needs a real Firebase Auth ID token to call the deployed
@@ -32,6 +33,15 @@ reference nutrition numbers instead of reading the real FKB would defeat the
 point of the eval. Needs a human to supply `EVAL_ID_TOKEN` (or a test account)
 before V3A.2/V3B.1 can run. See `eval/run_mape.mjs` header for how to obtain
 one, and `--validate-only` for the schema-only check that already passes.
+
+**Phase 3C execution note:** `maybeLogValidationSample` (`functions/src/fkb/validationLog.ts`)
+is deployed-pending — needs `firebase deploy --only functions` and then a real
+scan (or a direct `matchFood` call) to produce a `validation_logs` row. V3C.1/
+V3C.2 (rate=1 / rate=0 via the `VALIDATION_SAMPLE_RATE` param) and V3C.4
+(group by `prompt_version`) need that staging run. V3C.3 (matcher exception
+doesn't fail the scan) is true by construction — the whole function body is
+wrapped in one `try/catch` that only logs — but wasn't forced end-to-end on
+live infra. The pure APE math has its own check: `eval/selfcheck_validation_log.mjs`.
 | Release compliance | Partially done ahead of schedule — see § "Phase 5" |
 
 Phase 5 was originally sequenced last. Several of its items were pulled forward
@@ -1046,9 +1056,9 @@ on every feature PR; that one is run before every submission.
 ~~3. `feat(ui): source badge + localization keys` — Phase 1D~~ **done 2026-08-05** (English locale only; other 15 locales fall back to English per `getString`, same debt pattern as `delete_account_*`)
 
 ~~5. `feat(eval): golden_set + mape runner` — Phase 3A/B~~ **code done 2026-08-05, execution blocked on `EVAL_ID_TOKEN` — see note above**
+~~6. `feat(eval): online validation_logs sampling` — Phase 3C~~ **code done 2026-08-05, needs a deploy + staging run to verify — see note above**
 
 Remaining, in order:
-6. `feat(eval): online validation_logs sampling` — Phase 3C
 7. `feat(plan): ground prompts on log summary` — Phase 4
 8. `feat(compliance): finish release checklist` — Phase 5 (remainder)
 

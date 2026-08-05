@@ -48,6 +48,8 @@ class MatchService {
     required double? portionGrams,
     required Map<String, dynamic> aiNutrients,
     String? locale,
+    String? modelId,
+    String? promptVersion,
   }) async {
     try {
       final result = await _matchCallable.call<Map<String, dynamic>>({
@@ -55,6 +57,8 @@ class MatchService {
         'portion_grams': portionGrams,
         if (locale != null) 'locale': locale,
         'ai_nutrients': aiNutrients,
+        if (modelId != null) 'model_id': modelId,
+        if (promptVersion != null) 'prompt_version': promptVersion,
       });
       final data = Map<String, dynamic>.from(result.data);
       final matchData = data['data'];

@@ -30,6 +30,16 @@ export interface NutrientsPer100g {
   sodium_mg: number;
 }
 
+export const NUTRIENT_KEYS = [
+  "calories_kcal",
+  "protein_g",
+  "carbs_g",
+  "fat_g",
+  "fiber_g",
+  "sugar_g",
+  "sodium_mg",
+] as const;
+
 export const NutrientsPer100gSchema = z.object({
   calories_kcal: z.number().min(0),
   protein_g: z.number().min(0),

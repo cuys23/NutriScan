@@ -95,15 +95,17 @@ portion_grams/source/fkb_food_id/match_score — landed ahead of 1D), Phase 1D
 compliance fixes (delete account, ATT, SKAdNetwork, export compliance, AdMob
 release guard, storage rules).
 
-**Not started:** `plan.md` Phases 3A → 6.
+**Code done, execution/verification pending (needs credentials or a staging
+deploy — see `plan.md` for the exact blockers):** Phase 3A (golden set), Phase
+3B (offline MAPE runner), Phase 3C (online validation_logs sampling).
+
+**Not started:** `plan.md` Phases 4 → 6.
 
 Next tickets, in order. Each closes only when its Verify table in `plan.md` has
 been executed and the results pasted into the PR.
 
-1. `feat(eval): golden_set + mape runner` — Phase 3A/B
-2. `feat(eval): online validation_logs sampling` — Phase 3C
-3. `feat(plan): ground prompts on log summary` — Phase 4
-4. `feat(compliance): finish release checklist` — Phase 5
+1. `feat(plan): ground prompts on log summary` — Phase 4
+2. `feat(compliance): finish release checklist` — Phase 5
 
 Known debt, safe to pick up any time:
 
@@ -125,6 +127,12 @@ Known debt, safe to pick up any time:
   avoid depending on which one won.
 - `app_version_subtitle` in `app_localizations.dart` is hardcoded and must be
   updated in the same commit as any `pubspec.yaml` version bump.
+- `model_id`/`prompt_version` SQLite columns (Phase 2 migration) are still
+  unpopulated in local scan history — Phase 3C wired them from
+  `ApiConfig.groqModel`/`ApiConfig.scanPromptVersion` into the server-side
+  `validation_logs` audit trail only (`matchFood` request), not into
+  `Food`/`database_helper.dart`. Same fix (extend `Food.fromJson`/`toMap`)
+  would close both at once if picked up.
 
 ## 6. Who does what
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:nutriscan/config/api_config.dart';
 import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/models/food.dart';
 import 'package:nutriscan/providers/ads/admob_provider.dart';
@@ -118,6 +119,8 @@ class FoodProvider with ChangeNotifier {
         'sodium_mg': food.sodium,
       },
       locale: language,
+      modelId: ApiConfig.groqModel,
+      promptVersion: ApiConfig.scanPromptVersion,
     );
 
     if (match == null || !match.isVerified) {

@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import { z } from "zod";
 import { runUsdaSeedImport } from "./jobs/importUsdaSeed";
@@ -10,6 +10,7 @@ import { searchFkbFoods } from "./fkb/search";
 import { getFkbFood } from "./fkb/get";
 import { matchFood as matchFoodImpl } from "./fkb/match";
 import { NutrientsPer100gSchema } from "./fkb/types";
+import { maybeLogValidationSample } from "./fkb/validationLog";
 
 initializeApp();
 const db = getFirestore();
@@ -17,6 +18,13 @@ const db = getFirestore();
 const GROQ_API_KEY = defineSecret("GROQ_API_KEY");
 const USDA_FDC_API_KEY = defineSecret("USDA_FDC_API_KEY");
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+// Fraction of successful matchFood calls sampled into `validation_logs` for
+// offline drift monitoring (docs/plan.md Phase 3C). Override per-environment
+// via the VALIDATION_SAMPLE_RATE functions param, not by editing this default.
+const VALIDATION_SAMPLE_RATE = defineString("VALIDATION_SAMPLE_RATE", {
+  default: "0.05",
+});
 
 // Real backstop for AI-call abuse — the client's "coin" balance is only a UX gate,
 // this is what actually stops someone from running unlimited billed Groq requests.
@@ -440,6 +448,8 @@ const MatchFoodRequestSchema = z.object({
   portion_grams: z.number().positive().nullable().optional(),
   locale: z.string().optional(),
   ai_nutrients: NutrientsPer100gSchema,
+  model_id: z.string().optional(),
+  prompt_version: z.string().optional(),
 });
 
 /**
@@ -460,8 +470,23 @@ export const matchFood = onCall(
     }
 
     try {
-      const { food_name, portion_grams, ai_nutrients } = parsed.data;
+      const { food_name, portion_grams, ai_nutrients, model_id, prompt_version } = parsed.data;
       const result = await matchFoodImpl(food_name, portion_grams, ai_nutrients);
+
+      await maybeLogValidationSample({
+        uid: request.auth.uid,
+        sampleRate: parseFloat(VALIDATION_SAMPLE_RATE.value()) || 0,
+        foodName: food_name,
+        status: result.status,
+        foodId: result.food_id,
+        matchScore: result.match_score,
+        portionGrams: portion_grams,
+        aiNutrients: ai_nutrients,
+        nutrientsTotal: result.nutrients_total,
+        modelId: model_id,
+        promptVersion: prompt_version,
+      });
+
       return { ok: true, data: result };
     } catch (err) {
       // Fail soft to estimated rather than failing the whole scan — the AI
