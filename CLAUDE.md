@@ -88,15 +88,16 @@ Do not go looking; these are the files that matter.
 
 ## 5. Current state — 2026-08-05
 
-**Done:** Phase 0, Phase 1A (78 verified foods imported — but see the critical
-data-integrity debt item below before trusting any USDA-sourced `verified`
-macro), Phase 1B (fkbSearch/fkbGet), Phase 1C (matchFood wired into
-analyzeFoodImage), Phase 2 (SQLite migration for
+**Done:** Phase 0, Phase 1A (71 verified foods imported — 61 USDA + 10 VN;
+originally 78, but most USDA `fdcId`s were wrong and have since been
+re-verified/corrected, see below), Phase 1B (fkbSearch/fkbGet), Phase 1C
+(matchFood wired into analyzeFoodImage), Phase 2 (SQLite migration for
 portion_grams/source/fkb_food_id/match_score — landed ahead of 1D), Phase 1D
 (source badge + localization keys, English only — see debt below), Phase 3A
 (golden set, executed), Phase 3B (offline MAPE runner, executed — surfaced and
-fixed a real `fkb/search.ts` tokenizer bug: match_rate 0.26 → 0.88, deployed),
-and the iOS compliance fixes (delete account, ATT, SKAdNetwork, export
+fixed a real `fkb/search.ts` tokenizer bug, then a much bigger USDA seed
+data-integrity bug; final verified numbers: match_rate = food_id_accuracy =
+0.878), and the iOS compliance fixes (delete account, ATT, SKAdNetwork, export
 compliance, AdMob release guard, storage rules).
 
 **Code done + deployed, staging verification pending:** Phase 3C (online
@@ -114,28 +115,31 @@ been executed and the results pasted into the PR.
 Known debt, **highest priority first — the first item below is a live
 data-correctness bug, not routine cleanup:**
 
-- **CRITICAL — most imported USDA FKB foods have the wrong `fdcId`, so their
-  `name_en`/`nutrients_per_100g` are a completely unrelated food.** First pass
-  (`eval/run_mape.mjs`, 2026-08-05) flagged 19/40 golden-set entries; a
-  stricter re-check (excluding generic words like "raw"/"cooked" from the
-  match heuristic) found the real number is closer to **all but 2–4 of the 40
-  checked** — this looks systemic (the whole `fdcId` column misaligned against
-  `hint`), not isolated typos. Examples: `usda_174608` (aliased "honey")
-  actually holds "Chicken breast, roll, oven-roasted"; `usda_174833` ("olive
-  oil") holds "Alcoholic Beverage, wine, table, red". A `matchFood` hit on any
-  of these returns a `verified` badge with wrong macros — the exact failure
-  `verified` is supposed to rule out. The import code itself is correct (keys
-  off USDA's real returned `fdcId`); the bug is in the hand-typed `fdcId`s in
-  `SEED_FOODS` (`functions/src/jobs/importUsdaSeed.ts`) and
-  `eval/usda_seed_ids.json`. **Research done, production data not yet
-  touched** — full status, a reusable `usdaFdcSearchDebug` lookup callable
-  (already deployed, uses the existing Secret Manager key, never needs the
-  raw key outside Functions), 9 confirmed correct-fdcId cross-references, and
-  real USDA candidate results for all 68 seed entries are in
-  `eval/USDA_FDC_FIX_NOTES.md` — read that file before resuming this, don't
-  redo the lookups. `gs_039` in `eval/golden_set.json` (`usda_174814`) is a
-  separate, smaller gap — that fdcId was never imported at all (404 on
-  `fkbGet`).
+- **FIXED 2026-08-05 — was CRITICAL: most imported USDA FKB foods had the
+  wrong `fdcId`** (e.g. `usda_174608` aliased "honey" actually held "Chicken
+  breast, roll, oven-roasted"). Root cause: `SEED_FOODS`
+  (`functions/src/jobs/importUsdaSeed.ts`) had hand-typed `fdcId`s that didn't
+  match their `hint`, likely never looked up against the real USDA FDC API.
+  Every `fdcId` in `SEED_FOODS` was re-verified against the real USDA FDC API
+  (via a temporary `usdaFdcSearchDebug` callable, since removed — see below)
+  and cross-checked with `fkbGet` against production data. 6 foods with no
+  confident match (lemon, egg noodles, turkey breast, green peas, soybeans,
+  dark chocolate) were dropped rather than guessed; the collection is now 61
+  USDA + 10 VN = 71 foods (down from 78). `runUsdaSeedImport` now wipes all
+  `source: usda` docs before reimporting (`deleteFkbFoodsBySource`) so a
+  future fdcId fix can't leave an orphaned wrong doc alongside the corrected
+  one. Verified via `eval/run_mape.mjs`: `match_rate` and `food_id_accuracy`
+  both **0.878** (43/49) on the golden set, with `food_id_accuracy ==
+  match_rate` confirming matches land on the intended food, not a
+  coincidental alias collision. Remaining 6 golden-set misses (orange, white
+  bread, potato, peanut butter, orange juice, soy sauce) are matcher-score
+  gaps, not data-correctness bugs — pick up separately if it matters.
+  `eval/USDA_FDC_FIX_NOTES.md` and `eval/usda_fdc_candidates_2026-08-05.json`
+  are the research trail, kept for reference.
+- `usdaFdcSearchDebug` (`functions/src/index.ts`) was a temporary debug
+  callable added to re-verify fdcIds above — **remove it** (and redeploy)
+  next time someone touches `functions/src/index.ts`; low priority, it's
+  auth-gated and harmless to leave live in the meantime.
 - `eval/get_eval_token.mjs` (untracked, not committed) hardcodes a real
   password for the `eval_test@nutriscan.com` account in plaintext. Don't
   `git add` it as-is — move the password to an env var first, or delete it

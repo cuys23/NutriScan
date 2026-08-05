@@ -16,106 +16,109 @@ import { logger } from "firebase-functions";
 import { getFood, getFoodsBatch, FdcFoodDetail } from "../usda/client";
 import { mapUsdaDetailNutrients } from "../usda/mapNutrients";
 import { FkbFood } from "../fkb/types";
-import { upsertBatch, getFkbCount } from "../fkb/upsert";
+import { upsertBatch, getFkbCount, deleteFkbFoodsBySource } from "../fkb/upsert";
 
 /**
  * Hardcoded seed list of common food FDC IDs.
  * These are Foundation / SR Legacy entries — authoritative per-100g data.
+ *
+ * Re-verified 2026-08-05 against the real USDA FDC API after discovering the
+ * original list's fdcIds were misaligned against their hints — most pointed
+ * at a completely unrelated food (see CLAUDE.md known debt,
+ * eval/USDA_FDC_FIX_NOTES.md). Every id below was fetched via
+ * `usdaFdcSearchDebug` / cross-referenced with `fkbGet` against production
+ * data, not hand-typed from memory. Hints reflect the real prep state of the
+ * matched entry (e.g. "raw" where no cooked Foundation/SR Legacy entry
+ * exists) rather than the aspirational one — a wrong prep-state label is the
+ * same class of bug this re-verification fixes. Six foods with no confident
+ * match (lemon, egg noodles, turkey breast, green peas, soybeans, dark
+ * chocolate) were dropped rather than guessed.
  */
 const SEED_FOODS: Array<{ fdcId: number; hint: string; nameVi?: string }> = [
   // ── Fruits ──
   { fdcId: 173944, hint: "Banana, raw", nameVi: "Chuối" },
   { fdcId: 171688, hint: "Apple, raw, with skin", nameVi: "Táo" },
-  { fdcId: 167762, hint: "Orange, raw", nameVi: "Cam" },
-  { fdcId: 167775, hint: "Grapes, red or green", nameVi: "Nho" },
-  { fdcId: 170393, hint: "Mango, raw", nameVi: "Xoài" },
-  { fdcId: 167764, hint: "Papaya, raw", nameVi: "Đu đủ" },
-  { fdcId: 171890, hint: "Watermelon, raw", nameVi: "Dưa hấu" },
-  { fdcId: 173945, hint: "Pineapple, raw", nameVi: "Dứa" },
-  { fdcId: 174687, hint: "Strawberries, raw", nameVi: "Dâu tây" },
-  { fdcId: 171711, hint: "Avocado, raw", nameVi: "Bơ" },
-  { fdcId: 167748, hint: "Lemon, raw", nameVi: "Chanh vàng" },
-  { fdcId: 174683, hint: "Blueberries, raw", nameVi: "Việt quất" },
+  { fdcId: 169097, hint: "Orange, raw", nameVi: "Cam" },
+  { fdcId: 174683, hint: "Grapes, red or green", nameVi: "Nho" },
+  { fdcId: 169910, hint: "Mango, raw", nameVi: "Xoài" },
+  { fdcId: 169926, hint: "Papaya, raw", nameVi: "Đu đủ" },
+  { fdcId: 167765, hint: "Watermelon, raw", nameVi: "Dưa hấu" },
+  { fdcId: 169124, hint: "Pineapple, raw", nameVi: "Dứa" },
+  { fdcId: 167762, hint: "Strawberries, raw", nameVi: "Dâu tây" },
+  { fdcId: 2710824, hint: "Avocado, raw", nameVi: "Bơ" },
+  { fdcId: 2346411, hint: "Blueberries, raw", nameVi: "Việt quất" },
 
   // ── Grains ──
-  { fdcId: 170457, hint: "Rice, white, long-grain, cooked", nameVi: "Cơm trắng" },
-  { fdcId: 169714, hint: "Rice, brown, long-grain, cooked", nameVi: "Cơm gạo lứt" },
-  { fdcId: 168878, hint: "Bread, white", nameVi: "Bánh mì trắng" },
-  { fdcId: 168873, hint: "Bread, whole-wheat", nameVi: "Bánh mì lúa mạch" },
-  { fdcId: 168871, hint: "Noodles, egg, cooked", nameVi: "Mì trứng" },
-  { fdcId: 170069, hint: "Oats, regular, cooked", nameVi: "Yến mạch" },
-  { fdcId: 168880, hint: "Pasta, cooked", nameVi: "Mì Ý" },
-  { fdcId: 170285, hint: "Corn, sweet, cooked", nameVi: "Bắp ngọt" },
-  { fdcId: 172451, hint: "Wheat flour, all-purpose", nameVi: "Bột mì" },
+  { fdcId: 168878, hint: "Rice, white, long-grain, cooked", nameVi: "Cơm trắng" },
+  { fdcId: 2512380, hint: "Rice, brown, long-grain, raw", nameVi: "Cơm gạo lứt" },
+  { fdcId: 2758993, hint: "Bread, white", nameVi: "Bánh mì trắng" },
+  { fdcId: 2758994, hint: "Bread, whole-wheat", nameVi: "Bánh mì lúa mạch" },
+  { fdcId: 2346397, hint: "Oats, steel cut, raw", nameVi: "Yến mạch" },
+  { fdcId: 2758998, hint: "Pasta, dry, spaghetti", nameVi: "Mì Ý" },
+  { fdcId: 2710826, hint: "Corn, sweet, raw", nameVi: "Bắp ngọt" },
+  { fdcId: 789890, hint: "Wheat flour, all-purpose", nameVi: "Bột mì" },
 
   // ── Proteins ──
-  { fdcId: 171057, hint: "Chicken breast, roasted", nameVi: "Ức gà nướng" },
-  { fdcId: 174002, hint: "Chicken thigh, roasted", nameVi: "Đùi gà nướng" },
+  { fdcId: 2646170, hint: "Chicken breast, raw", nameVi: "Ức gà nướng" },
+  { fdcId: 2646171, hint: "Chicken thigh, raw", nameVi: "Đùi gà nướng" },
   { fdcId: 174032, hint: "Beef, ground, 80% lean, cooked", nameVi: "Thịt bò xay" },
-  { fdcId: 175167, hint: "Pork, loin, cooked", nameVi: "Thịt heo thăn" },
-  { fdcId: 175139, hint: "Salmon, Atlantic, cooked", nameVi: "Cá hồi" },
-  { fdcId: 175159, hint: "Shrimp, cooked", nameVi: "Tôm" },
-  { fdcId: 171287, hint: "Egg, whole, hard-boiled", nameVi: "Trứng luộc" },
-  { fdcId: 172184, hint: "Tofu, firm", nameVi: "Đậu phụ" },
-  { fdcId: 174288, hint: "Tuna, canned in water", nameVi: "Cá ngừ đóng hộp" },
-  { fdcId: 173417, hint: "Turkey breast, cooked", nameVi: "Ức gà tây" },
-  { fdcId: 175108, hint: "Tilapia, cooked", nameVi: "Cá rô phi" },
-  { fdcId: 174230, hint: "Bacon, cooked", nameVi: "Thịt xông khói" },
+  { fdcId: 2646168, hint: "Pork, loin, raw", nameVi: "Thịt heo thăn" },
+  { fdcId: 2684441, hint: "Salmon, Atlantic, raw", nameVi: "Cá hồi" },
+  { fdcId: 175180, hint: "Shrimp, cooked", nameVi: "Tôm" },
+  { fdcId: 171287, hint: "Egg, whole, raw", nameVi: "Trứng gà sống" },
+  { fdcId: 172475, hint: "Tofu, firm", nameVi: "Đậu phụ" },
+  { fdcId: 175158, hint: "Tuna, canned in water", nameVi: "Cá ngừ đóng hộp" },
+  { fdcId: 2684442, hint: "Tilapia, raw", nameVi: "Cá rô phi" },
 
   // ── Dairy ──
-  { fdcId: 170903, hint: "Milk, whole", nameVi: "Sữa nguyên kem" },
-  { fdcId: 170906, hint: "Milk, 2% fat", nameVi: "Sữa ít béo" },
-  { fdcId: 170886, hint: "Cheese, cheddar", nameVi: "Phô mai cheddar" },
-  { fdcId: 170899, hint: "Yogurt, plain, whole milk", nameVi: "Sữa chua" },
-  { fdcId: 170855, hint: "Butter, salted", nameVi: "Bơ mặn" },
+  { fdcId: 171265, hint: "Milk, whole", nameVi: "Sữa nguyên kem" },
+  { fdcId: 171267, hint: "Milk, 2% fat", nameVi: "Sữa ít béo" },
+  { fdcId: 170899, hint: "Cheese, cheddar", nameVi: "Phô mai cheddar" },
+  { fdcId: 2259793, hint: "Yogurt, plain, whole milk", nameVi: "Sữa chua" },
+  { fdcId: 790508, hint: "Butter, salted", nameVi: "Bơ mặn" },
 
   // ── Vegetables ──
-  { fdcId: 170407, hint: "Potato, boiled", nameVi: "Khoai tây luộc" },
-  { fdcId: 169228, hint: "Broccoli, cooked", nameVi: "Bông cải xanh" },
-  { fdcId: 170440, hint: "Spinach, raw", nameVi: "Rau chân vịt" },
-  { fdcId: 169230, hint: "Carrot, raw", nameVi: "Cà rốt" },
-  { fdcId: 170050, hint: "Tomato, red, raw", nameVi: "Cà chua" },
-  { fdcId: 169986, hint: "Onion, raw", nameVi: "Hành tây" },
-  { fdcId: 169251, hint: "Cucumber, raw", nameVi: "Dưa chuột" },
-  { fdcId: 170417, hint: "Bell pepper, green", nameVi: "Ớt chuông xanh" },
-  { fdcId: 169985, hint: "Garlic, raw", nameVi: "Tỏi" },
-  { fdcId: 169226, hint: "Cabbage, raw", nameVi: "Bắp cải" },
-  { fdcId: 170471, hint: "Mushroom, white, raw", nameVi: "Nấm" },
-  { fdcId: 170399, hint: "Peas, green, cooked", nameVi: "Đậu Hà Lan" },
-  { fdcId: 170464, hint: "Cauliflower, cooked", nameVi: "Súp lơ trắng" },
+  { fdcId: 170440, hint: "Potato, boiled", nameVi: "Khoai tây luộc" },
+  { fdcId: 169967, hint: "Broccoli, cooked, boiled", nameVi: "Bông cải xanh" },
+  { fdcId: 168462, hint: "Spinach, raw", nameVi: "Rau chân vịt" },
+  { fdcId: 2258586, hint: "Carrot, raw", nameVi: "Cà rốt" },
+  { fdcId: 170457, hint: "Tomato, red, raw", nameVi: "Cà chua" },
+  { fdcId: 790646, hint: "Onion, raw", nameVi: "Hành tây" },
+  { fdcId: 2346406, hint: "Cucumber, raw", nameVi: "Dưa chuột" },
+  { fdcId: 2258588, hint: "Bell pepper, green", nameVi: "Ớt chuông xanh" },
+  { fdcId: 169230, hint: "Garlic, raw", nameVi: "Tỏi" },
+  { fdcId: 2346407, hint: "Cabbage, raw", nameVi: "Bắp cải" },
+  { fdcId: 1999629, hint: "Mushroom, white, raw", nameVi: "Nấm" },
+  { fdcId: 2685573, hint: "Cauliflower, raw", nameVi: "Súp lơ trắng" },
 
   // ── Nuts & Seeds ──
-  { fdcId: 170567, hint: "Peanut butter", nameVi: "Bơ đậu phộng" },
-  { fdcId: 170178, hint: "Almonds, raw", nameVi: "Hạnh nhân" },
-  { fdcId: 170187, hint: "Cashew nuts", nameVi: "Hạt điều" },
+  { fdcId: 2262072, hint: "Peanut butter", nameVi: "Bơ đậu phộng" },
+  { fdcId: 2346393, hint: "Almonds, raw", nameVi: "Hạnh nhân" },
+  { fdcId: 2515374, hint: "Cashew nuts", nameVi: "Hạt điều" },
 
   // ── Oils ──
-  { fdcId: 174833, hint: "Olive oil", nameVi: "Dầu ô liu" },
-  { fdcId: 171028, hint: "Coconut oil", nameVi: "Dầu dừa" },
-
-  // ── Eggs ──
-  { fdcId: 171285, hint: "Egg, whole, raw", nameVi: "Trứng gà sống" },
+  { fdcId: 171413, hint: "Olive oil", nameVi: "Dầu ô liu" },
+  { fdcId: 330458, hint: "Coconut oil", nameVi: "Dầu dừa" },
 
   // ── Sweeteners ──
-  { fdcId: 174608, hint: "Honey", nameVi: "Mật ong" },
+  { fdcId: 169640, hint: "Honey", nameVi: "Mật ong" },
   { fdcId: 169655, hint: "Sugar, white", nameVi: "Đường trắng" },
 
   // ── Legumes ──
-  { fdcId: 173530, hint: "Beans, black, cooked", nameVi: "Đậu đen" },
-  { fdcId: 175198, hint: "Lentils, cooked", nameVi: "Đậu lăng" },
-  { fdcId: 172421, hint: "Soybeans, cooked", nameVi: "Đậu nành" },
+  { fdcId: 175237, hint: "Beans, black, cooked", nameVi: "Đậu đen" },
+  { fdcId: 2644283, hint: "Lentils, dry", nameVi: "Đậu lăng" },
 
   // ── Beverages ──
-  { fdcId: 174832, hint: "Coffee, brewed", nameVi: "Cà phê" },
-  { fdcId: 171917, hint: "Tea, brewed", nameVi: "Trà" },
+  { fdcId: 171890, hint: "Coffee, brewed", nameVi: "Cà phê" },
+  { fdcId: 171917, hint: "Tea, green, brewed", nameVi: "Trà" },
+  { fdcId: 169098, hint: "Orange juice, raw", nameVi: "Nước cam" },
 
   // ── Condiments ──
-  { fdcId: 170474, hint: "Soy sauce", nameVi: "Nước tương" },
-  { fdcId: 169409, hint: "Salt, table", nameVi: "Muối" },
+  { fdcId: 174278, hint: "Soy sauce made from soy (tamari)", nameVi: "Nước tương" },
+  { fdcId: 746775, hint: "Salt, table, iodized", nameVi: "Muối" },
 
-  // ── Desserts & Prepared ──
-  { fdcId: 173959, hint: "Ice cream, vanilla", nameVi: "Kem vani" },
-  { fdcId: 167587, hint: "Chocolate, dark", nameVi: "Sô cô la đen" },
+  // ── Desserts ──
+  { fdcId: 167575, hint: "Ice creams, vanilla", nameVi: "Kem vani" },
 ];
 
 /**
@@ -166,10 +169,17 @@ export async function runUsdaSeedImport(apiKey: string): Promise<{
   requested: number;
   fetched: number;
   written: number;
+  deletedStale: number;
   errors: string[];
 }> {
   const errors: string[] = [];
   const allFoods: FkbFood[] = [];
+
+  // Wipe existing usda-sourced docs first. A fixed fdcId writes a *new*
+  // food_id — upsert alone would leave the old, wrong-fdcId doc live
+  // alongside the corrected one (see CLAUDE.md known debt, 2026-08-05).
+  const deletedStale = await deleteFkbFoodsBySource("usda");
+  logger.info(`Deleted ${deletedStale} stale usda-sourced fkb_foods docs before reimport`);
 
   // Build lookup map for seed metadata
   const seedMap = new Map(SEED_FOODS.map((s) => [s.fdcId, s]));
@@ -185,6 +195,7 @@ export async function runUsdaSeedImport(apiKey: string): Promise<{
 
     try {
       const details = await getFoodsBatch(batchIds, apiKey);
+      const returnedIds = new Set(details.map((d) => d.fdcId));
 
       for (const detail of details) {
         try {
@@ -199,6 +210,22 @@ export async function runUsdaSeedImport(apiKey: string): Promise<{
           allFoods.push(fkbFood);
         } catch (err) {
           const msg = `Failed to map fdcId=${detail.fdcId}: ${err}`;
+          logger.error(msg);
+          errors.push(msg);
+        }
+      }
+
+      // The batch endpoint sometimes silently omits an id from the response
+      // instead of erroring — fetch those individually rather than losing
+      // them, same as the full-batch-failure fallback below.
+      const droppedIds = batchIds.filter((id) => !returnedIds.has(id));
+      for (const fdcId of droppedIds) {
+        try {
+          const detail = await getFood(fdcId, apiKey);
+          const seed = seedMap.get(fdcId);
+          allFoods.push(fdcToFkbFood(detail, seed));
+        } catch (innerErr) {
+          const msg = `Failed to fetch dropped fdcId=${fdcId}: ${innerErr}`;
           logger.error(msg);
           errors.push(msg);
         }
@@ -240,6 +267,7 @@ export async function runUsdaSeedImport(apiKey: string): Promise<{
     requested: uniqueIds.length,
     fetched: allFoods.length,
     written,
+    deletedStale,
     errors,
   };
 }

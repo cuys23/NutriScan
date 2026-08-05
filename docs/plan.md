@@ -14,13 +14,13 @@
 | Phase | State |
 |-------|-------|
 | 0 — Architecture lock | Done |
-| 1A — FKB schema & import | Done (78 verified foods) |
+| 1A — FKB schema & import | Done (71 verified foods: 61 USDA + 10 VN — originally 78, corrected 2026-08-05, see Phase 3A/3B note) |
 | 1B — FKB callable API | Done |
 | 1C — Matcher + scan wiring | Done |
 | 2 — SQLite migration | Done (landed ahead of 1D) |
 | 1D — UI source badge & copy | Done 2026-08-05 |
 | 3A — Golden set | Done 2026-08-05 — executed, V3A.2 passed |
-| 3B — Offline MAPE job | Done 2026-08-05 — executed, match_rate 0.26→0.88 after fixing a real search.ts bug it found; see note below |
+| 3B — Offline MAPE job | Done 2026-08-05 — executed, found + fixed a search.ts bug and a critical USDA seed data bug; final match_rate=food_id_accuracy=0.878; see note below |
 | 3C — Online validation sampling | Code done + deployed 2026-08-05; V3C.1/V3C.2/V3C.4 need a staging run, see note below |
 | 4 → 6 | Not started |
 
@@ -38,23 +38,31 @@ production surfaced two real bugs, not eval artifacts:
    exact match. First run: `match_rate=0.26`. Fixed (punctuation-stripped
    tokenizer, per-field max instead of pooled Jaccard) and deployed
    (`firebase deploy --only functions:matchFood,functions:fkbSearch`).
-   Re-run: `match_rate=0.88`, `food_id_accuracy=0.86`,
-   `mape.calories_kcal=11.62`. Self-check: `eval/selfcheck_search_score.mjs`.
-2. **Corrupted Phase 1A seed data — NOT fixed, see debt in `CLAUDE.md`.**
-   19 of 40 USDA golden-set entries resolve to a completely unrelated food
-   (e.g. `usda_174608` tagged "honey" in `SEED_FOODS`/aliases is actually
-   USDA's "Chicken breast, roll, oven-roasted"; `usda_174833` "olive oil" is
-   "Alcoholic Beverage, wine, table, red"). The import code itself is
-   correct — it keys off the real `detail.fdcId` from USDA's response, no
-   batch-order bug — the `fdcId`s hand-entered into `SEED_FOODS` in
-   `functions/src/jobs/importUsdaSeed.ts` (and duplicated in
-   `eval/usda_seed_ids.json`) just don't point at the foods their `hint`
-   claims. This is worse than a low match rate: a "verified" badge on these
-   would show real, wrong, confidently-labeled nutrition. **Do not treat any
-   `verified` USDA-sourced macro as trustworthy until this is re-imported
-   with confirmed fdcIds.** `eval/golden_set.json`'s `gs_039` (orange juice,
-   `usda_174814`) also 404s — that fdcId was never imported at all, a third,
-   smaller gap. User is re-deriving correct fdcIds; re-import once supplied.
+   Re-run: `match_rate=0.88`, `food_id_accuracy=0.86` (measured against the
+   still-corrupted seed data at the time — see item 2; the final numbers
+   after both fixes are 0.878/0.878). Self-check:
+   `eval/selfcheck_search_score.mjs`.
+2. **Corrupted Phase 1A seed data — FIXED 2026-08-05.** A stricter re-check
+   found the true scope was worse than the first 19/40 estimate — nearly all
+   40 golden-set USDA entries resolved to an unrelated food (e.g. `usda_174608`
+   "honey" was actually "Chicken breast, roll, oven-roasted"). The import code
+   itself was always correct (keys off the real `detail.fdcId` from USDA's
+   response); the hand-typed `fdcId`s in `SEED_FOODS`
+   (`functions/src/jobs/importUsdaSeed.ts`) just didn't point at the foods
+   their `hint` claimed. Fix: every `fdcId` re-derived from a real USDA FDC
+   search (via a temporary `usdaFdcSearchDebug` callable) and cross-verified
+   with `fkbGet`; 6 foods with no confident match dropped rather than guessed;
+   `runUsdaSeedImport` now wipes all `source: usda` docs
+   (`deleteFkbFoodsBySource`) before reimporting so a future fix can't leave
+   an orphaned wrong doc alongside the corrected one; also fixed a USDA batch
+   endpoint quirk where some ids were silently dropped from the response
+   instead of erroring (now falls back to individual `getFood`). Collection
+   is now 61 USDA + 10 VN = 71 (down from 78 — see `CLAUDE.md` for the 6
+   dropped foods). Re-verified: `match_rate` = `food_id_accuracy` = **0.878**
+   (43/49) — the equality confirms matches land on the intended food, not a
+   coincidental collision. `eval/golden_set.json`'s former `gs_039` gap
+   (orange juice) is also now imported (`usda_169098`). Research trail kept
+   in `eval/USDA_FDC_FIX_NOTES.md` / `eval/usda_fdc_candidates_2026-08-05.json`.
 
 **Phase 3C — code done 2026-08-05, deployed, not yet staging-verified.**
 `maybeLogValidationSample` (`functions/src/fkb/validationLog.ts`) is live

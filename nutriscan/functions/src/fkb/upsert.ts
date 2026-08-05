@@ -68,3 +68,31 @@ export async function getFkbCount(): Promise<number> {
   const snapshot = await db.collection(FKB_COLLECTION).count().get();
   return snapshot.data().count;
 }
+
+/**
+ * Delete every `fkb_foods` doc for a given source (e.g. "usda"). A reimport
+ * that fixes a food's fdcId writes a *new* food_id — the stale old doc
+ * doesn't get overwritten by an upsert and stays live with its wrong data,
+ * so a source-level re-import must wipe first. VN entries (source vn_fct)
+ * are hand-curated and untouched by this.
+ */
+export async function deleteFkbFoodsBySource(source: string): Promise<number> {
+  const db = getFirestore();
+  const snapshot = await db.collection(FKB_COLLECTION).where("source", "==", source).get();
+  if (snapshot.empty) return 0;
+
+  const BATCH_SIZE = 450;
+  const docs = snapshot.docs;
+  let deleted = 0;
+
+  for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+    const batch = db.batch();
+    for (const doc of docs.slice(i, i + BATCH_SIZE)) {
+      batch.delete(doc.ref);
+    }
+    await batch.commit();
+    deleted += Math.min(BATCH_SIZE, docs.length - i);
+  }
+
+  return deleted;
+}

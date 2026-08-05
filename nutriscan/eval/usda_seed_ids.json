@@ -1,100 +1,307 @@
 [
-  { "fdcId": 173944, "hint": "Banana, raw", "category": "fruit" },
-  { "fdcId": 171688, "hint": "Apple, raw, with skin", "category": "fruit" },
-  { "fdcId": 167762, "hint": "Orange, raw, all varieties", "category": "fruit" },
-  { "fdcId": 167775, "hint": "Grapes, red or green", "category": "fruit" },
-  { "fdcId": 170393, "hint": "Mango, raw", "category": "fruit" },
-  { "fdcId": 167764, "hint": "Papaya, raw", "category": "fruit" },
-  { "fdcId": 171890, "hint": "Watermelon, raw", "category": "fruit" },
-  { "fdcId": 173945, "hint": "Pineapple, raw", "category": "fruit" },
-  { "fdcId": 174687, "hint": "Strawberries, raw", "category": "fruit" },
-  { "fdcId": 171711, "hint": "Avocado, raw", "category": "fruit" },
-  { "fdcId": 167748, "hint": "Lemon, raw, without peel", "category": "fruit" },
-  { "fdcId": 174683, "hint": "Blueberries, raw", "category": "fruit" },
-
-  { "fdcId": 170457, "hint": "Rice, white, long-grain, cooked", "category": "grain" },
-  { "fdcId": 169714, "hint": "Rice, brown, long-grain, cooked", "category": "grain" },
-  { "fdcId": 168878, "hint": "Bread, white, commercially prepared", "category": "grain" },
-  { "fdcId": 168873, "hint": "Bread, whole-wheat", "category": "grain" },
-  { "fdcId": 168871, "hint": "Noodles, egg, cooked", "category": "grain" },
-  { "fdcId": 170069, "hint": "Oats, regular, cooked", "category": "grain" },
-  { "fdcId": 168880, "hint": "Pasta, cooked", "category": "grain" },
-  { "fdcId": 170285, "hint": "Corn, sweet, cooked", "category": "grain" },
-  { "fdcId": 172451, "hint": "Wheat flour, all-purpose", "category": "grain" },
-  { "fdcId": 173757, "hint": "Tortilla, flour", "category": "grain" },
-
-  { "fdcId": 171057, "hint": "Chicken breast, cooked, roasted", "category": "protein" },
-  { "fdcId": 174002, "hint": "Chicken thigh, cooked, roasted", "category": "protein" },
-  { "fdcId": 174032, "hint": "Beef, ground, 80% lean, cooked", "category": "protein" },
-  { "fdcId": 175167, "hint": "Pork, loin, cooked", "category": "protein" },
-  { "fdcId": 175139, "hint": "Salmon, Atlantic, cooked", "category": "protein" },
-  { "fdcId": 175159, "hint": "Shrimp, cooked", "category": "protein" },
-  { "fdcId": 171287, "hint": "Egg, whole, cooked, hard-boiled", "category": "protein" },
-  { "fdcId": 172184, "hint": "Tofu, firm", "category": "protein" },
-  { "fdcId": 174288, "hint": "Tuna, canned in water", "category": "protein" },
-  { "fdcId": 173417, "hint": "Turkey breast, cooked", "category": "protein" },
-  { "fdcId": 175108, "hint": "Tilapia, cooked", "category": "protein" },
-  { "fdcId": 174230, "hint": "Bacon, cooked", "category": "protein" },
-
-  { "fdcId": 170903, "hint": "Milk, whole", "category": "dairy" },
-  { "fdcId": 170906, "hint": "Milk, reduced fat, 2%", "category": "dairy" },
-  { "fdcId": 170886, "hint": "Cheese, cheddar", "category": "dairy" },
-  { "fdcId": 170899, "hint": "Yogurt, plain, whole milk", "category": "dairy" },
-  { "fdcId": 170855, "hint": "Butter, salted", "category": "dairy" },
-  { "fdcId": 170912, "hint": "Cream cheese", "category": "dairy" },
-  { "fdcId": 170857, "hint": "Butter, unsalted", "category": "dairy" },
-
-  { "fdcId": 170407, "hint": "Potato, boiled, cooked", "category": "vegetable" },
-  { "fdcId": 170393, "hint": "Sweet potato, cooked, baked", "category": "vegetable" },
-  { "fdcId": 169228, "hint": "Broccoli, cooked, boiled", "category": "vegetable" },
-  { "fdcId": 170440, "hint": "Spinach, raw", "category": "vegetable" },
-  { "fdcId": 169230, "hint": "Carrot, raw", "category": "vegetable" },
-  { "fdcId": 170050, "hint": "Tomato, red, raw", "category": "vegetable" },
-  { "fdcId": 169986, "hint": "Onion, raw", "category": "vegetable" },
-  { "fdcId": 169251, "hint": "Cucumber, with peel, raw", "category": "vegetable" },
-  { "fdcId": 169248, "hint": "Lettuce, iceberg, raw", "category": "vegetable" },
-  { "fdcId": 170417, "hint": "Bell pepper, green, raw", "category": "vegetable" },
-  { "fdcId": 169985, "hint": "Garlic, raw", "category": "vegetable" },
-  { "fdcId": 169226, "hint": "Cabbage, raw", "category": "vegetable" },
-  { "fdcId": 170471, "hint": "Mushroom, white, raw", "category": "vegetable" },
-  { "fdcId": 169988, "hint": "Green beans, cooked", "category": "vegetable" },
-  { "fdcId": 170399, "hint": "Peas, green, cooked", "category": "vegetable" },
-  { "fdcId": 170464, "hint": "Cauliflower, cooked", "category": "vegetable" },
-
-  { "fdcId": 170567, "hint": "Peanut butter, smooth", "category": "nut_seed" },
-  { "fdcId": 170178, "hint": "Almonds, raw", "category": "nut_seed" },
-  { "fdcId": 170187, "hint": "Cashew nuts, raw", "category": "nut_seed" },
-  { "fdcId": 170186, "hint": "Walnuts, raw", "category": "nut_seed" },
-
-  { "fdcId": 174833, "hint": "Olive oil", "category": "oil" },
-  { "fdcId": 172336, "hint": "Soybean oil", "category": "oil" },
-  { "fdcId": 171028, "hint": "Coconut oil", "category": "oil" },
-
-  { "fdcId": 171285, "hint": "Egg, whole, raw", "category": "egg" },
-  { "fdcId": 173424, "hint": "Egg white, raw", "category": "egg" },
-
-  { "fdcId": 174608, "hint": "Honey", "category": "sweetener" },
-  { "fdcId": 169655, "hint": "Sugar, white, granulated", "category": "sweetener" },
-
-  { "fdcId": 173530, "hint": "Beans, black, cooked", "category": "legume" },
-  { "fdcId": 175198, "hint": "Lentils, cooked", "category": "legume" },
-  { "fdcId": 173757, "hint": "Chickpeas, cooked", "category": "legume" },
-  { "fdcId": 172421, "hint": "Soybeans, cooked", "category": "legume" },
-
-  { "fdcId": 174832, "hint": "Coffee, brewed", "category": "beverage" },
-  { "fdcId": 171917, "hint": "Tea, brewed, unsweetened", "category": "beverage" },
-  { "fdcId": 174814, "hint": "Orange juice, fresh", "category": "beverage" },
-  { "fdcId": 174284, "hint": "Coconut water", "category": "beverage" },
-
-  { "fdcId": 170474, "hint": "Soy sauce", "category": "condiment" },
-  { "fdcId": 172232, "hint": "Ketchup", "category": "condiment" },
-  { "fdcId": 169409, "hint": "Salt, table", "category": "condiment" },
-
-  { "fdcId": 173959, "hint": "Ice cream, vanilla", "category": "dessert" },
-  { "fdcId": 167587, "hint": "Chocolate, dark, 70-85% cacao", "category": "dessert" },
-
-  { "fdcId": 170554, "hint": "Pizza, cheese, frozen", "category": "prepared" },
-  { "fdcId": 174574, "hint": "Hamburger, single patty", "category": "prepared" },
-  { "fdcId": 170720, "hint": "French fries, frozen, oven-baked", "category": "prepared" },
-  { "fdcId": 167512, "hint": "Ramen noodles, cooked", "category": "prepared" }
+  {
+    "fdcId": 173944,
+    "hint": "Banana, raw",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 171688,
+    "hint": "Apple, raw, with skin",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 169097,
+    "hint": "Oranges, raw, all commercial varieties",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 174683,
+    "hint": "Grapes, red or green",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 169910,
+    "hint": "Mangos, raw",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 169926,
+    "hint": "Papayas, raw",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 167765,
+    "hint": "Watermelon, raw",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 169124,
+    "hint": "Pineapple, raw, all varieties",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 167762,
+    "hint": "Strawberries, raw",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 2710824,
+    "hint": "Avocado, Hass, peeled, raw",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 2346411,
+    "hint": "Blueberries, raw",
+    "category": "fruit"
+  },
+  {
+    "fdcId": 168878,
+    "hint": "Rice, white, long-grain, regular, enriched, cooked",
+    "category": "grain"
+  },
+  {
+    "fdcId": 2512380,
+    "hint": "Rice, brown, long grain, unenriched, raw",
+    "category": "grain"
+  },
+  {
+    "fdcId": 2758993,
+    "hint": "Bread, white, commercial",
+    "category": "grain"
+  },
+  {
+    "fdcId": 2758994,
+    "hint": "Bread, 100% whole wheat, commercial",
+    "category": "grain"
+  },
+  {
+    "fdcId": 2346397,
+    "hint": "Oats, whole grain, steel cut",
+    "category": "grain"
+  },
+  {
+    "fdcId": 2758998,
+    "hint": "Pasta, dry, enriched, spaghetti",
+    "category": "grain"
+  },
+  {
+    "fdcId": 2710826,
+    "hint": "Corn, sweet, yellow and white kernels, fresh, raw",
+    "category": "grain"
+  },
+  {
+    "fdcId": 789890,
+    "hint": "Flour, wheat, all-purpose, enriched, bleached",
+    "category": "grain"
+  },
+  {
+    "fdcId": 2646170,
+    "hint": "Chicken, breast, boneless, skinless, raw",
+    "category": "protein"
+  },
+  {
+    "fdcId": 2646171,
+    "hint": "Chicken, thigh, boneless, skinless, raw",
+    "category": "protein"
+  },
+  {
+    "fdcId": 174032,
+    "hint": "Beef, ground, 80% lean, cooked",
+    "category": "protein"
+  },
+  {
+    "fdcId": 2646168,
+    "hint": "Pork, loin, boneless, raw",
+    "category": "protein"
+  },
+  {
+    "fdcId": 2684441,
+    "hint": "Fish, salmon, Atlantic, farm raised, raw",
+    "category": "protein"
+  },
+  {
+    "fdcId": 175180,
+    "hint": "Crustaceans, shrimp, cooked",
+    "category": "protein"
+  },
+  {
+    "fdcId": 171287,
+    "hint": "Egg, whole, raw, fresh",
+    "category": "protein"
+  },
+  {
+    "fdcId": 172475,
+    "hint": "Tofu, raw, firm, prepared with calcium sulfate",
+    "category": "protein"
+  },
+  {
+    "fdcId": 175158,
+    "hint": "Fish, tuna, white, canned in water, drained solids",
+    "category": "protein"
+  },
+  {
+    "fdcId": 2684442,
+    "hint": "Fish, tilapia, farm raised, raw",
+    "category": "protein"
+  },
+  {
+    "fdcId": 171265,
+    "hint": "Milk, whole, 3.25% milkfat, with added vitamin D",
+    "category": "dairy"
+  },
+  {
+    "fdcId": 171267,
+    "hint": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+    "category": "dairy"
+  },
+  {
+    "fdcId": 170899,
+    "hint": "Cheese, cheddar, sharp, sliced",
+    "category": "dairy"
+  },
+  {
+    "fdcId": 2259793,
+    "hint": "Yogurt, plain, whole milk",
+    "category": "dairy"
+  },
+  {
+    "fdcId": 790508,
+    "hint": "Butter, stick, salted",
+    "category": "dairy"
+  },
+  {
+    "fdcId": 170440,
+    "hint": "Potatoes, boiled, cooked without skin",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 169967,
+    "hint": "Broccoli, cooked, boiled, drained, without salt",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 168462,
+    "hint": "Spinach, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 2258586,
+    "hint": "Carrots, mature, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 170457,
+    "hint": "Tomatoes, red, ripe, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 790646,
+    "hint": "Onions, yellow, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 2346406,
+    "hint": "Cucumber, with peel, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 2258588,
+    "hint": "Peppers, bell, green, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 169230,
+    "hint": "Garlic, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 2346407,
+    "hint": "Cabbage, green, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 1999629,
+    "hint": "Mushrooms, white button",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 2685573,
+    "hint": "Cauliflower, raw",
+    "category": "vegetable"
+  },
+  {
+    "fdcId": 2262072,
+    "hint": "Peanut butter, creamy",
+    "category": "nut_seed"
+  },
+  {
+    "fdcId": 2346393,
+    "hint": "Nuts, almonds, whole, raw",
+    "category": "nut_seed"
+  },
+  {
+    "fdcId": 2515374,
+    "hint": "Nuts, cashew nuts, raw",
+    "category": "nut_seed"
+  },
+  {
+    "fdcId": 171413,
+    "hint": "Oil, olive, salad or cooking",
+    "category": "oil"
+  },
+  {
+    "fdcId": 330458,
+    "hint": "Oil, coconut",
+    "category": "oil"
+  },
+  {
+    "fdcId": 169640,
+    "hint": "Honey",
+    "category": "sweetener"
+  },
+  {
+    "fdcId": 746784,
+    "hint": "Sugars, granulated",
+    "category": "sweetener"
+  },
+  {
+    "fdcId": 175237,
+    "hint": "Beans, black, mature seeds, cooked, boiled, with salt",
+    "category": "legume"
+  },
+  {
+    "fdcId": 2644283,
+    "hint": "Lentils, dry",
+    "category": "legume"
+  },
+  {
+    "fdcId": 171890,
+    "hint": "Beverages, coffee, brewed, prepared with tap water",
+    "category": "beverage"
+  },
+  {
+    "fdcId": 171917,
+    "hint": "Beverages, tea, green, brewed, regular",
+    "category": "beverage"
+  },
+  {
+    "fdcId": 169098,
+    "hint": "Orange juice, raw",
+    "category": "beverage"
+  },
+  {
+    "fdcId": 174278,
+    "hint": "Soy sauce made from soy (tamari)",
+    "category": "condiment"
+  },
+  {
+    "fdcId": 746775,
+    "hint": "Salt, table, iodized",
+    "category": "condiment"
+  },
+  {
+    "fdcId": 167575,
+    "hint": "Ice creams, vanilla",
+    "category": "dessert"
+  }
 ]

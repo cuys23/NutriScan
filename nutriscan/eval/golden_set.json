@@ -1,52 +1,679 @@
 [
-  { "id": "gs_001", "description": "Banana, raw, one medium", "food_name_hint": "banana raw", "portion_grams": 118, "fdc_id": 173944, "food_id": "usda_173944", "tags": ["fruit", "simple", "en"], "image_path": null },
-  { "id": "gs_002", "description": "Apple, raw, with skin, one medium", "food_name_hint": "apple raw with skin", "portion_grams": 182, "fdc_id": 171688, "food_id": "usda_171688", "tags": ["fruit", "simple", "en"], "image_path": null },
-  { "id": "gs_003", "description": "Orange, raw, one medium", "food_name_hint": "orange raw all varieties", "portion_grams": 131, "fdc_id": 167762, "food_id": "usda_167762", "tags": ["fruit", "simple", "en"], "image_path": null },
-  { "id": "gs_004", "description": "Grapes, red or green, one cup", "food_name_hint": "grapes red or green", "portion_grams": 92, "fdc_id": 167775, "food_id": "usda_167775", "tags": ["fruit", "simple", "en"], "image_path": null },
-  { "id": "gs_005", "description": "Strawberries, raw, one cup", "food_name_hint": "strawberries raw", "portion_grams": 152, "fdc_id": 174687, "food_id": "usda_174687", "tags": ["fruit", "simple", "en"], "image_path": null },
-  { "id": "gs_006", "description": "Avocado, raw, whole", "food_name_hint": "avocado raw", "portion_grams": 150, "fdc_id": 171711, "food_id": "usda_171711", "tags": ["fruit", "simple", "en"], "image_path": null },
-  { "id": "gs_007", "description": "Rice, white, long-grain, cooked, one cup", "food_name_hint": "rice white long-grain cooked", "portion_grams": 158, "fdc_id": 170457, "food_id": "usda_170457", "tags": ["grain", "simple", "en"], "image_path": null },
-  { "id": "gs_008", "description": "Rice, brown, long-grain, cooked, one cup", "food_name_hint": "rice brown long-grain cooked", "portion_grams": 195, "fdc_id": 169714, "food_id": "usda_169714", "tags": ["grain", "simple", "en"], "image_path": null },
-  { "id": "gs_009", "description": "Bread, white, commercially prepared, one slice", "food_name_hint": "bread white commercially prepared", "portion_grams": 25, "fdc_id": 168878, "food_id": "usda_168878", "tags": ["grain", "simple", "en"], "image_path": null },
-  { "id": "gs_010", "description": "Oats, regular, cooked, one cup", "food_name_hint": "oats regular cooked", "portion_grams": 234, "fdc_id": 170069, "food_id": "usda_170069", "tags": ["grain", "simple", "en"], "image_path": null },
-  { "id": "gs_011", "description": "Pasta, cooked, one cup", "food_name_hint": "pasta cooked", "portion_grams": 140, "fdc_id": 168880, "food_id": "usda_168880", "tags": ["grain", "simple", "en"], "image_path": null },
-  { "id": "gs_012", "description": "Chicken breast, cooked, roasted", "food_name_hint": "chicken breast cooked roasted", "portion_grams": 140, "fdc_id": 171057, "food_id": "usda_171057", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_013", "description": "Chicken thigh, cooked, roasted", "food_name_hint": "chicken thigh cooked roasted", "portion_grams": 130, "fdc_id": 174002, "food_id": "usda_174002", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_014", "description": "Beef, ground, 80% lean, cooked", "food_name_hint": "beef ground 80% lean cooked", "portion_grams": 85, "fdc_id": 174032, "food_id": "usda_174032", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_015", "description": "Salmon, Atlantic, cooked", "food_name_hint": "salmon atlantic cooked", "portion_grams": 85, "fdc_id": 175139, "food_id": "usda_175139", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_016", "description": "Shrimp, cooked", "food_name_hint": "shrimp cooked", "portion_grams": 85, "fdc_id": 175159, "food_id": "usda_175159", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_017", "description": "Egg, whole, cooked, hard-boiled", "food_name_hint": "egg whole cooked hard-boiled", "portion_grams": 50, "fdc_id": 171287, "food_id": "usda_171287", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_018", "description": "Tofu, firm, half cup", "food_name_hint": "tofu firm", "portion_grams": 126, "fdc_id": 172184, "food_id": "usda_172184", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_019", "description": "Tuna, canned in water, drained", "food_name_hint": "tuna canned in water", "portion_grams": 85, "fdc_id": 174288, "food_id": "usda_174288", "tags": ["protein", "simple", "en"], "image_path": null },
-  { "id": "gs_020", "description": "Milk, whole, one cup", "food_name_hint": "milk whole", "portion_grams": 244, "fdc_id": 170903, "food_id": "usda_170903", "tags": ["dairy", "simple", "en"], "image_path": null },
-  { "id": "gs_021", "description": "Cheese, cheddar, one ounce", "food_name_hint": "cheese cheddar", "portion_grams": 28, "fdc_id": 170886, "food_id": "usda_170886", "tags": ["dairy", "simple", "en"], "image_path": null },
-  { "id": "gs_022", "description": "Yogurt, plain, whole milk, one cup", "food_name_hint": "yogurt plain whole milk", "portion_grams": 245, "fdc_id": 170899, "food_id": "usda_170899", "tags": ["dairy", "simple", "en"], "image_path": null },
-  { "id": "gs_023", "description": "Butter, salted, one tablespoon", "food_name_hint": "butter salted", "portion_grams": 14, "fdc_id": 170855, "food_id": "usda_170855", "tags": ["dairy", "simple", "en"], "image_path": null },
-  { "id": "gs_024", "description": "Potato, boiled, cooked, one medium", "food_name_hint": "potato boiled cooked", "portion_grams": 156, "fdc_id": 170407, "food_id": "usda_170407", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_025", "description": "Broccoli, cooked, boiled, one cup", "food_name_hint": "broccoli cooked boiled", "portion_grams": 156, "fdc_id": 169228, "food_id": "usda_169228", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_026", "description": "Spinach, raw, one cup", "food_name_hint": "spinach raw", "portion_grams": 30, "fdc_id": 170440, "food_id": "usda_170440", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_027", "description": "Carrot, raw, one medium", "food_name_hint": "carrot raw", "portion_grams": 61, "fdc_id": 169230, "food_id": "usda_169230", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_028", "description": "Tomato, red, raw, one medium", "food_name_hint": "tomato red raw", "portion_grams": 123, "fdc_id": 170050, "food_id": "usda_170050", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_029", "description": "Onion, raw, one medium", "food_name_hint": "onion raw", "portion_grams": 110, "fdc_id": 169986, "food_id": "usda_169986", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_030", "description": "Bell pepper, green, raw, one medium", "food_name_hint": "bell pepper green raw", "portion_grams": 119, "fdc_id": 170417, "food_id": "usda_170417", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_031", "description": "Cabbage, raw, one cup chopped", "food_name_hint": "cabbage raw", "portion_grams": 89, "fdc_id": 169226, "food_id": "usda_169226", "tags": ["vegetable", "simple", "en"], "image_path": null },
-  { "id": "gs_032", "description": "Peanut butter, smooth, two tablespoons", "food_name_hint": "peanut butter smooth", "portion_grams": 32, "fdc_id": 170567, "food_id": "usda_170567", "tags": ["nut_seed", "simple", "en"], "image_path": null },
-  { "id": "gs_033", "description": "Almonds, raw, one ounce", "food_name_hint": "almonds raw", "portion_grams": 28, "fdc_id": 170178, "food_id": "usda_170178", "tags": ["nut_seed", "simple", "en"], "image_path": null },
-  { "id": "gs_034", "description": "Olive oil, one tablespoon", "food_name_hint": "olive oil", "portion_grams": 14, "fdc_id": 174833, "food_id": "usda_174833", "tags": ["oil", "simple", "en"], "image_path": null },
-  { "id": "gs_035", "description": "Egg, whole, raw, one large", "food_name_hint": "egg whole raw", "portion_grams": 50, "fdc_id": 171285, "food_id": "usda_171285", "tags": ["egg", "simple", "en"], "image_path": null },
-  { "id": "gs_036", "description": "Honey, one tablespoon", "food_name_hint": "honey", "portion_grams": 21, "fdc_id": 174608, "food_id": "usda_174608", "tags": ["sweetener", "simple", "en"], "image_path": null },
-  { "id": "gs_037", "description": "Beans, black, cooked, one cup", "food_name_hint": "beans black cooked", "portion_grams": 172, "fdc_id": 173530, "food_id": "usda_173530", "tags": ["legume", "simple", "en"], "image_path": null },
-  { "id": "gs_038", "description": "Lentils, cooked, one cup", "food_name_hint": "lentils cooked", "portion_grams": 198, "fdc_id": 175198, "food_id": "usda_175198", "tags": ["legume", "simple", "en"], "image_path": null },
-  { "id": "gs_039", "description": "Orange juice, fresh, one cup", "food_name_hint": "orange juice fresh", "portion_grams": 248, "fdc_id": 174814, "food_id": "usda_174814", "tags": ["beverage", "simple", "en"], "image_path": null },
-  { "id": "gs_040", "description": "Soy sauce, one tablespoon", "food_name_hint": "soy sauce", "portion_grams": 16, "fdc_id": 170474, "food_id": "usda_170474", "tags": ["condiment", "simple", "en"], "image_path": null },
-  { "id": "gs_041", "description": "Phở bò, large bowl", "food_name_hint": "pho bo", "portion_grams": 500, "fdc_id": null, "food_id": "vn_001", "tags": ["prepared", "vi"], "image_path": null },
-  { "id": "gs_042", "description": "Phở gà, large bowl", "food_name_hint": "pho ga", "portion_grams": 500, "fdc_id": null, "food_id": "vn_002", "tags": ["prepared", "vi"], "image_path": null },
-  { "id": "gs_043", "description": "Bún bò Huế, large bowl", "food_name_hint": "bun bo hue", "portion_grams": 500, "fdc_id": null, "food_id": "vn_003", "tags": ["prepared", "vi"], "image_path": null },
-  { "id": "gs_044", "description": "Bánh mì, one sandwich", "food_name_hint": "banh mi", "portion_grams": 200, "fdc_id": null, "food_id": "vn_004", "tags": ["prepared", "vi"], "image_path": null },
-  { "id": "gs_045", "description": "Cơm tấm sườn, one plate", "food_name_hint": "com tam", "portion_grams": 350, "fdc_id": null, "food_id": "vn_005", "tags": ["prepared", "vi"], "image_path": null },
-  { "id": "gs_046", "description": "Gỏi cuốn, two rolls", "food_name_hint": "goi cuon", "portion_grams": 120, "fdc_id": null, "food_id": "vn_006", "tags": ["prepared", "vi"], "image_path": null },
-  { "id": "gs_047", "description": "Bún chả Hà Nội, one plate", "food_name_hint": "bun cha", "portion_grams": 350, "fdc_id": null, "food_id": "vn_007", "tags": ["prepared", "vi"], "image_path": null },
-  { "id": "gs_048", "description": "Chè, one bowl", "food_name_hint": "che", "portion_grams": 200, "fdc_id": null, "food_id": "vn_008", "tags": ["dessert", "vi"], "image_path": null },
-  { "id": "gs_049", "description": "Cà phê sữa đá, one glass", "food_name_hint": "ca phe sua da", "portion_grams": 240, "fdc_id": null, "food_id": "vn_009", "tags": ["beverage", "vi"], "image_path": null },
-  { "id": "gs_050", "description": "Cơm trắng, one cup steamed", "food_name_hint": "com trang", "portion_grams": 158, "fdc_id": null, "food_id": "vn_010", "tags": ["grain", "simple", "vi"], "image_path": null }
+  {
+    "id": "gs_001",
+    "description": "Banana, raw, one medium",
+    "food_name_hint": "banana raw",
+    "portion_grams": 118,
+    "fdc_id": 173944,
+    "food_id": "usda_173944",
+    "tags": [
+      "fruit",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_002",
+    "description": "Apple, raw, with skin, one medium",
+    "food_name_hint": "apple raw with skin",
+    "portion_grams": 182,
+    "fdc_id": 171688,
+    "food_id": "usda_171688",
+    "tags": [
+      "fruit",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_003",
+    "description": "Orange, raw, one medium",
+    "food_name_hint": "orange raw all varieties",
+    "portion_grams": 131,
+    "fdc_id": 169097,
+    "food_id": "usda_169097",
+    "tags": [
+      "fruit",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_004",
+    "description": "Grapes, red or green, one cup",
+    "food_name_hint": "grapes red or green",
+    "portion_grams": 92,
+    "fdc_id": 174683,
+    "food_id": "usda_174683",
+    "tags": [
+      "fruit",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_005",
+    "description": "Strawberries, raw, one cup",
+    "food_name_hint": "strawberries raw",
+    "portion_grams": 152,
+    "fdc_id": 167762,
+    "food_id": "usda_167762",
+    "tags": [
+      "fruit",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_006",
+    "description": "Avocado, raw, whole",
+    "food_name_hint": "avocado raw",
+    "portion_grams": 150,
+    "fdc_id": 2710824,
+    "food_id": "usda_2710824",
+    "tags": [
+      "fruit",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_007",
+    "description": "Rice, white, long-grain, cooked, one cup",
+    "food_name_hint": "rice white long-grain cooked",
+    "portion_grams": 158,
+    "fdc_id": 168878,
+    "food_id": "usda_168878",
+    "tags": [
+      "grain",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_008",
+    "description": "Rice, brown, long-grain, raw, 50g dry",
+    "food_name_hint": "rice brown long-grain raw",
+    "portion_grams": 50,
+    "fdc_id": 2512380,
+    "food_id": "usda_2512380",
+    "tags": [
+      "grain",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_009",
+    "description": "Bread, white, commercially prepared, one slice",
+    "food_name_hint": "bread white commercially prepared",
+    "portion_grams": 25,
+    "fdc_id": 2758993,
+    "food_id": "usda_2758993",
+    "tags": [
+      "grain",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_010",
+    "description": "Oats, whole grain, steel cut, raw, 40g dry",
+    "food_name_hint": "oats steel cut raw",
+    "portion_grams": 40,
+    "fdc_id": 2346397,
+    "food_id": "usda_2346397",
+    "tags": [
+      "grain",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_011",
+    "description": "Pasta, dry, enriched, spaghetti, 85g dry",
+    "food_name_hint": "pasta dry spaghetti",
+    "portion_grams": 85,
+    "fdc_id": 2758998,
+    "food_id": "usda_2758998",
+    "tags": [
+      "grain",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_012",
+    "description": "Chicken breast, boneless, skinless, raw",
+    "food_name_hint": "chicken breast raw",
+    "portion_grams": 140,
+    "fdc_id": 2646170,
+    "food_id": "usda_2646170",
+    "tags": [
+      "protein",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_013",
+    "description": "Chicken thigh, boneless, skinless, raw",
+    "food_name_hint": "chicken thigh raw",
+    "portion_grams": 130,
+    "fdc_id": 2646171,
+    "food_id": "usda_2646171",
+    "tags": [
+      "protein",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_014",
+    "description": "Beef, ground, 80% lean, cooked",
+    "food_name_hint": "beef ground 80% lean cooked",
+    "portion_grams": 85,
+    "fdc_id": 174032,
+    "food_id": "usda_174032",
+    "tags": [
+      "protein",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_015",
+    "description": "Salmon, Atlantic, raw",
+    "food_name_hint": "salmon atlantic raw",
+    "portion_grams": 85,
+    "fdc_id": 2684441,
+    "food_id": "usda_2684441",
+    "tags": [
+      "protein",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_016",
+    "description": "Shrimp, cooked",
+    "food_name_hint": "shrimp cooked",
+    "portion_grams": 85,
+    "fdc_id": 175180,
+    "food_id": "usda_175180",
+    "tags": [
+      "protein",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_018",
+    "description": "Tofu, firm, half cup",
+    "food_name_hint": "tofu firm",
+    "portion_grams": 126,
+    "fdc_id": 172475,
+    "food_id": "usda_172475",
+    "tags": [
+      "protein",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_019",
+    "description": "Tuna, canned in water, drained",
+    "food_name_hint": "tuna canned in water",
+    "portion_grams": 85,
+    "fdc_id": 175158,
+    "food_id": "usda_175158",
+    "tags": [
+      "protein",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_020",
+    "description": "Milk, whole, one cup",
+    "food_name_hint": "milk whole",
+    "portion_grams": 244,
+    "fdc_id": 171265,
+    "food_id": "usda_171265",
+    "tags": [
+      "dairy",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_021",
+    "description": "Cheese, cheddar, one ounce",
+    "food_name_hint": "cheese cheddar",
+    "portion_grams": 28,
+    "fdc_id": 170899,
+    "food_id": "usda_170899",
+    "tags": [
+      "dairy",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_022",
+    "description": "Yogurt, plain, whole milk, one cup",
+    "food_name_hint": "yogurt plain whole milk",
+    "portion_grams": 245,
+    "fdc_id": 2259793,
+    "food_id": "usda_2259793",
+    "tags": [
+      "dairy",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_023",
+    "description": "Butter, salted, one tablespoon",
+    "food_name_hint": "butter salted",
+    "portion_grams": 14,
+    "fdc_id": 790508,
+    "food_id": "usda_790508",
+    "tags": [
+      "dairy",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_024",
+    "description": "Potato, boiled, cooked, one medium",
+    "food_name_hint": "potato boiled cooked",
+    "portion_grams": 156,
+    "fdc_id": 170440,
+    "food_id": "usda_170440",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_025",
+    "description": "Broccoli, cooked, boiled, one cup",
+    "food_name_hint": "broccoli cooked boiled",
+    "portion_grams": 156,
+    "fdc_id": 169967,
+    "food_id": "usda_169967",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_026",
+    "description": "Spinach, raw, one cup",
+    "food_name_hint": "spinach raw",
+    "portion_grams": 30,
+    "fdc_id": 168462,
+    "food_id": "usda_168462",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_027",
+    "description": "Carrot, raw, one medium",
+    "food_name_hint": "carrot raw",
+    "portion_grams": 61,
+    "fdc_id": 2258586,
+    "food_id": "usda_2258586",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_028",
+    "description": "Tomato, red, raw, one medium",
+    "food_name_hint": "tomato red raw",
+    "portion_grams": 123,
+    "fdc_id": 170457,
+    "food_id": "usda_170457",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_029",
+    "description": "Onion, raw, one medium",
+    "food_name_hint": "onion raw",
+    "portion_grams": 110,
+    "fdc_id": 790646,
+    "food_id": "usda_790646",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_030",
+    "description": "Bell pepper, green, raw, one medium",
+    "food_name_hint": "bell pepper green raw",
+    "portion_grams": 119,
+    "fdc_id": 2258588,
+    "food_id": "usda_2258588",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_031",
+    "description": "Cabbage, raw, one cup chopped",
+    "food_name_hint": "cabbage raw",
+    "portion_grams": 89,
+    "fdc_id": 2346407,
+    "food_id": "usda_2346407",
+    "tags": [
+      "vegetable",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_032",
+    "description": "Peanut butter, smooth, two tablespoons",
+    "food_name_hint": "peanut butter smooth",
+    "portion_grams": 32,
+    "fdc_id": 2262072,
+    "food_id": "usda_2262072",
+    "tags": [
+      "nut_seed",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_033",
+    "description": "Almonds, raw, one ounce",
+    "food_name_hint": "almonds raw",
+    "portion_grams": 28,
+    "fdc_id": 2346393,
+    "food_id": "usda_2346393",
+    "tags": [
+      "nut_seed",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_034",
+    "description": "Olive oil, one tablespoon",
+    "food_name_hint": "olive oil",
+    "portion_grams": 14,
+    "fdc_id": 171413,
+    "food_id": "usda_171413",
+    "tags": [
+      "oil",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_035",
+    "description": "Egg, whole, raw, one large",
+    "food_name_hint": "egg whole raw",
+    "portion_grams": 50,
+    "fdc_id": 171287,
+    "food_id": "usda_171287",
+    "tags": [
+      "egg",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_036",
+    "description": "Honey, one tablespoon",
+    "food_name_hint": "honey",
+    "portion_grams": 21,
+    "fdc_id": 169640,
+    "food_id": "usda_169640",
+    "tags": [
+      "sweetener",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_037",
+    "description": "Beans, black, cooked, one cup",
+    "food_name_hint": "beans black cooked",
+    "portion_grams": 172,
+    "fdc_id": 175237,
+    "food_id": "usda_175237",
+    "tags": [
+      "legume",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_038",
+    "description": "Lentils, dry, 50g",
+    "food_name_hint": "lentils dry",
+    "portion_grams": 50,
+    "fdc_id": 2644283,
+    "food_id": "usda_2644283",
+    "tags": [
+      "legume",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_039",
+    "description": "Orange juice, fresh, one cup",
+    "food_name_hint": "orange juice fresh",
+    "portion_grams": 248,
+    "fdc_id": 169098,
+    "food_id": "usda_169098",
+    "tags": [
+      "beverage",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_040",
+    "description": "Soy sauce, one tablespoon",
+    "food_name_hint": "soy sauce",
+    "portion_grams": 16,
+    "fdc_id": 174278,
+    "food_id": "usda_174278",
+    "tags": [
+      "condiment",
+      "simple",
+      "en"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_041",
+    "description": "Phở bò, large bowl",
+    "food_name_hint": "pho bo",
+    "portion_grams": 500,
+    "fdc_id": null,
+    "food_id": "vn_001",
+    "tags": [
+      "prepared",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_042",
+    "description": "Phở gà, large bowl",
+    "food_name_hint": "pho ga",
+    "portion_grams": 500,
+    "fdc_id": null,
+    "food_id": "vn_002",
+    "tags": [
+      "prepared",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_043",
+    "description": "Bún bò Huế, large bowl",
+    "food_name_hint": "bun bo hue",
+    "portion_grams": 500,
+    "fdc_id": null,
+    "food_id": "vn_003",
+    "tags": [
+      "prepared",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_044",
+    "description": "Bánh mì, one sandwich",
+    "food_name_hint": "banh mi",
+    "portion_grams": 200,
+    "fdc_id": null,
+    "food_id": "vn_004",
+    "tags": [
+      "prepared",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_045",
+    "description": "Cơm tấm sườn, one plate",
+    "food_name_hint": "com tam",
+    "portion_grams": 350,
+    "fdc_id": null,
+    "food_id": "vn_005",
+    "tags": [
+      "prepared",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_046",
+    "description": "Gỏi cuốn, two rolls",
+    "food_name_hint": "goi cuon",
+    "portion_grams": 120,
+    "fdc_id": null,
+    "food_id": "vn_006",
+    "tags": [
+      "prepared",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_047",
+    "description": "Bún chả Hà Nội, one plate",
+    "food_name_hint": "bun cha",
+    "portion_grams": 350,
+    "fdc_id": null,
+    "food_id": "vn_007",
+    "tags": [
+      "prepared",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_048",
+    "description": "Chè, one bowl",
+    "food_name_hint": "che",
+    "portion_grams": 200,
+    "fdc_id": null,
+    "food_id": "vn_008",
+    "tags": [
+      "dessert",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_049",
+    "description": "Cà phê sữa đá, one glass",
+    "food_name_hint": "ca phe sua da",
+    "portion_grams": 240,
+    "fdc_id": null,
+    "food_id": "vn_009",
+    "tags": [
+      "beverage",
+      "vi"
+    ],
+    "image_path": null
+  },
+  {
+    "id": "gs_050",
+    "description": "Cơm trắng, one cup steamed",
+    "food_name_hint": "com trang",
+    "portion_grams": 158,
+    "fdc_id": null,
+    "food_id": "vn_010",
+    "tags": [
+      "grain",
+      "simple",
+      "vi"
+    ],
+    "image_path": null
+  }
 ]
