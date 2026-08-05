@@ -143,7 +143,7 @@ export const groqChatCompletion = onCall(
 const APPLE_ISSUER_ID = defineSecret("APPLE_ISSUER_ID");
 const APPLE_KEY_ID = defineSecret("APPLE_KEY_ID");
 const APPLE_PRIVATE_KEY = defineSecret("APPLE_PRIVATE_KEY");
-const APPLE_BUNDLE_ID = "com.nutriscan.app";
+const APPLE_BUNDLE_ID = "com.vin.nutrisnap";
 
 /**
  * NOTE: fill this in with a Google Cloud service-account JSON that has the

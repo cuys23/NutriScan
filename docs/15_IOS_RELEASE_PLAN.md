@@ -67,7 +67,7 @@ Audited 2026-08-04 against commit on `main`.
 | IAP + server-side verification | Present | `functions/src/index.ts` → `verifyPurchase` |
 | Restore purchases | Present | `lib/services/payment/iap_service.dart` |
 | Privacy Policy / Terms screens | Present | `lib/screens/legal/` |
-| iOS bundle id + team | Set | `com.nutriscan.app`, team `U5Y77MA4F9` |
+| iOS bundle id + team | Set | `com.vin.nutrisnap`, team `KS362JT4QN` (updated 2026-08-05 — see § 3.1) |
 | **Delete account** | **Added 2026-08-04** | `lib/services/auth/account_deletion_service.dart` |
 | **ATT + SKAdNetwork + export compliance** | **Added 2026-08-04** | `ios/Runner/Info.plist` |
 | **AdMob release guard** | **Added 2026-08-04** | `lib/config/ads_config.dart` |
@@ -77,7 +77,7 @@ Audited 2026-08-04 against commit on `main`.
 
 | Gap | Blocking? | Section |
 |-----|-----------|---------|
-| Real AdMob App ID + ad unit IDs | Yes (if shipping with ads) | § 6.4 |
+| Real AdMob App ID + ad unit IDs | **Done 2026-08-05 (iOS)** — Android still open | § 6.4 |
 | App Store Connect app record + IAP products | Yes | § 3, § 7 |
 | Public Privacy Policy / Terms **URLs** | Yes | § 6.1 |
 | App Privacy nutrition labels filled in | Yes | § 6.2 |
@@ -85,7 +85,7 @@ Audited 2026-08-04 against commit on `main`.
 | Screenshots, description, keywords | Yes | § 10 |
 | Reviewer demo account | Yes | § 10.3 |
 | Separate staging Firebase project | No (recommended) | § 4 |
-| Automated tests (`test/` directory is absent) | No (recommended) | § 9.4 |
+| Automated tests | **Done 2026-08-05** — `test/` directory now exists, see `CLAUDE.md` § 5 | § 9.4 |
 | CI/CD pipeline | No (recommended) | § 8.4 |
 | Localised strings for the new delete-account keys | No (English fallback works) | § 6.6 |
 
@@ -171,7 +171,10 @@ Start this section **before** any code work. Everything here has external lead t
 ## 3.1 Apple Developer Program
 
 - Enrolled organisation or individual account, US$99/year, active.
-- Team ID `U5Y77MA4F9` is already referenced in the Xcode project — confirm it matches the account you intend to publish from.
+- Team ID `KS362JT4QN` is already referenced in the Xcode project (updated
+  2026-08-05, replacing the earlier `U5Y77MA4F9` — see `CLAUDE.md`'s Apple Dev
+  Personal Team note for why) — confirm it matches the account you intend to
+  publish from.
 - Roles needed: **Account Holder** for agreements, **Admin** or **App Manager** for App Store Connect work.
 
 ## 3.2 Agreements, Tax, and Banking
@@ -193,11 +196,11 @@ App Store Connect → My Apps → **+** → New App.
 | Platform | iOS |
 | Name | NutriScan (must be globally unique — check availability early) |
 | Primary language | English (US) |
-| Bundle ID | `com.nutriscan.app` — register in Certificates, Identifiers & Profiles first |
+| Bundle ID | `com.vin.nutrisnap` — register in Certificates, Identifiers & Profiles first |
 | SKU | e.g. `NUTRISCAN-IOS-001` (internal only) |
 | User Access | Full Access |
 
-**App ID capabilities** (Certificates, Identifiers & Profiles → Identifiers → `com.nutriscan.app`) — enable all of these, they are all used by the current code:
+**App ID capabilities** (Certificates, Identifiers & Profiles → Identifiers → `com.vin.nutrisnap`) — enable all of these, they are all used by the current code:
 
 - [ ] Push Notifications (FCM)
 - [ ] Sign in with Apple (entitlement already in the project)
@@ -226,9 +229,9 @@ One Firebase project, `nutriscan-75d57`, used for everything. Acceptable for a f
 
 | Environment | Firebase project | Bundle ID | Distribution |
 |-------------|------------------|-----------|--------------|
-| dev | `nutriscan-dev` | `com.nutriscan.app.dev` | Local + emulators |
-| staging | `nutriscan-staging` | `com.nutriscan.app.staging` | TestFlight internal |
-| prod | `nutriscan-75d57` | `com.nutriscan.app` | App Store |
+| dev | `nutriscan-dev` | `com.vin.nutrisnap.dev` | Local + emulators |
+| staging | `nutriscan-staging` | `com.vin.nutrisnap.staging` | TestFlight internal |
+| prod | `nutriscan-75d57` | `com.vin.nutrisnap` | App Store |
 
 Implement with Xcode build configurations and per-configuration `GoogleService-Info.plist` files, plus `--dart-define=ENV=staging`. Distinct bundle IDs let all three coexist on one device.
 
@@ -287,7 +290,7 @@ So `pubspec.yaml` `version:` is the single source of truth. Good — leave it th
 - Bump the version string for every user-visible release: `2.1.2` → `2.1.3`.
 - `app_version_subtitle` in `lib/config/app_localizations.dart` is hardcoded to `2.1.2`. Update it in the same commit as any version bump, or it will drift.
 
-The `RunnerTests` target bundle ID was `com.example.nutriscan.RunnerTests` and has been corrected to `com.nutriscan.app.RunnerTests` (fixed 2026-08-04). A `com.example.*` identifier anywhere in the project is a recognisable "template not finished" signal.
+The `RunnerTests` target bundle ID was originally `com.example.nutriscan.RunnerTests`, corrected to `com.nutriscan.app.RunnerTests` (2026-08-04), and now tracks the app's real bundle: `com.vin.nutrisnap.RunnerTests` (2026-08-05). A `com.example.*` identifier anywhere in the project is a recognisable "template not finished" signal.
 
 ---
 
