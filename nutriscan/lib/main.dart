@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nutriscan/config/ads_config.dart';
 import 'package:nutriscan/config/app_config.dart';
+import 'package:nutriscan/config/feature_flags.dart';
 import 'package:nutriscan/firebase_options.dart';
 import 'package:nutriscan/providers/ads/admob_provider.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
@@ -77,9 +78,21 @@ Future<void> _bootstrap() async {
     // Cloud Functions calls to the local emulator (`npm run serve` in
     // functions/) instead of production during debug builds. Remove once a
     // real Apple Developer / Play Console account is wired up.
-    if (kDebugMode) {
-      FirebaseFunctions.instance.useFunctionsEmulator('127.0.0.1', 5001);
-    }
+    // LOCAL DEV ONLY — do not commit disabled. Re-enable
+    // (`FirebaseFunctions.instance.useFunctionsEmulator(...)`, host =
+    // Mac's LAN IP for a physical device, `127.0.0.1` for Simulator, from
+    // `ipconfig getifaddr en0`) when testing IAP against
+    // `npm run serve` in functions/. Left off so scan/FKB testing hits
+    // production directly without needing the Mac + device on the same
+    // Wi-Fi.
+    // if (kDebugMode) {
+    //   FirebaseFunctions.instance.useFunctionsEmulator('192.168.68.34', 5001);
+    // }
+
+    // Ops kill switches / live-tunable values (docs/plan.md Phase 5) —
+    // fire-and-forget, defaults match hardcoded behavior so a slow or failed
+    // fetch never blocks or changes startup.
+    unawaited(FeatureFlags().init());
 
     // Route Flutter framework errors and uncaught async errors to Crashlytics.
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -91,8 +104,12 @@ Future<void> _bootstrap() async {
     // Verifies calls to our Cloud Functions (groqChatCompletion, verifyPurchase)
     // come from this genuine app build, not a script replaying a stolen token.
     await FirebaseAppCheck.instance.activate(
-      providerAndroid: const AndroidPlayIntegrityProvider(),
-      providerApple: const AppleAppAttestProvider(),
+      providerAndroid: kDebugMode
+          ? const AndroidDebugProvider()
+          : const AndroidPlayIntegrityProvider(),
+      providerApple: kDebugMode
+          ? const AppleDebugProvider()
+          : const AppleAppAttestProvider(),
     );
 
     // iOS App Tracking Transparency must be resolved BEFORE AdMob initializes,

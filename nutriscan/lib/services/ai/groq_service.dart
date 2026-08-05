@@ -5,12 +5,12 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 
 import 'package:image/image.dart' as img;
-import 'package:nutriscan/config/api_config.dart';
+import 'package:nutriscan/config/feature_flags.dart';
 import 'package:nutriscan/models/chat_message.dart';
 import 'package:nutriscan/models/meal_plan.dart';
 
 class GroqService {
-  static String get _model => ApiConfig.groqModel;
+  static String get _model => FeatureFlags().aiModelScan;
 
   final HttpsCallable _groqCallable = FirebaseFunctions.instance
       .httpsCallable(

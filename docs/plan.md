@@ -1019,8 +1019,19 @@ Phases 1–4 feature-complete on staging.
 
 ### Ops
 
-- [ ] Feature flags: `fkb_matcher_enabled`, `validation_sample_rate`, `ai_model_scan`
-- [ ] Crashlytics verified on staging builds
+- [x] Feature flags — `fkb_matcher_enabled` and `ai_model_scan` done 2026-08-05
+  via Firebase Remote Config (`lib/config/feature_flags.dart`); defaults match
+  current hardcoded behavior so setting nothing in the console changes
+  nothing. `validation_sample_rate` was already live server-side as the
+  `VALIDATION_SAMPLE_RATE` Functions param (Phase 3C) — a client-side copy of
+  that name would be meaningless (sampling must stay server-authoritative, a
+  client could otherwise just claim rate=0 to dodge audit logging), so no
+  client work was needed for it.
+- [x] Crashlytics — already wired in `lib/main.dart` (`FlutterError.onError`,
+  `PlatformDispatcher.instance.onError`, and the `runZonedGuarded` catch all
+  route to `FirebaseCrashlytics.instance.recordError`/
+  `recordFlutterFatalError`); "verified on staging" still needs an actual
+  staging run on a device, which is human/device-dependent — see `CLAUDE.md` § 6.
 - [ ] Basic AI error + latency logging retained
 
 ### Debt carried into this phase

@@ -84,6 +84,7 @@ Do not go looking; these are the files that matter.
 | Coins | `lib/providers/coins/coin_provider.dart` |
 | Subscription / IAP | `lib/providers/payment/subscription_provider.dart`, `lib/services/payment/iap_service.dart` |
 | Account deletion | `lib/services/auth/account_deletion_service.dart` |
+| Feature flags / ops kill switches | `lib/config/feature_flags.dart` (Firebase Remote Config) |
 | Localization | `lib/config/app_localizations.dart` (15 locales, English fallback) |
 
 ## 5. Current state — 2026-08-05

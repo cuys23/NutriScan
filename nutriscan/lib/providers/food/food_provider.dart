@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:nutriscan/config/api_config.dart';
 import 'package:nutriscan/config/app_localizations.dart';
+import 'package:nutriscan/config/feature_flags.dart';
 import 'package:nutriscan/models/food.dart';
 import 'package:nutriscan/providers/ads/admob_provider.dart';
 import 'package:nutriscan/providers/coins/coin_provider.dart';
@@ -106,6 +107,10 @@ class FoodProvider with ChangeNotifier {
   /// `source: estimated` (AI macros unchanged) otherwise. Never throws —
   /// a matcher outage must not fail the whole scan (docs/plan.md Phase 1C).
   Future<Food> _resolveFoodSource(Food food, String language) async {
+    if (!FeatureFlags().fkbMatcherEnabled) {
+      return food.copyWith(source: 'estimated');
+    }
+
     final match = await _matchService.match(
       foodName: food.name,
       portionGrams: food.portionGrams,
@@ -119,7 +124,7 @@ class FoodProvider with ChangeNotifier {
         'sodium_mg': food.sodium,
       },
       locale: language,
-      modelId: ApiConfig.groqModel,
+      modelId: FeatureFlags().aiModelScan,
       promptVersion: ApiConfig.scanPromptVersion,
     );
 
