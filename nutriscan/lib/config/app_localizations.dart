@@ -467,7 +467,7 @@ class AppLocalizations {
       'save_percentage': 'Save 17%',
       'subscription_successful': 'Subscription successful! Welcome to Premium!',
       'subscription_terms_detailed':
-          'By subscribing, you agree to our Terms of Service and Privacy Policy. Subscription will be charged to your payment method. You can cancel anytime in your account settings.',
+          'Payment will be charged to your account at confirmation of purchase. Subscription automatically renews unless it is cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage or cancel your subscription anytime in your App Store account settings. By subscribing, you agree to our Terms of Service and Privacy Policy.',
       'active_premium_subscription': 'Active Premium Subscription',
       'billed_monthly_desc': 'Billed monthly',
       'billed_annually_desc': 'Billed annually',

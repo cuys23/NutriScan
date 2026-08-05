@@ -992,9 +992,11 @@ Phases 1–4 feature-complete on staging.
 - [x] In-app **Delete account** — `lib/services/auth/account_deletion_service.dart` + `lib/widgets/settings/delete_account_dialog.dart` (2026-08-04)
   - Order is fixed by ADR-011: Storage → Firestore → Auth user → local. Do not reorder.
   - Requires `allow delete` on `users/{userId}` in `firestore.rules` — deployed together or the flow fails mid-wipe.
-- [ ] Privacy Policy **public HTTPS URL** live + link in app *(in-app screens exist; the URL does not)*
-- [ ] Terms of Use URL live + link
-- [ ] Nutrition/health disclaimer screens
+- [ ] Privacy Policy **public HTTPS URL** live + link in app *(in-app screens exist; the URL does not — human task, needs hosting, see `15_IOS_RELEASE_PLAN.md` § 6.1)*
+- [ ] Terms of Use URL live + link *(same as above — human task)*
+- [x] Nutrition/health disclaimer screens — already satisfied: `nutrition_disclaimer_short`
+  is directly on the main Settings screen body (`_buildAboutSection()`), which
+  meets V5.3 (≤ 2 taps from Settings) as written in `15_IOS_RELEASE_PLAN.md` § 6.7.
 
 ### iOS technical compliance
 
@@ -1019,8 +1021,19 @@ Phases 1–4 feature-complete on staging.
 
 ### Monetization
 
-- [ ] Restore purchases (iOS/Android sandbox)
-- [ ] Subscription terms visible on the paywall itself, with Terms + Privacy links
+- [ ] Restore purchases (iOS/Android sandbox) — human task, needs a Sandbox
+  Apple ID + physical device, see `15_IOS_RELEASE_PLAN.md` § 7.5
+- [x] Subscription terms visible on the paywall itself, with Terms + Privacy
+  links — done 2026-08-05. `subscription_screen.dart`'s `_buildTermsSection`
+  already linked in-app Terms/Privacy screens; the `subscription_terms_detailed`
+  English copy was missing Apple's required Guideline 3.1.2 auto-renewal
+  disclosure ("auto-renews unless cancelled at least 24 hours before...") —
+  rewrote it in `lib/config/app_localizations.dart` to include that plus the
+  charge-timing language. Price/period display was already correct (StoreKit
+  `ProductDetails.price`, already locale-formatted, + `/month` + `billed_monthly`).
+  Still debt: same string in the other 14 locales still has the old, softer
+  wording — needs accurate legal translation, not a mechanical one, so left
+  alone rather than risk a wrong translation of compliance-relevant text.
 - [ ] Coin economy still coherent with premium bypass
 
 ### Auth
@@ -1047,7 +1060,7 @@ Phases 1–4 feature-complete on staging.
 ### Debt carried into this phase
 
 - [ ] `delete_account_*` localization keys exist in `en` only; 14 locales fall back to English
-- [ ] No `test/` directory exists anywhere in the repo
+- [x] No `test/` directory exists anywhere in the repo — **fixed 2026-08-05**, see `CLAUDE.md` § 5
 
 ## Verify — Phase 5
 
