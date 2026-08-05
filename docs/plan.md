@@ -1055,7 +1055,10 @@ Phases 1–4 feature-complete on staging.
   route to `FirebaseCrashlytics.instance.recordError`/
   `recordFlutterFatalError`); "verified on staging" still needs an actual
   staging run on a device, which is human/device-dependent — see `CLAUDE.md` § 6.
-- [ ] Basic AI error + latency logging retained
+- [x] Basic AI error + latency logging retained — `groqChatCompletion`
+  (`functions/src/index.ts`) now logs `uid`/`model`/`latencyMs` on every path
+  (success, Groq API error, HttpsError rethrow, timeout, unexpected error),
+  committed 2026-08-05
 
 ### Debt carried into this phase
 

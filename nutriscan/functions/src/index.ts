@@ -98,6 +98,7 @@ export const groqChatCompletion = onCall(
       receiveTimeoutMs ?? 30_000,
     );
 
+    const startTime = Date.now();
     try {
       const response = await fetch(GROQ_BASE_URL, {
         method: "POST",
@@ -109,21 +110,57 @@ export const groqChatCompletion = onCall(
         signal: controller.signal,
       });
 
-      const json = await response.json();
+      const latencyMs = Date.now() - startTime;
+      const json = (await response.json()) as { usage?: unknown; [key: string]: unknown };
+
       if (!response.ok) {
-        logger.warn("Groq API error", { status: response.status, json });
+        logger.warn("Groq API error", {
+          uid: request.auth.uid,
+          model: groqBody.model,
+          latencyMs,
+          status: response.status,
+          json,
+        });
         throw new HttpsError(
           response.status === 429 ? "resource-exhausted" : "internal",
           `Groq API request failed with status ${response.status}`,
         );
       }
+
+      logger.info("Groq API success", {
+        uid: request.auth.uid,
+        model: groqBody.model,
+        latencyMs,
+        usage: json.usage,
+      });
+
       return json;
     } catch (err) {
-      if (err instanceof HttpsError) throw err;
+      const latencyMs = Date.now() - startTime;
+      if (err instanceof HttpsError) {
+        logger.warn("Groq request failed with HttpsError", {
+          uid: request.auth.uid,
+          model: groqBody.model,
+          latencyMs,
+          code: err.code,
+          message: err.message,
+        });
+        throw err;
+      }
       if ((err as Error).name === "AbortError") {
+        logger.error("Groq request timeout", {
+          uid: request.auth.uid,
+          model: groqBody.model,
+          latencyMs,
+        });
         throw new HttpsError("deadline-exceeded", "Groq request timed out.");
       }
-      logger.error("Unexpected error calling Groq", err);
+      logger.error("Unexpected error calling Groq", {
+        uid: request.auth.uid,
+        model: groqBody.model,
+        latencyMs,
+        error: String(err),
+      });
       throw new HttpsError("internal", "Failed to reach the AI service.");
     } finally {
       clearTimeout(timeout);
