@@ -1003,8 +1003,17 @@ Phases 1–4 feature-complete on staging.
 - [x] `ITSAppUsesNonExemptEncryption` declared
 - [x] Release builds cannot serve Google sample ad units (ADR-009)
 - [x] `storage.rules` versioned in repo and registered in `firebase.json` (ADR-010)
-- [ ] Real AdMob App ID in `ios/Runner/Info.plist` — **still the Google sample value**
-- [ ] Production ad unit IDs in `lib/config/ads_config.dart`, **or** `_adsEnabledByConfig = false` for v1.0
+- [x] Real AdMob App ID (iOS) in `ios/Runner/Info.plist` — done 2026-08-05
+  (`ca-app-pub-5770727176247801~9874508638`), also mirrored into
+  `AdsConfig.productionAdMobAppIdIos`. Android App ID still the Google sample
+  value — no Android AdMob account set up yet.
+- [ ] Production ad unit IDs in `lib/config/ads_config.dart` — iOS rewarded
+  done 2026-08-05 (`ca-app-pub-5770727176247801/8369855276`); iOS
+  interstitial/open/banner and all Android units still placeholders. The
+  existing fail-safe (`AdsConfig.hasProductionAdUnitIds`) already keeps ads
+  off in release builds until every unit for the current platform is filled
+  in, so this is safe to ship partially configured — no `_adsEnabledByConfig
+  = false` override needed for v1.0.
 - [ ] Privacy Report reviewed at archive time
 
 ### Monetization

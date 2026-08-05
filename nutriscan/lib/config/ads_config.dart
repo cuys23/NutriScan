@@ -97,14 +97,16 @@ class AdsConfig {
   static const String _androidProductionOpenAdUnitId = _placeholder;
   static const String _iosProductionOpenAdUnitId = _placeholder;
   static const String _androidProductionRewardedAdUnitId = _placeholder;
-  static const String _iosProductionRewardedAdUnitId = _placeholder;
+  static const String _iosProductionRewardedAdUnitId =
+      'ca-app-pub-5770727176247801/8369855276';
   static const String _androidProductionBannerAdUnitId = _placeholder;
   static const String _iosProductionBannerAdUnitId = _placeholder;
 
   /// AdMob **App IDs** (the `~` form). Kept here only so the release checklist
   /// has one place to look; the values that actually matter at runtime live in
   /// Info.plist (iOS) and AndroidManifest.xml (Android).
-  static const String productionAdMobAppIdIos = _placeholder;
+  static const String productionAdMobAppIdIos =
+      'ca-app-pub-5770727176247801~9874508638';
   static const String productionAdMobAppIdAndroid = _placeholder;
 
   static const List<String> _iosProductionIds = [
