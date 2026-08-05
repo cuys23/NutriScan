@@ -33,17 +33,21 @@ class ImageHelper {
     }
   }
 
-  /// Creates appropriate DecorationImage based on image path type
+  /// Creates appropriate DecorationImage based on image path type.
+  /// [cacheWidth] caps the decoded bitmap size (device px) so a full-res
+  /// camera photo isn't decoded into memory just to render a small card —
+  /// default covers the largest current use (200dp-tall food card) at 2x.
   static DecorationImage? getDecorationImage(
     String imagePath, {
     BoxFit fit = BoxFit.cover,
     String? placeholderAsset,
+    int cacheWidth = 400,
   }) {
     final imageProvider = getImageProvider(imagePath);
     if (imageProvider == null) return null;
 
     return DecorationImage(
-      image: imageProvider,
+      image: ResizeImage(imageProvider, width: cacheWidth),
       fit: fit,
       onError: placeholderAsset != null
           ? (exception, stackTrace) {
@@ -51,75 +55,6 @@ class ImageHelper {
             }
           : null,
     );
-  }
-
-  /// Creates appropriate Image widget based on image path type
-  static Widget getImageWidget(
-    String imagePath, {
-    double? width,
-    double? height,
-    BoxFit fit = BoxFit.cover,
-    String? placeholderAsset,
-    Widget? errorWidget,
-  }) {
-    if (isNetworkUrl(imagePath)) {
-      return Image.network(
-        imagePath,
-        width: width,
-        height: height,
-        fit: fit,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            width: width,
-            height: height,
-            color: Colors.grey[300],
-            child: const Center(child: CircularProgressIndicator()),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return errorWidget ??
-              Container(
-                width: width,
-                height: height,
-                color: Colors.grey[300],
-                child: const Icon(
-                  IconlyLight.danger,
-                  color: Colors.red,
-                  size: 48,
-                ),
-              );
-        },
-      );
-    } else if (isLocalPath(imagePath)) {
-      return Image.file(
-        File(imagePath),
-        width: width,
-        height: height,
-        fit: fit,
-        errorBuilder: (context, error, stackTrace) {
-          return errorWidget ??
-              Container(
-                width: width,
-                height: height,
-                color: Colors.grey[300],
-                child: const Icon(
-                  IconlyLight.danger,
-                  color: Colors.red,
-                  size: 48,
-                ),
-              );
-        },
-      );
-    } else {
-      // Return placeholder widget with icon
-      return Container(
-        width: width,
-        height: height,
-        color: Colors.grey[300],
-        child: const Icon(IconlyLight.image, color: Colors.grey, size: 48),
-      );
-    }
   }
 
   /// Checks if a local file exists
