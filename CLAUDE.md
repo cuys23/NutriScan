@@ -114,6 +114,15 @@ Known debt, safe to pick up any time:
 - Source-badge localization keys (`source_verified`, `source_estimated`,
   `source_user_edited`, `source_verified_subtitle`, `nutrition_disclaimer_short`)
   exist in `en` only; 15 locales fall back to English. Same pattern as above.
+- `eval/usda_seed_ids.json` has two duplicate `fdcId`s (170393 used for both
+  "Mango, raw" and "Sweet potato, cooked, baked"; 173757 used for both
+  "Tortilla, flour" and "Chickpeas, cooked"). The Phase 1A import upserts by
+  `food_id = usda_{fdcId}`, so whichever entry ran last in the array silently
+  overwrote the other in production `fkb_foods` — one of each pair is not
+  actually in the FKB under its expected name. Fix: give the losing item its
+  own correct `fdcId` (verify via USDA FDC search) and re-run the import.
+  `eval/golden_set.json` (Phase 3A) deliberately excludes all four names to
+  avoid depending on which one won.
 - `app_version_subtitle` in `app_localizations.dart` is hardcoded and must be
   updated in the same commit as any `pubspec.yaml` version bump.
 

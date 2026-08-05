@@ -19,7 +19,19 @@
 | 1C — Matcher + scan wiring | Done |
 | 2 — SQLite migration | Done (landed ahead of 1D) |
 | 1D — UI source badge & copy | Done 2026-08-05 |
-| 3A → 6 | Not started |
+| 3A — Golden set | Code done 2026-08-05; V3A.2 blocked, see note below |
+| 3B — Offline MAPE job | Code done 2026-08-05; V3B.1 blocked, see note below |
+| 3C → 6 | Not started |
+
+**Phase 3A/3B execution blocker:** `eval/run_mape.mjs` (and V3A.2's per-item
+resolve check) needs a real Firebase Auth ID token to call the deployed
+`fkbGet`/`matchFood` callables — a gcloud identity token does not populate
+`request.auth` the way a Firebase Auth ID token does. No agent session has
+gcloud, a service account, or a signed-in test-user token, and fabricating
+reference nutrition numbers instead of reading the real FKB would defeat the
+point of the eval. Needs a human to supply `EVAL_ID_TOKEN` (or a test account)
+before V3A.2/V3B.1 can run. See `eval/run_mape.mjs` header for how to obtain
+one, and `--validate-only` for the schema-only check that already passes.
 | Release compliance | Partially done ahead of schedule — see § "Phase 5" |
 
 Phase 5 was originally sequenced last. Several of its items were pulled forward
@@ -1033,9 +1045,9 @@ on every feature PR; that one is run before every submission.
 ~~4. `feat(db): migrate portion_grams source fkb_food_id` — Phase 2~~ **done** (landed ahead of 1D)
 ~~3. `feat(ui): source badge + localization keys` — Phase 1D~~ **done 2026-08-05** (English locale only; other 15 locales fall back to English per `getString`, same debt pattern as `delete_account_*`)
 
-Remaining, in order:
+~~5. `feat(eval): golden_set + mape runner` — Phase 3A/B~~ **code done 2026-08-05, execution blocked on `EVAL_ID_TOKEN` — see note above**
 
-5. `feat(eval): golden_set + mape runner` — Phase 3A/B
+Remaining, in order:
 6. `feat(eval): online validation_logs sampling` — Phase 3C
 7. `feat(plan): ground prompts on log summary` — Phase 4
 8. `feat(compliance): finish release checklist` — Phase 5 (remainder)
