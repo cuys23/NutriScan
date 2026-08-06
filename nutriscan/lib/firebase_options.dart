@@ -37,10 +37,10 @@ class DefaultFirebaseOptions {
   );
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCMAFZBfGe5-4ss07kXD9oH_Jw9wLZJ3Zw',
-    appId: '1:1088441843381:ios:c4d85183c6a959c674c8fc',
+    appId: '1:1088441843381:ios:7d030d222ca9113674c8fc',
     messagingSenderId: '1088441843381',
     projectId: 'nutriscan-75d57',
     storageBucket: 'nutriscan-75d57.firebasestorage.app',
-    iosBundleId: 'com.nutriscan.app',
+    iosBundleId: 'com.vin.nutrisnap',
   );
 }
