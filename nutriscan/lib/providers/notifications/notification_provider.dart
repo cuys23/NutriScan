@@ -900,19 +900,31 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  // Subscribe to language-specific topic for localized push notifications
+  // Subscribe to language-specific topic for localized push notifications.
+  // Every cold start calls this with the current language (main.dart), so
+  // skip the unsubscribe-from-every-other-language dance (16 FCM plugin
+  // calls) unless it actually changed since last launch — the common case
+  // is the same language every time, and each call is a real network round
+  // trip that's pure startup cost on a slow device/connection for no effect.
   Future<void> subscribeToLanguageTopic(String languageCode) async {
     try {
-      // Unsubscribe from all language topics first
-      final languages = [
-        'en', 'bn', 'hi', 'es', 'fr', 'de', 'zh', 'tr', 'ko', 'id', 'ja', 'ru', 'ur', 'pt', 'pt-BR', 'ar',
-      ];
-      for (final lang in languages) {
-        await _fcmService.unsubscribeFromTopic('lang_$lang');
-      }
+      final prefs = await SharedPreferences.getInstance();
+      final lastSubscribedLang = prefs.getString('fcm_subscribed_lang');
+      if (lastSubscribedLang == languageCode) return;
 
-      // Subscribe to current language topic
+      if (lastSubscribedLang != null) {
+        await _fcmService.unsubscribeFromTopic('lang_$lastSubscribedLang');
+      }
       await _fcmService.subscribeToTopic('lang_$languageCode');
+      // ponytail: marks "subscribed" even if the underlying call silently
+      // no-op'd (FCMService swallows failures, e.g. no APNS token yet) —
+      // trades perfect correctness for not re-doing this every launch.
+      // Self-heals next time the user changes language in-app; if a user
+      // enables push in system Settings after initially declining and
+      // never changes language again, they won't get re-subscribed until
+      // reinstall. Upgrade path: have FCMService clear this pref from its
+      // onTokenRefresh handler so a fresh token forces one re-subscribe.
+      await prefs.setString('fcm_subscribed_lang', languageCode);
     } catch (e) {
       debugPrint('Error subscribing to language topic: $e');
     }
