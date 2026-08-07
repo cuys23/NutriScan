@@ -15,11 +15,7 @@ class FoodDetailCard extends StatefulWidget {
   final Food food;
   final VoidCallback? onFoodDeleted;
 
-  const FoodDetailCard({
-    super.key,
-    required this.food,
-    this.onFoodDeleted,
-  });
+  const FoodDetailCard({super.key, required this.food, this.onFoodDeleted});
 
   @override
   State<FoodDetailCard> createState() => _FoodDetailCardState();
@@ -65,97 +61,85 @@ class _FoodDetailCardState extends State<FoodDetailCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Food Image and Basic Info
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-              image: widget.food.effectiveImageUrl.isNotEmpty
-                  ? ImageHelper.getDecorationImage(
-                      widget.food.effectiveImageUrl,
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
-            child: Stack(
-              children: [
-                // Fallback widget when no image
-                if (widget.food.effectiveImageUrl.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    color: Colors.grey[300],
-                    child: const Center(
-                      child: Icon(
-                        IconlyLight.image,
-                        color: Colors.grey,
-                        size: 64,
+            child: SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ImageHelper.getImageWidget(
+                      widget.food.effectiveImageUrl,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getHealthScoreColor(widget.food.healthScore),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        '${AppLocalizations.getString('score', currentLanguage)}: ${widget.food.healthScore}',
+                        style: _getStyledText(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getHealthScoreColor(widget.food.healthScore),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Text(
-                      '${AppLocalizations.getString('score', currentLanguage)}: ${widget.food.healthScore}',
-                      style: _getStyledText(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
+                    child: Container(
+                      width:
+                          MediaQuery.of(context).size.width *
+                          0.5, // ইমেজের অর্ধেক জায়গা
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 12,
-                  left: 12,
-                  child: Container(
-                    width:
-                        MediaQuery.of(context).size.width *
-                        0.5, // ইমেজের অর্ধেক জায়গা
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDarkMode
-                          ? Colors.black.withValues(alpha: 0.7)
-                          : Colors.white.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+                      decoration: BoxDecoration(
                         color: isDarkMode
-                            ? Colors.black.withValues(alpha: 0.2)
-                            : Colors.white.withValues(alpha: 0.2),
-                        width: 1,
+                            ? Colors.black.withValues(alpha: 0.7)
+                            : Colors.white.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDarkMode
+                              ? Colors.black.withValues(alpha: 0.2)
+                              : Colors.white.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      widget.food.name,
-                      style: _getStyledText(
-                        color: isDarkMode
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        widget.food.name,
+                        style: _getStyledText(
+                          color: isDarkMode
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -167,18 +151,23 @@ class _FoodDetailCardState extends State<FoodDetailCard> {
                 // Description
                 Builder(
                   builder: (_) {
-                    final isEmpty = widget.food.description.trim().isEmpty ||
+                    final isEmpty =
+                        widget.food.description.trim().isEmpty ||
                         widget.food.description == 'No description available';
                     final text = isEmpty
                         ? AppLocalizations.getString(
-                            'no_description_available', currentLanguage)
+                            'no_description_available',
+                            currentLanguage,
+                          )
                         : widget.food.description;
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           AppLocalizations.getString(
-                              'description', currentLanguage),
+                            'description',
+                            currentLanguage,
+                          ),
                           style: _getStyledText(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -208,10 +197,7 @@ class _FoodDetailCardState extends State<FoodDetailCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      AppLocalizations.getString(
-                        'nutrition',
-                        currentLanguage,
-                      ),
+                      AppLocalizations.getString('nutrition', currentLanguage),
                       style: _getStyledText(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

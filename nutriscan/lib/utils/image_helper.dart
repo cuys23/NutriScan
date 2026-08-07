@@ -33,27 +33,38 @@ class ImageHelper {
     }
   }
 
-  /// Creates appropriate DecorationImage based on image path type.
+  /// Renders [imagePath] as an [Image], falling back to [getPlaceholderWidget]
+  /// on any load failure (missing/deleted file, corrupt data, network error)
+  /// instead of rendering nothing. Uses `Image`'s own `errorBuilder`, unlike
+  /// `DecorationImage.onError` which has no way to swap in fallback content —
+  /// a failure there just silently paints nothing, indistinguishable from a
+  /// slow load. Logs the real exception so a failure is diagnosable instead
+  /// of a blank card with no trace.
+  ///
   /// [cacheWidth] caps the decoded bitmap size (device px) so a full-res
   /// camera photo isn't decoded into memory just to render a small card —
   /// default covers the largest current use (200dp-tall food card) at 2x.
-  static DecorationImage? getDecorationImage(
+  static Widget getImageWidget(
     String imagePath, {
+    double? width,
+    double? height,
     BoxFit fit = BoxFit.cover,
-    String? placeholderAsset,
     int cacheWidth = 400,
   }) {
     final imageProvider = getImageProvider(imagePath);
-    if (imageProvider == null) return null;
+    if (imageProvider == null) {
+      return getPlaceholderWidget(width: width, height: height);
+    }
 
-    return DecorationImage(
+    return Image(
       image: ResizeImage(imageProvider, width: cacheWidth),
+      width: width,
+      height: height,
       fit: fit,
-      onError: placeholderAsset != null
-          ? (exception, stackTrace) {
-              // Handle error by using placeholder
-            }
-          : null,
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('ImageHelper: failed to load "$imagePath": $error');
+        return getPlaceholderWidget(width: width, height: height);
+      },
     );
   }
 
