@@ -70,6 +70,14 @@ class FoodProvider with ChangeNotifier {
 
       await imageFile.copy(localPath);
 
+      if (!await File(localPath).exists()) {
+        debugPrint(
+          'Error copying image to local storage: copy reported success '
+          'but "$localPath" does not exist afterward',
+        );
+        return imageFile.path;
+      }
+
       return localPath;
     } catch (e) {
       debugPrint('Error copying image to local storage: $e');
@@ -157,6 +165,17 @@ class FoodProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      // Persist the picked photo to permanent local storage right away,
+      // before the AI call below (up to 30s). The picker's source file is a
+      // temp file with no lifetime guarantee across a slow network
+      // round-trip; copying it up front (instead of after the AI call, as
+      // this used to) removes that window entirely.
+      final String localId = DateTime.now().millisecondsSinceEpoch.toString();
+      final String localImagePath = await _copyImageToLocalStorage(
+        imageFile,
+        localId,
+      );
+
       Map<String, dynamic> analysisResult = await _groqService
           .analyzeFoodImage(imageFile, language: language)
           .timeout(const Duration(seconds: 30));
@@ -181,30 +200,16 @@ class FoodProvider with ChangeNotifier {
         try {
           firebaseImageUrl = await _storageService.uploadImage(
             imageFile,
-            analysisResult['id'] ??
-                DateTime.now().millisecondsSinceEpoch.toString(),
+            analysisResult['id'] ?? localId,
           );
         } catch (e) {
           debugPrint('Firebase image upload failed: $e');
         }
       }
 
-      String imagePath = '';
-      if (isPremiumUser && firebaseImageUrl != null) {
-        imagePath = firebaseImageUrl;
-      } else if (!isPremiumUser) {
-        imagePath = await _copyImageToLocalStorage(
-          imageFile,
-          analysisResult['id'] ??
-              DateTime.now().millisecondsSinceEpoch.toString(),
-        );
-      } else {
-        imagePath = await _copyImageToLocalStorage(
-          imageFile,
-          analysisResult['id'] ??
-              DateTime.now().millisecondsSinceEpoch.toString(),
-        );
-      }
+      final String imagePath = (isPremiumUser && firebaseImageUrl != null)
+          ? firebaseImageUrl
+          : localImagePath;
 
       Food newFood = Food.fromJson({
         ...analysisResult,
