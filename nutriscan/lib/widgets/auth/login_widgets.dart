@@ -26,7 +26,7 @@ class LoginWelcomeText extends StatelessWidget {
                   'welcome_to_nutriscan',
                   currentLanguage,
                 ).replaceAll(
-                  'NutriScan',
+                  'NutriSnap',
                   AppLocalizations.getString('nutriscan', currentLanguage),
                 ),
           ),

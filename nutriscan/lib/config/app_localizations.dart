@@ -124,11 +124,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Are you sure you want to delete all food data for today?',
       'hello': 'Hello, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Clear Today\'s Data',
       'app_info_tooltip': 'App Info',
       'app_information': 'App Information',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'An AI-powered nutrition analysis app that scans food images to provide detailed nutritional information.',
       'features': 'Features:',
@@ -358,7 +358,7 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': 'Welcome to NutriScan',
+      'welcome_to_nutriscan': 'Welcome to NutriSnap',
       'login_description':
           'Sign in with your Google account to enable cloud backup and sync your data across all devices.',
       'sign_in_with_google': 'Sign in with Google',
@@ -367,7 +367,7 @@ class AppLocalizations {
       'skip_for_now': 'Skip for now',
       'login_failed': 'Login failed. Please try again.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
 
       // Cloud Backup Screen
       'cloud_backup': 'Cloud Backup',
@@ -838,11 +838,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'আপনি কি নিশ্চিত যে আজকের সব খাদ্য ডেটা মুছতে চান?',
       'hello': 'হ্যালো, 👋',
-      'calorie_tracker': 'নিউট্রিস্ক্যান',
+      'calorie_tracker': 'নিউট্রিস্ন্যাপ',
       'clear_todays_data_tooltip': 'আজকের ডেটা মুছুন',
       'app_info_tooltip': 'অ্যাপ তথ্য',
       'app_information': 'অ্যাপ তথ্য',
-      'calorie_tracker_version': 'নিউট্রিস্ক্যান v2.1.2',
+      'calorie_tracker_version': 'নিউট্রিস্ন্যাপ v2.1.2',
       'app_description':
           'একটি AI-পাওয়ার্ড পুষ্টি বিশ্লেষণ অ্যাপ যা খাদ্যের ছবি স্ক্যান করে বিস্তারিত পুষ্টি তথ্য প্রদান করে।',
       'features': 'বৈশিষ্ট্য:',
@@ -956,7 +956,7 @@ class AppLocalizations {
       'splash_version': '২.১.২',
 
       // Login Screen
-      'welcome_to_nutriscan': 'নিউট্রিস্ক্যানে স্বাগতম',
+      'welcome_to_nutriscan': 'নিউট্রিস্ন্যাপে স্বাগতম',
       'login_description':
           'ক্লাউড ব্যাকআপ সক্রিয় করতে এবং আপনার সমস্ত ডিভাইস জুড়ে ডেটা সিঙ্ক করতে আপনার Google অ্যাকাউন্ট দিয়ে সাইন ইন করুন।',
       'sign_in_with_google': 'Google দিয়ে সাইন ইন করুন',
@@ -964,7 +964,7 @@ class AppLocalizations {
       'skip_for_now': 'এখনই এড়িয়ে যান',
       'login_failed': 'লগইন ব্যর্থ হয়েছে। দয়া করে আবার চেষ্টা করুন।',
       'google': 'গুগল',
-      'nutriscan': 'নিউট্রিস্ক্যান',
+      'nutriscan': 'নিউট্রিস্ন্যাপ',
 
       // Cloud Backup Screen
       'cloud_backup': 'ক্লাউড ব্যাকআপ',
@@ -1316,11 +1316,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'क्या आप निश्चित हैं कि आज के सभी खाद्य डेटा हटाना चाहते हैं?',
       'hello': 'नमस्ते, 👋',
-      'calorie_tracker': 'न्यूट्रिस्कैन',
+      'calorie_tracker': 'न्यूट्रिस्नैप',
       'clear_todays_data_tooltip': 'आज का डेटा साफ़ करें',
       'app_info_tooltip': 'ऐप की जानकारी',
       'app_information': 'ऐप की जानकारी',
-      'calorie_tracker_version': 'न्यूट्रिस्कैन v2.1.2',
+      'calorie_tracker_version': 'न्यूट्रिस्नैप v2.1.2',
       'app_description':
           'एक AI-पावर्ड पोषण विश्लेषण ऐप जो खाद्य छवियों को स्कैन करता है और विस्तृत पोषण जानकारी प्रदान करता है।',
       'features': 'विशेषताएं:',
@@ -1556,7 +1556,7 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': 'न्यूट्रिस्कैन में आपका स्वागत है',
+      'welcome_to_nutriscan': 'न्यूट्रिस्नैप में आपका स्वागत है',
       'login_description':
           'क्लाउड बैकअप सक्षम करने और अपने सभी डिवाइस पर डेटा सिंक करने के लिए अपने Google खाते से साइन इन करें।',
       'sign_in_with_google': 'Google के साथ साइन इन करें',
@@ -1564,7 +1564,7 @@ class AppLocalizations {
       'skip_for_now': 'अभी के लिए छोड़ें',
       'login_failed': 'लॉगिन असफल। कृपया पुनः प्रयास करें।',
       'google': 'गूगल',
-      'nutriscan': 'न्यूट्रिस्कैन',
+      'nutriscan': 'न्यूट्रिस्नैप',
 
       // Cloud Backup Screen
       'cloud_backup': 'क्लाउड बैकअप',
@@ -2043,11 +2043,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           '¿Estás seguro de que quieres borrar todos los datos de alimentos de hoy?',
       'hello': '¡Hola, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Borrar Datos de Hoy',
       'app_info_tooltip': 'Información de la App',
       'app_information': 'Información de la App',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Una app de seguimiento de calorías con IA que analiza imágenes de alimentos para proporcionar información nutricional.',
       'features': 'Características:',
@@ -2162,7 +2162,7 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': 'Bienvenido a NutriScan',
+      'welcome_to_nutriscan': 'Bienvenido a NutriSnap',
       'login_description':
           'Inicia sesión con tu cuenta de Google para habilitar la copia de seguridad en la nube y sincronizar tus datos en todos los dispositivos.',
       'sign_in_with_google': 'Iniciar sesión con Google',
@@ -2170,7 +2170,7 @@ class AppLocalizations {
       'skip_for_now': 'Omitir por ahora',
       'login_failed': 'Error al iniciar sesión. Por favor, inténtalo de nuevo.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
 
       // Cloud Backup Screen
       'cloud_backup': 'Copia de Seguridad en la Nube',
@@ -2526,11 +2526,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Êtes-vous sûr de vouloir effacer toutes les données alimentaires d\'aujourd\'hui ?',
       'hello': 'Bonjour, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Effacer les Données d\'Aujourd\'hui',
       'app_info_tooltip': 'Informations de l\'App',
       'app_information': 'Informations de l\'App',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Une app de suivi des calories alimentée par l\'IA qui analyse les images d\'aliments pour fournir des informations nutritionnelles.',
       'features': 'Fonctionnalités :',
@@ -2774,7 +2774,7 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': 'Bienvenue sur NutriScan',
+      'welcome_to_nutriscan': 'Bienvenue sur NutriSnap',
       'login_description':
           'Connectez-vous avec votre compte Google pour activer la sauvegarde cloud et synchroniser vos données sur tous vos appareils.',
       'sign_in_with_google': 'Se connecter avec Google',
@@ -2782,7 +2782,7 @@ class AppLocalizations {
       'skip_for_now': 'Ignorer pour l\'instant',
       'login_failed': 'Échec de la connexion. Veuillez réessayer.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
 
       // Cloud Backup Screen
       'cloud_backup': 'Sauvegarde Cloud',
@@ -3145,11 +3145,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Sind Sie sicher, dass Sie alle heutigen Lebensmitteldaten löschen möchten?',
       'hello': 'Hallo, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Heutige Daten löschen',
       'app_info_tooltip': 'App-Informationen',
       'app_information': 'App-Informationen',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Eine KI-gestützte Kalorienverfolgungs-App, die Lebensmittelbilder analysiert, um Ernährungsinformationen zu liefern.',
       'features': 'Funktionen:',
@@ -3393,7 +3393,7 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': 'Willkommen bei NutriScan',
+      'welcome_to_nutriscan': 'Willkommen bei NutriSnap',
       'login_description':
           'Melden Sie sich mit Ihrem Google-Konto an, um Cloud-Backup zu aktivieren und Ihre Daten auf allen Geräten zu synchronisieren.',
       'sign_in_with_google': 'Mit Google anmelden',
@@ -3402,7 +3402,7 @@ class AppLocalizations {
       'login_failed':
           'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
 
       // Cloud Backup Screen
       'cloud_backup': 'Cloud-Backup',
@@ -3757,11 +3757,11 @@ class AppLocalizations {
       'clear_todays_data': '清除今日数据',
       'clear_todays_data_description': '您确定要删除今天的所有食物数据吗？',
       'hello': '你好，👋',
-      'calorie_tracker': '营养扫描',
+      'calorie_tracker': '营养快拍',
       'clear_todays_data_tooltip': '清除今日数据',
       'app_info_tooltip': '应用信息',
       'app_information': '应用信息',
-      'calorie_tracker_version': '营养扫描 v2.1.2',
+      'calorie_tracker_version': '营养快拍 v2.1.2',
       'app_description': '一个AI驱动的营养分析应用，扫描食物图像以提供详细的营养信息。',
       'features': '功能：',
       'camera_gallery_support': '相机和相册图像支持',
@@ -3958,14 +3958,14 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': '欢迎使用NutriScan',
+      'welcome_to_nutriscan': '欢迎使用NutriSnap',
       'login_description': '使用您的Google账户登录以启用云备份并在所有设备上同步您的数据。',
       'sign_in_with_google': '使用Google登录',
       'signing_in': '正在登录...',
       'skip_for_now': '暂时跳过',
       'login_failed': '登录失败。请重试。',
       'google': '谷歌',
-      'nutriscan': '营养扫描',
+      'nutriscan': '营养快拍',
 
       // Cloud Backup Screen
       'cloud_backup': '云备份',
@@ -4285,11 +4285,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Bugüne ait tüm yiyecek verilerini silmek istediğinizden emin misiniz?',
       'hello': 'Merhaba, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Bugünün Verilerini Temizle',
       'app_info_tooltip': 'Uygulama Bilgisi',
       'app_information': 'Uygulama Bilgisi',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Detaylı beslenme bilgisi sağlamak için yiyecek görüntülerini tarayan yapay zeka destekli beslenme analiz uygulaması.',
       'features': 'Özellikler:',
@@ -4522,7 +4522,7 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': 'NutriScan\'e Hoş Geldiniz',
+      'welcome_to_nutriscan': 'NutriSnap\'e Hoş Geldiniz',
       'login_description':
           'Bulut yedeklemeyi etkinleştirmek ve verilerinizi tüm cihazlarınızda senkronize etmek için Google hesabınızla oturum açın.',
       'sign_in_with_google': 'Google ile Oturum Aç',
@@ -4530,7 +4530,7 @@ class AppLocalizations {
       'skip_for_now': 'Şimdilik atla',
       'login_failed': 'Giriş başarısız. Lütfen tekrar deneyin.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
 
       // Cloud Backup Screen
       'cloud_backup': 'Bulut Yedekleme',
@@ -4861,11 +4861,11 @@ class AppLocalizations {
       'clear_todays_data': '오늘 데이터 지우기',
       'clear_todays_data_description': '오늘의 모든 음식 데이터를 삭제하시겠습니까?',
       'hello': '안녕하세요, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': '오늘 데이터 지우기',
       'app_info_tooltip': '앱 정보',
       'app_information': '앱 정보',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description': '음식 이미지를 스캔하여 상세한 영양 정보를 제공하는 AI 기반 영양 분석 앱입니다.',
       'features': '기능:',
       'camera_gallery_support': '카메라 및 갤러리 이미지 지원',
@@ -5061,7 +5061,7 @@ class AppLocalizations {
       'preparing_app': '앱 준비 중...',
       'powered_by_groq_ai': 'Groq AI 제공',
       'splash_version': 'v2.1.2',
-      'welcome_to_nutriscan': 'NutriScan에 오신 것을 환영합니다',
+      'welcome_to_nutriscan': 'NutriSnap에 오신 것을 환영합니다',
       'login_description':
           'Google 계정으로 로그인하여 클라우드 백업을 활성화하고 모든 기기에서 데이터를 동기화하세요.',
       'sign_in_with_google': 'Google로 로그인',
@@ -5069,7 +5069,7 @@ class AppLocalizations {
       'skip_for_now': '나중에 하기',
       'login_failed': '로그인 실패. 다시 시도하세요.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
       'cloud_backup': '클라우드 백업',
       'signed_in': '로그인됨',
       'not_signed_in': '로그인되지 않음',
@@ -5368,11 +5368,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Apakah Anda yakin ingin menghapus semua data makanan untuk hari ini?',
       'hello': 'Halo, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Hapus Data Hari Ini',
       'app_info_tooltip': 'Info Aplikasi',
       'app_information': 'Informasi Aplikasi',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Aplikasi analisis nutrisi berbasis AI yang memindai gambar makanan untuk memberikan informasi nutrisi terperinci.',
       'features': 'Fitur:',
@@ -5597,7 +5597,7 @@ class AppLocalizations {
       'preparing_app': 'Menyiapkan aplikasi Anda...',
       'powered_by_groq_ai': 'Didukung oleh Groq AI',
       'splash_version': 'v2.1.2',
-      'welcome_to_nutriscan': 'Selamat Datang di NutriScan',
+      'welcome_to_nutriscan': 'Selamat Datang di NutriSnap',
       'login_description':
           'Masuk dengan akun Google Anda untuk mengaktifkan cadangan cloud dan menyinkronkan data Anda di semua perangkat.',
       'sign_in_with_google': 'Masuk dengan Google',
@@ -5605,7 +5605,7 @@ class AppLocalizations {
       'skip_for_now': 'Lewati untuk saat ini',
       'login_failed': 'Masuk gagal. Silakan coba lagi.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
       'cloud_backup': 'Cadangan Cloud',
       'signed_in': 'Masuk',
       'not_signed_in': 'Belum Masuk',
@@ -5926,11 +5926,11 @@ class AppLocalizations {
       'clear_todays_data': '今日のデータを消去',
       'clear_todays_data_description': '今日のすべての食品データを削除してもよろしいですか？',
       'hello': 'こんにちは、👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': '今日のデータを消去',
       'app_info_tooltip': 'アプリ情報',
       'app_information': 'アプリ情報',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description': '食品画像をスキャンして詳細な栄養情報を提供するAI搭載の栄養分析アプリ。',
       'features': '機能:',
       'camera_gallery_support': 'カメラとギャラリー画像のサポート',
@@ -6123,7 +6123,7 @@ class AppLocalizations {
       'preparing_app': 'アプリを準備中...',
       'powered_by_groq_ai': 'Groq AI 提供',
       'splash_version': 'v2.1.2',
-      'welcome_to_nutriscan': 'NutriScanへようこそ',
+      'welcome_to_nutriscan': 'NutriSnapへようこそ',
       'login_description':
           'Googleアカウントでサインインして、クラウドバックアップを有効にし、すべてのデバイスでデータを同期します。',
       'sign_in_with_google': 'Googleでサインイン',
@@ -6131,7 +6131,7 @@ class AppLocalizations {
       'skip_for_now': '今はスキップ',
       'login_failed': 'ログインに失敗しました。もう一度お試しください。',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
       'cloud_backup': 'クラウドバックアップ',
       'signed_in': 'サインイン済み',
       'not_signed_in': 'サインインしていません',
@@ -6430,11 +6430,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Вы уверены, что хотите удалить все данные о еде за сегодня?',
       'hello': 'Привет, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Очистить данные за сегодня',
       'app_info_tooltip': 'Информация о приложении',
       'app_information': 'Информация о приложении',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Приложение для анализа питания на основе ИИ, которое сканирует изображения еды для предоставления подробной информации о питании.',
       'features': 'Функции:',
@@ -6659,7 +6659,7 @@ class AppLocalizations {
       'preparing_app': 'Подготовка приложения...',
       'powered_by_groq_ai': 'На базе Groq AI',
       'splash_version': 'v2.1.2',
-      'welcome_to_nutriscan': 'Добро пожаловать в NutriScan',
+      'welcome_to_nutriscan': 'Добро пожаловать в NutriSnap',
       'login_description':
           'Войдите с помощью аккаунта Google, чтобы включить облачное резервное копирование и синхронизировать данные на всех устройствах.',
       'sign_in_with_google': 'Войти через Google',
@@ -6667,7 +6667,7 @@ class AppLocalizations {
       'skip_for_now': 'Пропустить',
       'login_failed': 'Вход не выполнен. Попробуйте еще раз.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
       'cloud_backup': 'Облачное резервное копирование',
       'signed_in': 'Вход выполнен',
       'not_signed_in': 'Не выполнен вход',
@@ -6995,11 +6995,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'کیا آپ واقعی آج کا تمام کھانے کا ڈیٹا حذف کرنا چاہتے ہیں؟',
       'hello': 'ہیلو، 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'آج کا ڈیٹا صاف کریں',
       'app_info_tooltip': 'ایپ کی معلومات',
       'app_information': 'ایپ کی معلومات',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'AI سے چلنے والی غذائیت کی تجزیہ ایپ جو تفصیلی غذائی معلومات فراہم کرنے کے لیے کھانے کی تصاویر اسکین کرتی ہے۔',
       'features': 'خصوصیات:',
@@ -7221,7 +7221,7 @@ class AppLocalizations {
       'preparing_app': 'آپ کی ایپ تیار کی جا رہی ہے...',
       'powered_by_groq_ai': 'Groq AI کے ذریعہ',
       'splash_version': 'v2.1.2',
-      'welcome_to_nutriscan': 'NutriScan میں خوش آمدید',
+      'welcome_to_nutriscan': 'NutriSnap میں خوش آمدید',
       'login_description':
           'کلاؤڈ بیک اپ کو فعال کرنے اور تمام آلات پر اپنے ڈیٹا کو مطابقت پذیر بنانے کے لیے اپنے گوگل اکاؤنٹ کے ساتھ سائن ان کریں۔',
       'sign_in_with_google': 'گوگل کے ساتھ سائن ان کریں',
@@ -7229,7 +7229,7 @@ class AppLocalizations {
       'skip_for_now': 'ابھی چھوڑیں',
       'login_failed': 'لاگ ان ناکام ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔',
       'google': 'گوگل',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
       'cloud_backup': 'کلاؤڈ بیک اپ',
       'signed_in': 'سائن ان ہو گیا',
       'not_signed_in': 'سائن ان نہیں',
@@ -7551,11 +7551,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Tem certeza de que deseja excluir todos os dados de alimentos de hoje?',
       'hello': 'Olá, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Limpar Dados de Hoje',
       'app_info_tooltip': 'Informações do Aplicativo',
       'app_information': 'Informações do Aplicativo',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Um aplicativo de análise nutricional com IA que escaneia imagens de alimentos para fornecer informações nutricionais detalhadas.',
       'features': 'Recursos:',
@@ -7780,7 +7780,7 @@ class AppLocalizations {
       'preparing_app': 'Preparando seu aplicativo...',
       'powered_by_groq_ai': 'Desenvolvido por Groq AI',
       'splash_version': 'v2.1.2',
-      'welcome_to_nutriscan': 'Bem-vindo ao NutriScan',
+      'welcome_to_nutriscan': 'Bem-vindo ao NutriSnap',
       'login_description':
           'Faça login com sua conta do Google para habilitar o backup na nuvem e sincronizar seus dados em todos os dispositivos.',
       'sign_in_with_google': 'Entrar com o Google',
@@ -7788,7 +7788,7 @@ class AppLocalizations {
       'skip_for_now': 'Pular por agora',
       'login_failed': 'Falha no login. Por favor, tente novamente.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
       'cloud_backup': 'Backup na Nuvem',
       'signed_in': 'Conectado',
       'not_signed_in': 'Não Conectado',
@@ -8116,11 +8116,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'Tem certeza de que deseja excluir todos os dados de alimentos de hoje?',
       'hello': 'Olá, 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'Limpar Dados de Hoje',
       'app_info_tooltip': 'Informações do Aplicativo',
       'app_information': 'Informações do Aplicativo',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'Um aplicativo de análise nutricional com IA que escaneia imagens de alimentos para fornecer informações nutricionais detalhadas.',
       'features': 'Recursos:',
@@ -8345,7 +8345,7 @@ class AppLocalizations {
       'preparing_app': 'Preparando seu aplicativo...',
       'powered_by_groq_ai': 'Desenvolvido por Groq AI',
       'splash_version': 'v2.1.2',
-      'welcome_to_nutriscan': 'Bem-vindo ao NutriScan',
+      'welcome_to_nutriscan': 'Bem-vindo ao NutriSnap',
       'login_description':
           'Faça login com sua conta do Google para habilitar o backup na nuvem e sincronizar seus dados em todos os dispositivos.',
       'sign_in_with_google': 'Entrar com o Google',
@@ -8353,7 +8353,7 @@ class AppLocalizations {
       'skip_for_now': 'Pular por agora',
       'login_failed': 'Falha no login. Por favor, tente novamente.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
       'cloud_backup': 'Backup na Nuvem',
       'signed_in': 'Conectado',
       'not_signed_in': 'Não Conectado',
@@ -8689,11 +8689,11 @@ class AppLocalizations {
       'clear_todays_data_description':
           'هل أنت متأكد أنك تريد حذف جميع بيانات الطعام لليوم؟',
       'hello': 'مرحباً، 👋',
-      'calorie_tracker': 'NutriScan',
+      'calorie_tracker': 'NutriSnap',
       'clear_todays_data_tooltip': 'مسح بيانات اليوم',
       'app_info_tooltip': 'معلومات التطبيق',
       'app_information': 'معلومات التطبيق',
-      'calorie_tracker_version': 'NutriScan v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v2.1.2',
       'app_description':
           'تطبيق تحليل تغذية مدعوم بالذكاء الاصطناعي يمسح صور الطعام لتوفير معلومات غذائية مفصلة.',
       'features': 'الميزات:',
@@ -8921,7 +8921,7 @@ class AppLocalizations {
       'splash_version': 'v2.1.2',
 
       // Login Screen
-      'welcome_to_nutriscan': 'مرحباً بك في NutriScan',
+      'welcome_to_nutriscan': 'مرحباً بك في NutriSnap',
       'login_description':
           'قم بتسجيل الدخول بحساب Google الخاص بك لتمكين النسخ الاحتياطي السحابي ومزامنة بياناتك عبر جميع الأجهزة.',
       'sign_in_with_google': 'تسجيل الدخول باستخدام Google',
@@ -8929,7 +8929,7 @@ class AppLocalizations {
       'skip_for_now': 'تخطي الآن',
       'login_failed': 'فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.',
       'google': 'Google',
-      'nutriscan': 'NutriScan',
+      'nutriscan': 'NutriSnap',
 
       // Cloud Backup Screen
       'cloud_backup': 'النسخ الاحتياطي السحابي',
