@@ -23,6 +23,26 @@ class FCMService {
   String? _fcmToken;
   String? get fcmToken => _fcmToken;
 
+  // iOS only: whether an APNS token was obtained. When false, every topic
+  // (un)subscribe call would fail the same way (`apns-token-not-set`) —
+  // checked once and memoized instead of per-call, so a device without
+  // push entitlement (or a user who denied the permission) doesn't pay
+  // for ~20 sequential failing plugin calls + Crashlytics reports at
+  // startup. main.dart fires initializeNotifications() and the topic
+  // subscribe calls without awaiting each other, so this must be safe to
+  // call concurrently from all of them — memoizing the in-flight Future
+  // (not just the resolved bool) is what makes that safe.
+  Future<bool>? _pushAvailabilityCheck;
+
+  Future<bool> _isPushAvailable() {
+    if (!Platform.isIOS) return Future.value(true);
+    return _pushAvailabilityCheck ??= _messaging.getAPNSToken().then((token) async {
+      if (token != null) return true;
+      await Future.delayed(const Duration(seconds: 3));
+      return (await _messaging.getAPNSToken()) != null;
+    });
+  }
+
   final StreamController<RemoteMessage> _messageController =
       StreamController<RemoteMessage>.broadcast();
   Stream<RemoteMessage> get messageStream => _messageController.stream;
@@ -108,12 +128,7 @@ class FCMService {
 
   Future<void> _getFCMToken() async {
     try {
-      if (Platform.isIOS) {
-        final apnsToken = await _messaging.getAPNSToken();
-        if (apnsToken == null) {
-          await Future.delayed(const Duration(seconds: 3));
-        }
-      }
+      if (!await _isPushAvailable()) return;
 
       _fcmToken = await _messaging.getToken();
 
@@ -139,6 +154,7 @@ class FCMService {
   }
 
   void _onTokenRefresh(String token) async {
+    _pushAvailabilityCheck = Future.value(true);
     _fcmToken = token;
 
     // Save new token
@@ -302,6 +318,7 @@ class FCMService {
   }
 
   Future<void> subscribeToTopic(String topic) async {
+    if (!await _isPushAvailable()) return;
     try {
       await _messaging.subscribeToTopic(topic);
     } catch (e, stack) {
@@ -310,6 +327,7 @@ class FCMService {
   }
 
   Future<void> unsubscribeFromTopic(String topic) async {
+    if (!await _isPushAvailable()) return;
     try {
       await _messaging.unsubscribeFromTopic(topic);
     } catch (e, stack) {

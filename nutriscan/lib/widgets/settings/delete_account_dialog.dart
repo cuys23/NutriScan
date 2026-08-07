@@ -74,7 +74,13 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
       _isDeleting = false;
       _errorMessage = result.status == AccountDeletionStatus.requiresRecentLogin
           ? _t('delete_account_requires_login')
-          : _t('delete_account_failed');
+          // Append the underlying error code/message so a failure is
+          // diagnosable from a release/TestFlight build, where there's no
+          // console to read debugPrint from — the generic copy alone
+          // ("check your connection") hides real causes like a Firestore
+          // permission-denied or App Check rejection behind a network-sounding
+          // message that isn't actually about the network.
+          : '${_t('delete_account_failed')}\n(${result.message ?? 'unknown'})';
     });
   }
 
