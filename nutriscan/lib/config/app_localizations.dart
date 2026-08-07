@@ -46,7 +46,7 @@ class AppLocalizations {
       'terms_of_service': 'Terms of Service',
       'terms_of_service_subtitle': 'Read our terms and conditions',
       'app_version': 'App Version',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
 
       // App Version Screen
       'version': 'Version',
@@ -128,7 +128,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Clear Today\'s Data',
       'app_info_tooltip': 'App Info',
       'app_information': 'App Information',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'An AI-powered nutrition analysis app that scans food images to provide detailed nutritional information.',
       'features': 'Features:',
@@ -355,7 +355,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'Powered by Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': 'Welcome to NutriSnap',
@@ -643,7 +643,7 @@ class AppLocalizations {
       'terms_of_service': 'সেবার শর্তাবলী',
       'terms_of_service_subtitle': 'আমাদের শর্তাবলী পড়ুন',
       'app_version': 'অ্যাপ সংস্করণ',
-      'app_version_subtitle': '২.১.২',
+      'app_version_subtitle': '১.০.০',
 
       // App Version Screen
       'version': 'সংস্করণ',
@@ -842,7 +842,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'আজকের ডেটা মুছুন',
       'app_info_tooltip': 'অ্যাপ তথ্য',
       'app_information': 'অ্যাপ তথ্য',
-      'calorie_tracker_version': 'নিউট্রিস্ন্যাপ v2.1.2',
+      'calorie_tracker_version': 'নিউট্রিস্ন্যাপ v1.0.0',
       'app_description':
           'একটি AI-পাওয়ার্ড পুষ্টি বিশ্লেষণ অ্যাপ যা খাদ্যের ছবি স্ক্যান করে বিস্তারিত পুষ্টি তথ্য প্রদান করে।',
       'features': 'বৈশিষ্ট্য:',
@@ -953,7 +953,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'Groq AI দ্বারা চালিত',
-      'splash_version': '২.১.২',
+      'splash_version': '১.০.০',
 
       // Login Screen
       'welcome_to_nutriscan': 'নিউট্রিস্ন্যাপে স্বাগতম',
@@ -1243,7 +1243,7 @@ class AppLocalizations {
       'terms_of_service': 'सेवा की शर्तें',
       'terms_of_service_subtitle': 'हमारी शर्तें पढ़ें',
       'app_version': 'ऐप संस्करण',
-      'app_version_subtitle': '२.१.२',
+      'app_version_subtitle': '१.०.०',
 
       // App Version Screen
       'version': 'संस्करण',
@@ -1320,7 +1320,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'आज का डेटा साफ़ करें',
       'app_info_tooltip': 'ऐप की जानकारी',
       'app_information': 'ऐप की जानकारी',
-      'calorie_tracker_version': 'न्यूट्रिस्नैप v2.1.2',
+      'calorie_tracker_version': 'न्यूट्रिस्नैप v1.0.0',
       'app_description':
           'एक AI-पावर्ड पोषण विश्लेषण ऐप जो खाद्य छवियों को स्कैन करता है और विस्तृत पोषण जानकारी प्रदान करता है।',
       'features': 'विशेषताएं:',
@@ -1553,7 +1553,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'Groq AI द्वारा संचालित',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': 'न्यूट्रिस्नैप में आपका स्वागत है',
@@ -1970,7 +1970,7 @@ class AppLocalizations {
       'terms_of_service': 'Términos de Servicio',
       'terms_of_service_subtitle': 'Lee nuestros términos',
       'app_version': 'Versión de la App',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
 
       // App Version Screen
       'version': 'Versión',
@@ -2047,7 +2047,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Borrar Datos de Hoy',
       'app_info_tooltip': 'Información de la App',
       'app_information': 'Información de la App',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Una app de seguimiento de calorías con IA que analiza imágenes de alimentos para proporcionar información nutricional.',
       'features': 'Características:',
@@ -2159,7 +2159,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'Desarrollado por Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': 'Bienvenido a NutriSnap',
@@ -2452,7 +2452,7 @@ class AppLocalizations {
       'terms_of_service': 'Conditions de Service',
       'terms_of_service_subtitle': 'Lisez nos conditions',
       'app_version': 'Version de l\'App',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
 
       // App Version Screen
       'version': 'Version',
@@ -2530,7 +2530,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Effacer les Données d\'Aujourd\'hui',
       'app_info_tooltip': 'Informations de l\'App',
       'app_information': 'Informations de l\'App',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Une app de suivi des calories alimentée par l\'IA qui analyse les images d\'aliments pour fournir des informations nutritionnelles.',
       'features': 'Fonctionnalités :',
@@ -2771,7 +2771,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'Propulsé par Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': 'Bienvenue sur NutriSnap',
@@ -3071,7 +3071,7 @@ class AppLocalizations {
       'terms_of_service': 'Nutzungsbedingungen',
       'terms_of_service_subtitle': 'Lesen Sie unsere Bedingungen',
       'app_version': 'App-Version',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
 
       // App Version Screen
       'version': 'Version',
@@ -3149,7 +3149,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Heutige Daten löschen',
       'app_info_tooltip': 'App-Informationen',
       'app_information': 'App-Informationen',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Eine KI-gestützte Kalorienverfolgungs-App, die Lebensmittelbilder analysiert, um Ernährungsinformationen zu liefern.',
       'features': 'Funktionen:',
@@ -3390,7 +3390,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'Unterstützt von Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': 'Willkommen bei NutriSnap',
@@ -3688,7 +3688,7 @@ class AppLocalizations {
       'terms_of_service': '服务条款',
       'terms_of_service_subtitle': '阅读我们的条款',
       'app_version': '应用版本',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
 
       // App Version Screen
       'version': '版本',
@@ -3761,7 +3761,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': '清除今日数据',
       'app_info_tooltip': '应用信息',
       'app_information': '应用信息',
-      'calorie_tracker_version': '营养快拍 v2.1.2',
+      'calorie_tracker_version': '营养快拍 v1.0.0',
       'app_description': '一个AI驱动的营养分析应用，扫描食物图像以提供详细的营养信息。',
       'features': '功能：',
       'camera_gallery_support': '相机和相册图像支持',
@@ -3955,7 +3955,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': '由 Groq AI 提供支持',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': '欢迎使用NutriSnap',
@@ -4212,7 +4212,7 @@ class AppLocalizations {
       'terms_of_service': 'Hizmet Şartları',
       'terms_of_service_subtitle': 'Şartlar ve koşullarımızı okuyun',
       'app_version': 'Uygulama Sürümü',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
 
       // App Version Screen
       'version': 'Sürüm',
@@ -4289,7 +4289,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Bugünün Verilerini Temizle',
       'app_info_tooltip': 'Uygulama Bilgisi',
       'app_information': 'Uygulama Bilgisi',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Detaylı beslenme bilgisi sağlamak için yiyecek görüntülerini tarayan yapay zeka destekli beslenme analiz uygulaması.',
       'features': 'Özellikler:',
@@ -4519,7 +4519,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'Groq AI tarafından desteklenmektedir',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': 'NutriSnap\'e Hoş Geldiniz',
@@ -4802,7 +4802,7 @@ class AppLocalizations {
       'terms_of_service': '서비스 약관',
       'terms_of_service_subtitle': '이용 약관 읽기',
       'app_version': '앱 버전',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
       'version': '버전',
       'build_number': '빌드 번호',
       'developer': '개발자',
@@ -4865,7 +4865,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': '오늘 데이터 지우기',
       'app_info_tooltip': '앱 정보',
       'app_information': '앱 정보',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description': '음식 이미지를 스캔하여 상세한 영양 정보를 제공하는 AI 기반 영양 분석 앱입니다.',
       'features': '기능:',
       'camera_gallery_support': '카메라 및 갤러리 이미지 지원',
@@ -5060,7 +5060,7 @@ class AppLocalizations {
       'track_nutrition_journey': '영양 여정을 추적하세요',
       'preparing_app': '앱 준비 중...',
       'powered_by_groq_ai': 'Groq AI 제공',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
       'welcome_to_nutriscan': 'NutriSnap에 오신 것을 환영합니다',
       'login_description':
           'Google 계정으로 로그인하여 클라우드 백업을 활성화하고 모든 기기에서 데이터를 동기화하세요.',
@@ -5305,7 +5305,7 @@ class AppLocalizations {
       'terms_of_service': 'Ketentuan Layanan',
       'terms_of_service_subtitle': 'Baca syarat dan ketentuan kami',
       'app_version': 'Versi Aplikasi',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
       'version': 'Versi',
       'build_number': 'Nomor Build',
       'developer': 'Pengembang',
@@ -5372,7 +5372,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Hapus Data Hari Ini',
       'app_info_tooltip': 'Info Aplikasi',
       'app_information': 'Informasi Aplikasi',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Aplikasi analisis nutrisi berbasis AI yang memindai gambar makanan untuk memberikan informasi nutrisi terperinci.',
       'features': 'Fitur:',
@@ -5596,7 +5596,7 @@ class AppLocalizations {
       'track_nutrition_journey': 'Lacak perjalanan nutrisi Anda',
       'preparing_app': 'Menyiapkan aplikasi Anda...',
       'powered_by_groq_ai': 'Didukung oleh Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
       'welcome_to_nutriscan': 'Selamat Datang di NutriSnap',
       'login_description':
           'Masuk dengan akun Google Anda untuk mengaktifkan cadangan cloud dan menyinkronkan data Anda di semua perangkat.',
@@ -5867,7 +5867,7 @@ class AppLocalizations {
       'terms_of_service': '利用規約',
       'terms_of_service_subtitle': '利用規約を読む',
       'app_version': 'アプリバージョン',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
       'version': 'バージョン',
       'build_number': 'ビルド番号',
       'developer': '開発者',
@@ -5930,7 +5930,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': '今日のデータを消去',
       'app_info_tooltip': 'アプリ情報',
       'app_information': 'アプリ情報',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description': '食品画像をスキャンして詳細な栄養情報を提供するAI搭載の栄養分析アプリ。',
       'features': '機能:',
       'camera_gallery_support': 'カメラとギャラリー画像のサポート',
@@ -6122,7 +6122,7 @@ class AppLocalizations {
       'track_nutrition_journey': '栄養の旅を追跡',
       'preparing_app': 'アプリを準備中...',
       'powered_by_groq_ai': 'Groq AI 提供',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
       'welcome_to_nutriscan': 'NutriSnapへようこそ',
       'login_description':
           'Googleアカウントでサインインして、クラウドバックアップを有効にし、すべてのデバイスでデータを同期します。',
@@ -6367,7 +6367,7 @@ class AppLocalizations {
       'terms_of_service': 'Условия использования',
       'terms_of_service_subtitle': 'Прочитать условия использования',
       'app_version': 'Версия приложения',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
       'version': 'Версия',
       'build_number': 'Номер сборки',
       'developer': 'Разработчик',
@@ -6434,7 +6434,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Очистить данные за сегодня',
       'app_info_tooltip': 'Информация о приложении',
       'app_information': 'Информация о приложении',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Приложение для анализа питания на основе ИИ, которое сканирует изображения еды для предоставления подробной информации о питании.',
       'features': 'Функции:',
@@ -6658,7 +6658,7 @@ class AppLocalizations {
       'track_nutrition_journey': 'Отслеживайте свой путь питания',
       'preparing_app': 'Подготовка приложения...',
       'powered_by_groq_ai': 'На базе Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
       'welcome_to_nutriscan': 'Добро пожаловать в NutriSnap',
       'login_description':
           'Войдите с помощью аккаунта Google, чтобы включить облачное резервное копирование и синхронизировать данные на всех устройствах.',
@@ -6931,7 +6931,7 @@ class AppLocalizations {
       'terms_of_service': 'سروس کی شرائط',
       'terms_of_service_subtitle': 'ہماری شرائط و ضوابط پڑھیں',
       'app_version': 'ایپ ورژن',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
       'version': 'ورژن',
       'build_number': 'بلڈ نمبر',
       'developer': 'ڈویلپر',
@@ -6999,7 +6999,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'آج کا ڈیٹا صاف کریں',
       'app_info_tooltip': 'ایپ کی معلومات',
       'app_information': 'ایپ کی معلومات',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'AI سے چلنے والی غذائیت کی تجزیہ ایپ جو تفصیلی غذائی معلومات فراہم کرنے کے لیے کھانے کی تصاویر اسکین کرتی ہے۔',
       'features': 'خصوصیات:',
@@ -7220,7 +7220,7 @@ class AppLocalizations {
       'track_nutrition_journey': 'اپنے غذائیت کے سفر کو ٹریک کریں',
       'preparing_app': 'آپ کی ایپ تیار کی جا رہی ہے...',
       'powered_by_groq_ai': 'Groq AI کے ذریعہ',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
       'welcome_to_nutriscan': 'NutriSnap میں خوش آمدید',
       'login_description':
           'کلاؤڈ بیک اپ کو فعال کرنے اور تمام آلات پر اپنے ڈیٹا کو مطابقت پذیر بنانے کے لیے اپنے گوگل اکاؤنٹ کے ساتھ سائن ان کریں۔',
@@ -7488,7 +7488,7 @@ class AppLocalizations {
       'terms_of_service': 'Termos de Serviço',
       'terms_of_service_subtitle': 'Leia nossos termos e condições',
       'app_version': 'Versão do Aplicativo',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
       'version': 'Versão',
       'build_number': 'Número da Compilação',
       'developer': 'Desenvolvedor',
@@ -7555,7 +7555,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Limpar Dados de Hoje',
       'app_info_tooltip': 'Informações do Aplicativo',
       'app_information': 'Informações do Aplicativo',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Um aplicativo de análise nutricional com IA que escaneia imagens de alimentos para fornecer informações nutricionais detalhadas.',
       'features': 'Recursos:',
@@ -7779,7 +7779,7 @@ class AppLocalizations {
       'track_nutrition_journey': 'Acompanhe sua jornada nutricional',
       'preparing_app': 'Preparando seu aplicativo...',
       'powered_by_groq_ai': 'Desenvolvido por Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
       'welcome_to_nutriscan': 'Bem-vindo ao NutriSnap',
       'login_description':
           'Faça login com sua conta do Google para habilitar o backup na nuvem e sincronizar seus dados em todos os dispositivos.',
@@ -8053,7 +8053,7 @@ class AppLocalizations {
       'terms_of_service': 'Termos de Serviço',
       'terms_of_service_subtitle': 'Leia nossos termos e condições',
       'app_version': 'Versão do Aplicativo',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
       'version': 'Versão',
       'build_number': 'Número da Compilação',
       'developer': 'Desenvolvedor',
@@ -8120,7 +8120,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'Limpar Dados de Hoje',
       'app_info_tooltip': 'Informações do Aplicativo',
       'app_information': 'Informações do Aplicativo',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'Um aplicativo de análise nutricional com IA que escaneia imagens de alimentos para fornecer informações nutricionais detalhadas.',
       'features': 'Recursos:',
@@ -8344,7 +8344,7 @@ class AppLocalizations {
       'track_nutrition_journey': 'Acompanhe sua jornada nutricional',
       'preparing_app': 'Preparando seu aplicativo...',
       'powered_by_groq_ai': 'Desenvolvido por Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
       'welcome_to_nutriscan': 'Bem-vindo ao NutriSnap',
       'login_description':
           'Faça login com sua conta do Google para habilitar o backup na nuvem e sincronizar seus dados em todos os dispositivos.',
@@ -8618,7 +8618,7 @@ class AppLocalizations {
       'terms_of_service': 'شروط الخدمة',
       'terms_of_service_subtitle': 'اقرأ الشروط والأحكام الخاصة بنا',
       'app_version': 'إصدار التطبيق',
-      'app_version_subtitle': '2.1.2',
+      'app_version_subtitle': '1.0.0',
 
       // App Version Screen
       'version': 'الإصدار',
@@ -8693,7 +8693,7 @@ class AppLocalizations {
       'clear_todays_data_tooltip': 'مسح بيانات اليوم',
       'app_info_tooltip': 'معلومات التطبيق',
       'app_information': 'معلومات التطبيق',
-      'calorie_tracker_version': 'NutriSnap v2.1.2',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
       'app_description':
           'تطبيق تحليل تغذية مدعوم بالذكاء الاصطناعي يمسح صور الطعام لتوفير معلومات غذائية مفصلة.',
       'features': 'الميزات:',
@@ -8918,7 +8918,7 @@ class AppLocalizations {
 
       // Splash Screen
       'powered_by_groq_ai': 'مدعوم من Groq AI',
-      'splash_version': 'v2.1.2',
+      'splash_version': 'v1.0.0',
 
       // Login Screen
       'welcome_to_nutriscan': 'مرحباً بك في NutriSnap',
