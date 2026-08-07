@@ -1,6 +1,6 @@
 {
   "name": "functions",
-  "description": "NutriScan Cloud Functions — Groq AI proxy and IAP receipt verification",
+  "description": "NutriSnap Cloud Functions — Groq AI proxy and IAP receipt verification",
   "engines": {
     "node": "20"
   },
