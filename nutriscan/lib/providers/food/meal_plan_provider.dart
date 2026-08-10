@@ -25,6 +25,7 @@ class MealPlanProvider extends ChangeNotifier {
   final DatabaseHelper _databaseHelper;
 
   MealPlan? _currentPlan;
+  MealPlan? _activePlan; // Loaded from local DB — shown on home screen.
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -36,6 +37,7 @@ class MealPlanProvider extends ChangeNotifier {
   UserNutritionInsight? _lastInsight;
 
   MealPlan? get currentPlan => _currentPlan;
+  MealPlan? get activePlan => _activePlan;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   UserNutritionInsight? get lastInsight => _lastInsight;
@@ -44,6 +46,39 @@ class MealPlanProvider extends ChangeNotifier {
   String get dietStyle => _dietStyle;
   int get mealsPerDay => _mealsPerDay;
   List<String> get restrictions => List.unmodifiable(_restrictions);
+
+  /// Load the most recent active meal plan from the local database.
+  /// Call once at app startup (e.g. from HomeScreen._initializeData).
+  Future<void> loadActiveMealPlan() async {
+    try {
+      _activePlan = await _databaseHelper.getActiveMealPlan();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to load active meal plan: $e');
+    }
+  }
+
+  /// Copies the persisted active plan into [currentPlan] so
+  /// MealPlanResultScreen (which reads currentPlan) can display it.
+  /// Call before navigating to the result screen from the home card.
+  void showActivePlan() {
+    if (_activePlan != null) {
+      _currentPlan = _activePlan;
+      _errorMessage = null;
+      notifyListeners();
+    }
+  }
+
+  /// Dismiss the active meal plan from the home screen.
+  Future<void> dismissMealPlan() async {
+    _activePlan = null;
+    notifyListeners();
+    try {
+      await _databaseHelper.deactivateActiveMealPlan();
+    } catch (e) {
+      debugPrint('Failed to deactivate meal plan: $e');
+    }
+  }
 
   void setCalorieTarget(double value) {
     _calorieTarget = value.clamp(1200, 3500);
@@ -209,7 +244,20 @@ class MealPlanProvider extends ChangeNotifier {
       );
 
       _currentPlan = result;
+      _activePlan = result;
       _errorMessage = null;
+
+      // Persist to local DB so it survives app restarts.
+      try {
+        await _databaseHelper.saveMealPlan(
+          result,
+          targetCalories: _calorieTarget,
+          dietStyle: _dietStyle,
+          mealsPerDay: _mealsPerDay,
+        );
+      } catch (e) {
+        debugPrint('Failed to save meal plan to DB: $e');
+      }
     } catch (error) {
       _errorMessage = error.toString();
       _currentPlan = null;

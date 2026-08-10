@@ -8,15 +8,18 @@ import 'package:nutriscan/providers/ads/admob_provider.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
 import 'package:nutriscan/providers/coins/coin_provider.dart';
 import 'package:nutriscan/providers/food/food_provider.dart';
+import 'package:nutriscan/providers/food/meal_plan_provider.dart';
 import 'package:nutriscan/providers/payment/subscription_provider.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/screens/chat/health_coach_screen.dart';
+import 'package:nutriscan/screens/food/meal_plan_screen.dart';
 import 'package:nutriscan/services/ai/groq_service.dart';
 import 'package:nutriscan/services/media/image_picker_service.dart';
 import 'package:nutriscan/utils/page_transition.dart';
 import 'package:nutriscan/widgets/ads/adaptive_banner_ad.dart';
 import 'package:nutriscan/widgets/dialogs/coin_ad_dialogs.dart';
+import 'package:nutriscan/widgets/food/active_meal_plan_card.dart';
 import 'package:nutriscan/widgets/food/food_list.dart';
 import 'package:nutriscan/widgets/food/nutrition_summary_card.dart';
 import 'package:nutriscan/widgets/home/image_source_button.dart';
@@ -95,8 +98,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Future<void> _initializeData() async {
     try {
       final foodProvider = context.read<FoodProvider>();
+      final mealPlanProvider = context.read<MealPlanProvider>();
       await Future.delayed(const Duration(seconds: 1));
-      await foodProvider.loadFoods();
+      await Future.wait([
+        foodProvider.loadFoods(),
+        mealPlanProvider.loadActiveMealPlan(),
+      ]);
       if (mounted) {
         setState(() {
           _isInitialLoading = false;
@@ -719,7 +726,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 currentLanguage,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+
+            // Active Meal Plan (if exists)
+            Consumer<MealPlanProvider>(
+              builder: (context, mealPlanProvider, _) {
+                final activePlan = mealPlanProvider.activePlan;
+                if (activePlan == null) return const SizedBox.shrink();
+                return Column(
+                  children: [
+                    ActiveMealPlanCard(
+                      plan: activePlan,
+                      language: currentLanguage,
+                      themeProvider: themeProvider,
+                      isDarkMode: isDarkMode,
+                      onTap: () {
+                        mealPlanProvider.showActivePlan();
+                        Navigator.push(
+                          context,
+                          PageTransition(
+                            child: const MealPlanResultScreen(),
+                          ),
+                        );
+                      },
+                      onDismiss: () {
+                        mealPlanProvider.dismissMealPlan();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
 
             // Today's Food List
             Row(

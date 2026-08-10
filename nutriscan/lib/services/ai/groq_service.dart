@@ -22,13 +22,29 @@ class GroqService {
   /// Cloud Function instead of calling api.groq.com directly — keeps the
   /// Groq API key server-side and lets the function enforce a real per-user
   /// daily rate limit (see functions/src/index.ts).
+  ///
+  /// Automatically retries once with a short backoff on transient 429
+  /// (resource-exhausted) errors from the provider.
   Future<Map<String, dynamic>> _callGroq(
     Map<String, dynamic> requestBody,
   ) async {
-    final result = await _groqCallable.call<Map<String, dynamic>>(
-      requestBody,
-    );
-    return Map<String, dynamic>.from(result.data);
+    try {
+      final result = await _groqCallable.call<Map<String, dynamic>>(
+        requestBody,
+      );
+      return Map<String, dynamic>.from(result.data);
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'resource-exhausted') {
+        // Transient provider rate-limit — wait briefly and retry once.
+        debugPrint('Groq 429, retrying after 3s backoff...');
+        await Future.delayed(const Duration(seconds: 3));
+        final result = await _groqCallable.call<Map<String, dynamic>>(
+          requestBody,
+        );
+        return Map<String, dynamic>.from(result.data);
+      }
+      rethrow;
+    }
   }
 
   static String _mimeTypeFromFile(File file) {
@@ -38,25 +54,36 @@ class GroqService {
     return 'image/jpeg';
   }
 
+  // Phase 2 (PLAN_AI_COST_PROMPT_OPT §2.1): resize max side to 1024px,
+  // JPEG quality 75. Always encode to JPEG to guarantee a bounded payload
+  // regardless of the source format (PNG screenshots can be 5-10MB raw).
+  static const int _maxImageSide = 1024;
+  static const int _jpegQuality = 75;
+
   static Future<String> _processAndEncodeImage(File imageFile) async {
     try {
       final bytes = await imageFile.readAsBytes();
-      if (bytes.length < 200 * 1024) {
+      final originalKB = bytes.length ~/ 1024;
+
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) {
+        debugPrint('[img] decode failed, sending raw ${originalKB}KB');
         return base64Encode(bytes);
       }
-      final decoded = img.decodeImage(bytes);
-      if (decoded == null) return base64Encode(bytes);
 
       img.Image resized = decoded;
-      if (decoded.width > 600 || decoded.height > 600) {
+      if (decoded.width > _maxImageSide || decoded.height > _maxImageSide) {
         final isLandscape = decoded.width > decoded.height;
         resized = img.copyResize(
           decoded,
-          width: isLandscape ? 600 : null,
-          height: !isLandscape ? 600 : null,
+          width: isLandscape ? _maxImageSide : null,
+          height: !isLandscape ? _maxImageSide : null,
         );
       }
-      final compressed = img.encodeJpg(resized, quality: 75);
+      final compressed = img.encodeJpg(resized, quality: _jpegQuality);
+      final compressedKB = compressed.length ~/ 1024;
+      debugPrint('[img] ${decoded.width}x${decoded.height} ${originalKB}KB'
+          ' → ${resized.width}x${resized.height} ${compressedKB}KB');
       return base64Encode(compressed);
     } catch (e) {
       debugPrint('Error in _processAndEncodeImage: $e');
@@ -118,6 +145,17 @@ class GroqService {
     }
     return '';
   }
+
+  // -----------------------------------------------------------------------
+  // Phase 1 (PLAN_AI_COST_PROMPT_OPT §1.1): isFoodImage is no longer called
+  // as a separate vision request. The analysis prompt already returns
+  // `is_food`, so food_provider checks that field after a single vision
+  // call — cutting per-scan API calls from 2 to 1.
+  //
+  // The method is kept (not deleted) so callers outside the happy-path
+  // scan flow can still use it if needed (e.g. a future A/B test), but
+  // the main scan pipeline in food_provider.analyzeFoodImage bypasses it.
+  // -----------------------------------------------------------------------
 
   Future<bool> isFoodImage(File imageFile, {String language = 'en'}) async {
     try {
@@ -289,37 +327,38 @@ class GroqService {
             ],
           },
         ],
-        "temperature": 0.4,
+        // Phase 1 (§1.6): lower temperature for more deterministic JSON.
+        "temperature": 0.2,
         "top_p": 1,
-        // Multi-food (docs/plan.md Phase 7A) asks for up to 8 full item
-        // objects instead of one — 2048 tokens was tuned for a single item
-        // and truncates a multi-item response mid-JSON, which is exactly
-        // the "Could not parse JSON response from AI" failure this guards
-        // against. Single-item mode is untouched.
-        //
-        // Capped at 4096, not higher: the vision prompt's image tokens alone
-        // run ~2300-2900 (measured), and this Groq account's tier enforces
-        // an 8000 tokens-per-minute ceiling per request (prompt + max_tokens
-        // combined) — 6144 blew past it ("Request too large ... Requested
-        // 9076") before this call ever reached the model. 4096 leaves
-        // headroom under 8000 even on the larger end of prompt sizes.
-        "max_tokens": multiFood ? 4096 : 2048,
+        // Multi-food (docs/plan.md Phase 7A) asks for up to 8 items.
+        // Single-item max_tokens: 2048→1536 (compact schema saves ~25%).
+        // NOTE: 1024 was tried first but truncated responses mid-JSON.
+        "max_tokens": multiFood ? 4096 : 1536,
       };
 
       final responseData = await _callGroq(requestBody);
-      final content = _extractContentFromResponse(responseData);
+      var content = _extractContentFromResponse(responseData);
       if (content.isEmpty) {
         throw Exception(getLocalizedErrorMessage('parse_error', language));
       }
+
+      // Strip markdown code fences and any conversational preamble/epilogue.
+      content = content
+          .replaceAll(RegExp(r'```(?:json)?\s*', multiLine: true), '')
+          .trim();
+
       final jsonStart = content.indexOf('{');
-      final jsonEnd = content.lastIndexOf('}') + 1;
-      if (jsonStart != -1 && jsonEnd > jsonStart) {
-        final jsonString = content.substring(jsonStart, jsonEnd);
-        final Map<String, dynamic> result =
-            json.decode(jsonString) as Map<String, dynamic>;
-        return result;
+      if (jsonStart == -1) {
+        throw Exception(getLocalizedErrorMessage('parse_error', language));
       }
-      throw Exception(getLocalizedErrorMessage('parse_error', language));
+      final jsonEnd = _findMatchingBraceEnd(content, jsonStart);
+      if (jsonEnd == null) {
+        throw Exception(getLocalizedErrorMessage('parse_error', language));
+      }
+      final jsonString = content.substring(jsonStart, jsonEnd);
+      final Map<String, dynamic> result =
+          json.decode(jsonString) as Map<String, dynamic>;
+      return result;
     } on FirebaseFunctionsException catch (e) {
       debugPrint('groqChatCompletion error in analyzeFoodImage: ${e.code} ${e.message}');
       String errorMessage;
@@ -420,11 +459,14 @@ Rules:
     }
   }
 
+  // Phase 1 (§1.2): compact schema — dropped health_benefits,
+  // health_warnings (UI never rendered them). Kept health_score because
+  // food_detail_card, health_score_chart, and analysis_screen depend on it.
   static const String _foodAnalysisJsonSchema = '''
 {
   "is_food": true,
-  "food_name": "string",
-  "description": "string",
+  "food_name": "",
+  "portion_grams": 0,
   "calories": 0,
   "protein": 0,
   "carbs": 0,
@@ -433,10 +475,8 @@ Rules:
   "sugar": 0,
   "sodium": 0,
   "health_score": 0,
-  "health_benefits": ["benefit 1", "benefit 2"],
-  "health_warnings": ["warning 1", "warning 2"],
-  "serving_size": "string",
-  "portion_grams": 0
+  "serving_size": "",
+  "description": ""
 }''';
 
   // docs/plan.md Phase 7A — leaner than the single-item schema above on
@@ -470,10 +510,13 @@ Rules:
   ]
 }''';
 
+  // Phase 1 (§1.3): leaner meal plan schema — kept hydration_reminders,
+  // lifestyle_tips, grocery_list, ingredients, instructions because the UI
+  // (meal_plan_generator.dart) renders them. Made descriptions short.
   static const String _mealPlanJsonSchema = '''
 {
-  "plan_title": "string",
-  "goal_summary": "string",
+  "plan_title": "",
+  "goal_summary": "",
   "target_calories": 2000,
   "nutrition_overview": {
     "total_calories": 2000,
@@ -486,19 +529,19 @@ Rules:
   "meals": [
     {
       "type": "breakfast",
-      "title": "string",
-      "description": "string",
+      "title": "",
+      "description": "",
       "calories": 500,
       "protein": 25,
       "carbs": 60,
       "fat": 15,
-      "ingredients": ["item 1", "item 2"],
-      "instructions": ["step 1", "step 2"]
+      "ingredients": ["item"],
+      "instructions": ["step"]
     }
   ],
-  "hydration_reminders": ["tip 1", "tip 2"],
-  "lifestyle_tips": ["tip 1", "tip 2"],
-  "grocery_list": ["item 1", "item 2"]
+  "hydration_reminders": ["tip"],
+  "lifestyle_tips": ["tip"],
+  "grocery_list": ["item"]
 }''';
 
   static String _languageNameForModel(String code) {
@@ -521,49 +564,38 @@ Rules:
     }
   }
 
+  // Phase 1 (§1.2): compact prompt from PLAN_AI_COST_PROMPT_OPT.md.
+  // health_score kept because UI depends on it; health_benefits/warnings
+  // dropped (never rendered).
   String _getLocalizedPrompt(String language) {
     final langName = _languageNameForModel(language);
-    return '''You are a nutrition expert. Analyze the food image and return exactly one JSON object.
+    return '''Role: Food image → JSON only. Language for ALL text fields: $langName.
 
-CRITICAL LANGUAGE RULE: The user's app language is $langName (code: $language). You MUST write ALL text fields in $langName only—no English for bn/hi/es/fr/de/zh/tr/ko/id/ja/ru/ur/pt/ar:
-- "food_name" in $langName.
-- "description" in $langName: 1–3 sentences speaking directly to the user as advice.
-- "serving_size" and "notes" in $langName.
-
-Schema:
+Return ONE JSON object, no markdown:
 $_foodAnalysisJsonSchema
 
 Rules:
-- Set "is_food": true if the image contains any food, dish, meal, drink, tea, coffee, snack, packaged food, or fruit/vegetable.
-- Set "is_food": false ONLY if the image contains clearly NO food (e.g. only person, animal, vehicle, landscape, furniture).
-- healthScore: integer 1–10 based on nutrition.
-- "portion_grams": your best-effort estimate of the total edible weight in grams (a number, e.g. 118), independent of "serving_size"'s free text. Always provide your best estimate, never 0 or null, unless the amount truly cannot be judged from the image.
-- Respond with ONLY one valid JSON object. No markdown.''';
+- is_food=false only if no edible item. Unsure → true.
+- portion_grams > 0 when is_food=true; estimate visible edible portion.
+- health_score: integer 1–10 based on nutrition.
+- description ≤ 2 short sentences in $langName; food_name in $langName.
+- No medical claims. No extra keys.''';
   }
 
-  // docs/plan.md Phase 7A — only used when multiFood is requested; the
-  // single-item prompt above is completely unchanged and still the default.
+  // Phase 1 (§1.2): compact multi-food prompt — same terse style.
   String _getLocalizedMultiPrompt(String language) {
     final langName = _languageNameForModel(language);
-    return '''You are a nutrition expert. Analyze the food image, which may contain MORE THAN ONE distinct food item (e.g. a plate with rice, meat, and vegetables). Return exactly one JSON object listing every distinct item you can identify, up to 8.
+    return '''Role: Food image → JSON only. Language: $langName. Image may show multiple foods.
 
-CRITICAL LANGUAGE RULE: The user's app language is $langName (code: $language). You MUST write ALL text fields in $langName only—no English for bn/hi/es/fr/de/zh/tr/ko/id/ja/ru/ur/pt/ar:
-- "food_name" in $langName for every item.
-- "description" in $langName: ONE short phrase (3–6 words), not a full sentence.
-- "serving_size" in $langName.
-
-Schema:
+Return ONE JSON object, no markdown:
 $_foodAnalysisMultiJsonSchema
 
 Rules:
-- Keep every field terse — this response lists multiple items and must stay short enough to not get cut off.
-- Set "is_food": true and list every distinct food/dish/drink as a separate object in "items", up to 8 items maximum. If more than 8 are visible, list only the 8 largest/most prominent.
-- If the same food appears more than once (e.g. two spoons of the same rice), merge it into ONE item with a combined "portion_grams" estimate rather than repeating it.
-- If a food is a WELL-KNOWN layered/composite dish whose parts are stacked or wrapped and not individually visible (e.g. a burger, sandwich, bánh mì, wrap, club sandwich), break it into its typical components as separate items (e.g. a cheeseburger → bun, patty, cheese, lettuce, tomato) using common preparation knowledge, splitting a normal serving's total weight across them — do this ONLY for dishes you can confidently name; if you cannot tell what it's made of, keep it as one item instead of guessing. Still list any genuinely separate items visible elsewhere in the photo (e.g. fries or a side salad next to the burger) too.
-- Set "is_food": false with an empty "items" array ONLY if the image contains clearly NO food.
-- Each item's health_score: integer 1–10 based on nutrition.
-- Each item's "portion_grams": best-effort estimate of that item's edible weight in grams, independent of "serving_size" free text. Always provide a best estimate, never 0 or null, unless truly unjudgeable.
-- Respond with ONLY one valid JSON object. No markdown.''';
+- List every distinct food up to 8 items. Merge duplicates.
+- is_food=false + empty items only if clearly no food.
+- Composite dishes (burger, sandwich): break into component items.
+- Each item: portion_grams > 0, health_score 1–10, description ≤ 6 words in $langName.
+- Keep every field terse. No extra keys. No markdown.''';
   }
 
   Future<MealPlan> generateMealPlan({
@@ -609,6 +641,25 @@ Rules:
         content = await _requestMealPlanContent(messages, language);
         return _parseMealPlan(content, language);
       }
+    } on FirebaseFunctionsException catch (e) {
+      debugPrint('groqChatCompletion error in generateMealPlan: ${e.code} ${e.message}');
+      String errorMessage;
+      switch (e.code) {
+        case 'deadline-exceeded':
+          errorMessage = getLocalizedErrorMessage('response_timeout', language);
+          break;
+        case 'unavailable':
+          errorMessage = getLocalizedErrorMessage('connection_failed', language);
+          break;
+        case 'resource-exhausted':
+          errorMessage = getLocalizedErrorMessage('rate_limit', language);
+          break;
+        default:
+          errorMessage = getLocalizedErrorMessage('server_error', language, {
+            'status': e.code,
+          });
+      }
+      throw Exception(errorMessage);
     } catch (e) {
       debugPrint('Error in generateMealPlan: $e');
       rethrow;
@@ -619,12 +670,14 @@ Rules:
     List<Map<String, String>> messages,
     String language,
   ) async {
+    // Phase 1 (§1.3): reduced max_tokens from 8192→4096 — the leaner schema
+    // and shorter descriptions fit well within this budget.
     final requestBody = {
-      "model": "llama-3.3-70b-versatile",
+      "model": _model,
       "messages": messages,
       "temperature": 0.45,
       "top_p": 0.95,
-      "max_tokens": 8192,
+      "max_tokens": 4096,
       "receiveTimeoutMs": 90000,
     };
 
@@ -636,8 +689,8 @@ Rules:
 
   MealPlan _parseMealPlan(String rawContent, String language) {
     final content = rawContent
-        .replaceAll(RegExp(r'^```(?:json)?\s*'), '')
-        .replaceAll(RegExp(r'\s*```\s*$'), '')
+        .replaceAll(RegExp(r'^```(?:json)?\s*', multiLine: true), '')
+        .replaceAll(RegExp(r'\s*```\s*$', multiLine: true), '')
         .trim();
     final jsonStart = content.indexOf('{');
     if (jsonStart == -1) throw Exception(getLocalizedErrorMessage('parse_error', language));
@@ -657,24 +710,54 @@ Rules:
 
       final requestBody = {
         "model": _model,
-        "messages": [{"role": "user", "content": _getInsightsPrompt(language, foodData)}],
+        "messages": [
+          {"role": "user", "content": _getInsightsPrompt(language, foodData)},
+        ],
         "temperature": 0.3, "top_p": 1, "max_tokens": 2048,
       };
 
       final responseData = await _callGroq(requestBody);
-      final content = _extractContentFromResponse(responseData);
-      final jsonStart = content.indexOf('[');
-      final jsonEnd = content.lastIndexOf(']') + 1;
-      if (jsonStart != -1 && jsonEnd > jsonStart) {
-        return (json.decode(content.substring(jsonStart, jsonEnd)) as List).cast<Map<String, dynamic>>();
-      }
-      throw Exception("Failed to fetch insights");
+      // Strip markdown code fences and any conversational preamble.
+      var content = _extractContentFromResponse(responseData);
+      content = content
+          .replaceAll(RegExp(r'```(?:json)?\s*', multiLine: true), '')
+          .trim();
+
+      // Find the actual JSON array start: look for '[' immediately followed
+      // by '{' (with optional whitespace) to skip stray brackets in preamble.
+      final jsonArrayMatch = RegExp(r'\[\s*\{').firstMatch(content);
+      if (jsonArrayMatch == null) throw Exception('No JSON array in insights response');
+      final jsonStart = jsonArrayMatch.start;
+      final jsonEnd = _findMatchingBracketEnd(content, jsonStart);
+      if (jsonEnd == null) throw Exception('Unbalanced brackets in insights response');
+
+      return (json.decode(content.substring(jsonStart, jsonEnd)) as List).cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('Error in fetchInsights: $e');
       rethrow;
     }
   }
 
+  /// Finds the index *past* the closing `]` that matches the `[` at [start].
+  static int? _findMatchingBracketEnd(String s, int start) {
+    if (start < 0 || start >= s.length || s[start] != '[') return null;
+    int depth = 0;
+    bool inString = false;
+    for (int i = start; i < s.length; i++) {
+      final c = s[i];
+      if (inString) {
+        if (c == '\\') { i++; continue; }
+        if (c == '"') inString = false;
+        continue;
+      }
+      if (c == '"') { inString = true; continue; }
+      if (c == '[') depth++;
+      if (c == ']') { depth--; if (depth == 0) return i + 1; }
+    }
+    return null;
+  }
+
+  // Phase 1 (§1.3): shorter meal plan prompt — same constraints, fewer words.
   String _getMealPlanPrompt({
     required String language,
     required int targetCalories,
@@ -684,19 +767,43 @@ Rules:
     String? userNutritionContext,
   }) {
     final langName = _languageNameForModel(language);
-    return '''As a nutrition expert, generate a $mealsPerDay meal plan for exactly $targetCalories kcal daily ($dietStyle diet) in $langName.
-The plan must strictly follow the provided JSON schema.
-
-User restrictions/preferences: ${restrictions.isEmpty ? 'None' : restrictions.join(', ')}
-${userNutritionContext != null ? 'User health context: $userNutritionContext' : ''}
-
-CRITICAL: Return ONLY the JSON object. ALL text fields must be in $langName.
+    return '''$mealsPerDay-meal plan, $targetCalories kcal/day, $dietStyle diet. Language: $langName.
+Restrictions: ${restrictions.isEmpty ? 'None' : restrictions.join(', ')}
+${userNutritionContext != null ? 'Context: $userNutritionContext' : ''}
+Return ONLY JSON, all text in $langName. Keep descriptions ≤ 1 sentence, instructions ≤ 3 steps each.
 Schema:
 $_mealPlanJsonSchema''';
   }
 
+  // Phase 1 (§1.5): send aggregate summary instead of raw food log to
+  // reduce input tokens. The previous version sent every food item's full
+  // data; now we compute totals/averages and send a compact summary.
   String _getInsightsPrompt(String language, List<Map<String, dynamic>> foodData) {
-    return "As a dietary advisor, analyze this food history and provide exactly 3-5 actionable insights in ${_languageNameForModel(language)} as a JSON array of objects with 'title' and 'insight' fields. Data: ${jsonEncode(foodData)}";
+    // Build aggregate summary instead of sending raw data.
+    final count = foodData.length;
+    double totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+    final names = <String>[];
+    for (final f in foodData) {
+      totalCal += (f['calories'] as num?)?.toDouble() ?? 0;
+      totalProtein += (f['protein'] as num?)?.toDouble() ?? 0;
+      totalCarbs += (f['carbs'] as num?)?.toDouble() ?? 0;
+      totalFat += (f['fat'] as num?)?.toDouble() ?? 0;
+      final name = f['name']?.toString();
+      if (name != null && name.isNotEmpty && names.length < 15) {
+        names.add(name);
+      }
+    }
+    final summary = '{"items":$count,'
+        '"total_cal":${totalCal.round()},'
+        '"avg_cal":${count > 0 ? (totalCal / count).round() : 0},'
+        '"total_protein":${totalProtein.round()},'
+        '"total_carbs":${totalCarbs.round()},'
+        '"total_fat":${totalFat.round()},'
+        '"foods":[${names.map((n) => '"$n"').join(',')}]}';
+
+    return "3-5 actionable nutrition insights in ${_languageNameForModel(language)}. "
+        "JSON array only: [{\"title\":\"...\",\"description\":\"...\"}]. "
+        "No markdown.\nSummary: $summary";
   }
 
   Future<bool> _checkNetworkConnectivity() async {
@@ -713,6 +820,11 @@ $_mealPlanJsonSchema''';
     // Show dialog implementation...
   }
 
+  // Phase 1 (§1.4): limit chat history to the most recent 8 messages to
+  // cap input tokens. Older context is dropped — the system prompt already
+  // carries the user's nutrition profile so the coach stays relevant.
+  static const int _maxCoachHistoryMessages = 8;
+
   Future<String> getHealthCoachResponse({
     required List<ChatMessage> history,
     required String userContext,
@@ -720,7 +832,11 @@ $_mealPlanJsonSchema''';
   }) async {
     try {
       final messages = [{"role": "system", "content": _getHealthCoachSystemPrompt(language, userContext)}];
-      messages.addAll(history.map((m) => {"role": m.role == MessageRole.user ? "user" : "assistant", "content": m.content}));
+      // Only send the N most recent messages to keep input tokens bounded.
+      final trimmed = history.length > _maxCoachHistoryMessages
+          ? history.sublist(history.length - _maxCoachHistoryMessages)
+          : history;
+      messages.addAll(trimmed.map((m) => {"role": m.role == MessageRole.user ? "user" : "assistant", "content": m.content}));
       final responseData = await _callGroq({"model": _model, "messages": messages});
       return _extractContentFromResponse(responseData);
     } catch (e) {
@@ -729,11 +845,11 @@ $_mealPlanJsonSchema''';
     }
   }
 
+  // Phase 1 (§1.4): shorter system prompt — same rules, fewer tokens.
   String _getHealthCoachSystemPrompt(String language, String userContext) {
-    return "You are a professional nutrition coach in ${_languageNameForModel(language)}, not a doctor. "
-        "Context: $userContext. Provide empathetic, scientifically-grounded nutrition advice and education. "
-        "Never diagnose, treat, or claim to cure any medical condition or disease. If asked to diagnose "
-        "symptoms or a condition (e.g. 'do I have diabetes'), give general nutrition education only and "
-        "recommend the user consult a doctor or registered dietitian.";
+    return "Nutrition coach in ${_languageNameForModel(language)}. "
+        "$userContext "
+        "Give nutrition advice only. Never diagnose or treat. "
+        "Reply ≤ 150 words. Recommend a doctor for medical questions.";
   }
 }

@@ -273,6 +273,8 @@ class AppLocalizations {
           'Choose your calorie goal, diet style, and restrictions, then tap generate to get started.',
       'meal_plan_suggested_for_you':
           'Suggested for you based on your food history',
+      'active_meal_plan': 'Today\'s Meal Plan',
+      'view_meal_plan': 'View Details',
       'hydration_and_tips': 'Hydration & lifestyle reminders',
       'grocery_list_label': 'Smart grocery list',
       'ingredients_label': 'Ingredients',
@@ -720,6 +722,8 @@ class AppLocalizations {
           'ক্যালোরি লক্ষ্য, ডায়েট স্টাইল ও নিষেধাজ্ঞা বেছে নিয়ে জেনারেট চাপুন।',
       'meal_plan_suggested_for_you':
           'আপনার খাবার ডেটা অনুযায়ী আপনার জন্য সাজেস্টেড',
+      'active_meal_plan': 'আজকের খাবার পরিকল্পনা',
+      'view_meal_plan': 'বিস্তারিত দেখুন',
       'hydration_and_tips': 'হাইড্রেশন ও লাইফস্টাইল টিপস',
       'grocery_list_label': 'ক্রয় তালিকা',
       'ingredients_label': 'উপকরণ',
@@ -1472,6 +1476,8 @@ class AppLocalizations {
           'कैलोरी लक्ष्य, आहार शैली और प्रतिबंध चुनें और Generate दबाएँ।',
       'meal_plan_suggested_for_you':
           'आपके खाने के डेटा के आधार पर आपके लिए सुझाव',
+      'active_meal_plan': 'आज का भोजन प्लान',
+      'view_meal_plan': 'विवरण देखें',
       'hydration_and_tips': 'हाइड्रेशन और जीवनशैली सुझाव',
       'grocery_list_label': 'किराना सूची',
       'ingredients_label': 'सामग्री',
@@ -1891,6 +1897,8 @@ class AppLocalizations {
       'meal_plan_empty_subtitle':
           'Elige objetivo calórico, estilo de dieta y restricciones, luego pulsa Generar.',
       'meal_plan_suggested_for_you': 'Sugerido según tu historial de comidas',
+      'active_meal_plan': 'Plan de Comidas de Hoy',
+      'view_meal_plan': 'Ver Detalles',
       'hydration_and_tips': 'Hidratación y consejos de estilo de vida',
       'grocery_list_label': 'Lista de compras',
       'ingredients_label': 'Ingredientes',
@@ -2684,6 +2692,8 @@ class AppLocalizations {
           'Choisissez objectif calorique, style alimentaire et restrictions, puis appuyez sur Générer.',
       'meal_plan_suggested_for_you':
           'Suggéré selon votre historique alimentaire',
+      'active_meal_plan': 'Plan Repas du Jour',
+      'view_meal_plan': 'Voir les Détails',
       'hydration_and_tips': 'Hydratation et conseils de vie',
       'grocery_list_label': 'Liste de courses',
       'ingredients_label': 'Ingrédients',
@@ -3302,6 +3312,8 @@ class AppLocalizations {
           'Wähle Kalorienziel, Ernährungsstil und Einschränkungen und tippe auf Generieren.',
       'meal_plan_suggested_for_you':
           'Basierend auf deiner Ernährung vorgeschlagen',
+      'active_meal_plan': 'Heutiger Essensplan',
+      'view_meal_plan': 'Details ansehen',
       'hydration_and_tips': 'Hydrations- & Lifestyle-Tipps',
       'grocery_list_label': 'Einkaufsliste',
       'ingredients_label': 'Zutaten',
@@ -3889,6 +3901,8 @@ class AppLocalizations {
       'meal_plan_empty_title': '准备好获取个性化膳食计划了吗？',
       'meal_plan_empty_subtitle': '选择卡路里目标、饮食风格与禁忌，然后点击生成。',
       'meal_plan_suggested_for_you': '根据您的饮食记录为您推荐',
+      'active_meal_plan': '今日膳食计划',
+      'view_meal_plan': '查看详情',
       'hydration_and_tips': '补水与生活方式建议',
       'grocery_list_label': '购物清单',
       'ingredients_label': '食材',
@@ -4434,6 +4448,8 @@ class AppLocalizations {
       'meal_plan_empty_subtitle':
           'Kalori hedefini, diyet stilini ve kısıtlamalarını seç ve Oluştur’a bas.',
       'meal_plan_suggested_for_you': 'Yemek geçmişinize göre size önerilen',
+      'active_meal_plan': 'Bugünün Öğün Planı',
+      'view_meal_plan': 'Detayları Gör',
       'hydration_and_tips': 'Hidrasyon ve yaşam tarzı ipuçları',
       'grocery_list_label': 'Alışveriş listesi',
       'ingredients_label': 'Malzemeler',
@@ -4996,6 +5012,8 @@ class AppLocalizations {
       'meal_plan_empty_title': '맞춤형 식단을 준비할까요?',
       'meal_plan_empty_subtitle': '칼로리 목표와 식단 스타일, 제한 사항을 선택한 뒤 생성 버튼을 눌러 주세요.',
       'meal_plan_suggested_for_you': '식사 기록을 바탕으로 추천',
+      'active_meal_plan': '오늘의 식단',
+      'view_meal_plan': '자세히 보기',
       'hydration_and_tips': '수분 및 라이프스타일 팁',
       'grocery_list_label': '장보기 리스트',
       'ingredients_label': '재료',
@@ -5522,6 +5540,8 @@ class AppLocalizations {
           'Pilih target kalori, gaya diet, dan pantangan, lalu tekan Generate.',
       'meal_plan_suggested_for_you':
           'Disarankan untuk Anda berdasarkan riwayat makanan',
+      'active_meal_plan': 'Rencana Makan Hari Ini',
+      'view_meal_plan': 'Lihat Detail',
       'hydration_and_tips': 'Tips hidrasi & gaya hidup',
       'grocery_list_label': 'Daftar belanja',
       'ingredients_label': 'Bahan',
@@ -6059,6 +6079,8 @@ class AppLocalizations {
       'meal_plan_empty_title': 'パーソナルプランを始めますか？',
       'meal_plan_empty_subtitle': 'カロリー目標・食事スタイル・制限を選択して「生成」を押してください。',
       'meal_plan_suggested_for_you': '食事履歴に基づいておすすめ',
+      'active_meal_plan': '今日の食事プラン',
+      'view_meal_plan': '詳細を見る',
       'hydration_and_tips': '水分補給とライフスタイルのヒント',
       'grocery_list_label': '買い物リスト',
       'ingredients_label': '材料',
@@ -6583,6 +6605,8 @@ class AppLocalizations {
       'meal_plan_empty_subtitle':
           'Выберите цель по калориям, стиль питания и ограничения, затем нажмите «Создать».',
       'meal_plan_suggested_for_you': 'Рекомендовано по вашей истории питания',
+      'active_meal_plan': 'План питания на сегодня',
+      'view_meal_plan': 'Подробнее',
       'hydration_and_tips': 'Советы по гидратации и образу жизни',
       'grocery_list_label': 'Список покупок',
       'ingredients_label': 'Ингредиенты',
@@ -7147,6 +7171,8 @@ class AppLocalizations {
           'کیلوری ہدف، ڈائٹ اسٹائل اور پابندیاں منتخب کریں اور Generate دبائیں۔',
       'meal_plan_suggested_for_you':
           'آپ کے کھانے کے ڈیٹا کی بنیاد پر آپ کے لیے تجویز کردہ',
+      'active_meal_plan': 'آج کا کھانے کا منصوبہ',
+      'view_meal_plan': 'تفصیلات دیکھیں',
       'hydration_and_tips': 'ہائڈریشن اور طرز زندگی کے مشورے',
       'grocery_list_label': 'گروسری فہرست',
       'ingredients_label': 'اجزاء',
@@ -7703,6 +7729,8 @@ class AppLocalizations {
           'Escolha a meta calórica, o estilo de dieta e as restrições, depois toque em Gerar.',
       'meal_plan_suggested_for_you':
           'Sugerido com base no seu histórico de refeições',
+      'active_meal_plan': 'Plano de Refeições de Hoje',
+      'view_meal_plan': 'Ver Detalhes',
       'hydration_and_tips': 'Dicas de hidratação e estilo de vida',
       'grocery_list_label': 'Lista de compras',
       'ingredients_label': 'Ingredientes',
@@ -8268,6 +8296,8 @@ class AppLocalizations {
           'Escolha sua meta de calorias, estilo alimentar e restrições, depois toque em gerar para começar.',
       'meal_plan_suggested_for_you':
           'Sugerido com base no seu histórico de refeições',
+      'active_meal_plan': 'Plano de Refeições de Hoje',
+      'view_meal_plan': 'Ver Detalhes',
       'hydration_and_tips': 'Hidratação e lembretes de estilo de vida',
       'grocery_list_label': 'Lista de compras inteligente',
       'ingredients_label': 'Ingredientes',
@@ -8839,6 +8869,8 @@ class AppLocalizations {
       'meal_plan_empty_subtitle':
           'اختر هدف السعرات الحرارية ونمط النظام الغذائي والقيود، ثم اضغط على إنشاء للبدء.',
       'meal_plan_suggested_for_you': 'مقترح لك بناءً على سجل طعامك',
+      'active_meal_plan': 'خطة وجبات اليوم',
+      'view_meal_plan': 'عرض التفاصيل',
       'hydration_and_tips': 'تذكيرات الترطيب ونمط الحياة',
       'grocery_list_label': 'قائمة تسوق ذكية',
       'ingredients_label': 'المكونات',
