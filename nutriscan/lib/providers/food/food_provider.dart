@@ -22,6 +22,14 @@ class FoodProvider with ChangeNotifier {
   List<Food> _foods = [];
   bool _isLoading = false;
   String? _error;
+
+  // docs/plan.md Phase 7A — a multi-item scan is held here for user review
+  // (keep/drop items) instead of being saved immediately. Null when there is
+  // nothing pending. A single-item scan never touches this — it still saves
+  // immediately, unchanged from before 7A.
+  List<Food>? _pendingMultiFoodCandidates;
+  String _pendingLanguage = 'en';
+  bool _pendingIsPremiumUser = false;
   final GroqService _groqService = GroqService();
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final FirebaseStorageService _storageService = FirebaseStorageService();
@@ -38,6 +46,10 @@ class FoodProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   String? get error => _error;
+
+  /// Items awaiting user review from a multi-food scan (docs/plan.md Phase
+  /// 7A), or null if there's nothing pending.
+  List<Food>? get pendingMultiFoodCandidates => _pendingMultiFoodCandidates;
 
   void setAdMobProvider(AdMobProvider admobProvider) {
     _admobProvider = admobProvider;
@@ -155,6 +167,36 @@ class FoodProvider with ChangeNotifier {
     );
   }
 
+  /// Pure parsing step of docs/plan.md Phase 7A: turns one AI response into
+  /// a list of item maps regardless of scan mode, so the rest of
+  /// [analyzeFoodImage] never branches on `multiFood` again.
+  ///
+  /// - `multiFood: false`, or the model didn't return an `items` list even
+  ///   though it was asked to: treated as a single item — [analysisResult]
+  ///   itself — identical to the pre-7A behavior.
+  /// - `multiFood: true` with a valid `items` list: capped to 8 (a
+  ///   hallucinated 20-item list is a UX/cost problem, not a real plate).
+  /// - Any item without a non-empty `food_name` is dropped in both modes —
+  ///   matches the old single-item validation that used to live inline here.
+  @visibleForTesting
+  static List<Map<String, dynamic>> normalizeScanItems(
+    Map<String, dynamic> analysisResult, {
+    required bool multiFood,
+  }) {
+    List<dynamic> items;
+    if (multiFood && analysisResult['items'] is List) {
+      items = analysisResult['items'] as List;
+      if (items.length > 8) items = items.sublist(0, 8);
+    } else {
+      items = [analysisResult];
+    }
+    return items
+        .whereType<Map>()
+        .where((it) => (it['food_name']?.toString().trim().isNotEmpty) ?? false)
+        .map((it) => Map<String, dynamic>.from(it))
+        .toList();
+  }
+
   Future<void> analyzeFoodImage(
     File imageFile, {
     String language = 'en',
@@ -176,13 +218,18 @@ class FoodProvider with ChangeNotifier {
         localId,
       );
 
+      final bool multiFood = FeatureFlags().multiFoodScanEnabled;
+
       Map<String, dynamic> analysisResult = await _groqService
-          .analyzeFoodImage(imageFile, language: language)
+          .analyzeFoodImage(imageFile, language: language, multiFood: multiFood)
           .timeout(const Duration(seconds: 30));
 
-      if (analysisResult['is_food'] == false ||
-          analysisResult['food_name'] == null ||
-          analysisResult['food_name'].toString().trim().isEmpty) {
+      final items = FoodProvider.normalizeScanItems(
+        analysisResult,
+        multiFood: multiFood,
+      );
+
+      if (analysisResult['is_food'] == false || items.isEmpty) {
         _error = 'NOT_FOOD_IMAGE';
         _isLoading = false;
         notifyListeners();
@@ -211,67 +258,43 @@ class FoodProvider with ChangeNotifier {
           ? firebaseImageUrl
           : localImagePath;
 
-      Food newFood = Food.fromJson({
-        ...analysisResult,
-        'image_path': imagePath,
-      });
-
-      newFood = await _resolveFoodSource(newFood, language);
-
-      await _databaseHelper.insertFood(newFood, isPremiumUser: isPremiumUser);
-
-      _foods.insert(0, newFood);
-
-      final todayCalories = await getTodayCalories();
-      _notificationProvider?.updateDailyProgressNotification(todayCalories);
-
-      final weeklySummary = await _databaseHelper.getWeeklySummary();
-      _notificationProvider?.updateWeeklySummaryNotification(
-        weeklySummary['total_foods'] as int,
-        weeklySummary['avg_calories_per_day'] as double,
+      // Match items in parallel, not sequentially — up to 8 sequential FKB
+      // round-trips would blow the p95 scan latency budget (MASTER_PLAN.md
+      // §12.1). Safe because _resolveFoodSource never throws (fail-soft to
+      // estimated on any matcher error, see Phase 1C edge cases).
+      //
+      // Explicit per-item id, not Food.fromJson's default: that default is
+      // DateTime.now().millisecondsSinceEpoch, and every Food.fromJson call
+      // below runs in the same synchronous tick (items.map is eager), so two
+      // items can land on the identical millisecond. insertFood is `INSERT
+      // OR REPLACE` — a same-millisecond id collision silently overwrites
+      // one saved item with another. Hit this for real during Phase 7A
+      // testing (a 3-item scan only produced 2 DB rows).
+      final List<Food> candidates = await Future.wait(
+        items.asMap().entries.map((entry) async {
+          final food = Food.fromJson({
+            ...entry.value,
+            'id': '${localId}_${entry.key}',
+            'image_path': imagePath,
+          });
+          return _resolveFoodSource(food, language);
+        }),
       );
 
-      final currentMonthSummary = await _databaseHelper
-          .getCurrentMonthSummary();
-      final monthNumber = currentMonthSummary['month_number'] as int;
-      final prefs = await SharedPreferences.getInstance();
-      final currentLanguage = prefs.getString('selected_language') ?? 'en';
-      final monthKeys = [
-        'january',
-        'february',
-        'march',
-        'april',
-        'may',
-        'june',
-        'july',
-        'august',
-        'september',
-        'october',
-        'november',
-        'december',
-      ];
-      final monthName = AppLocalizations.getString(
-        monthKeys[monthNumber - 1],
-        currentLanguage,
-      );
-      _notificationProvider?.updateMonthlySummaryNotification(
-        currentMonthSummary['total_foods'] as int,
-        monthName,
-      );
-
-      _notificationProvider?.updateLastFoodScanTime();
-
-      await _checkAndNotifyNutrientDeficiency(language);
-
-      _admobProvider?.incrementActionCount();
-
-      if (_subscriptionProvider != null &&
-          !_subscriptionProvider!.hasPremiumFeatures &&
-          _coinProvider != null) {
-        await _coinProvider!.spendCoins(CoinProvider.coinsPerScan);
+      if (candidates.length == 1) {
+        // Unchanged single-item behavior: save immediately, no review step.
+        final newFood = candidates.first;
+        await _databaseHelper.insertFood(newFood, isPremiumUser: isPremiumUser);
+        _foods.insert(0, newFood);
+        await _finalizeScan(language);
+      } else {
+        // Multi-item: hold for user review (keep/drop) before anything is
+        // saved or charged — see confirmMultiFoodSelection.
+        _pendingMultiFoodCandidates = candidates;
+        _pendingLanguage = language;
+        _pendingIsPremiumUser = isPremiumUser;
+        notifyListeners();
       }
-
-      notifyListeners();
     } catch (e) {
       debugPrint('Error in analyzeFoodImage: $e');
       if (e is TimeoutException) {
@@ -291,6 +314,93 @@ class FoodProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Saves the items the user kept from a multi-food review (docs/plan.md
+  /// Phase 7A) and runs the same one-time-per-scan side effects
+  /// (notifications, coin spend) that a single-item scan already ran inline.
+  /// Passing an empty list behaves like [cancelMultiFoodSelection] — no
+  /// insert, no charge.
+  Future<void> confirmMultiFoodSelection(List<Food> selectedFoods) async {
+    if (selectedFoods.isEmpty) {
+      cancelMultiFoodSelection();
+      return;
+    }
+
+    final language = _pendingLanguage;
+    for (final food in selectedFoods) {
+      await _databaseHelper.insertFood(
+        food,
+        isPremiumUser: _pendingIsPremiumUser,
+      );
+      _foods.insert(0, food);
+    }
+    _pendingMultiFoodCandidates = null;
+    await _finalizeScan(language);
+  }
+
+  /// Discards a pending multi-food review with nothing saved and no coin
+  /// spent (docs/plan.md Phase 7A edge case: user deselects everything).
+  void cancelMultiFoodSelection() {
+    _pendingMultiFoodCandidates = null;
+    notifyListeners();
+  }
+
+  /// Side effects that must run exactly once per scan action, regardless of
+  /// how many food items that scan produced: progress notifications, the
+  /// nutrient-deficiency check, ad action tracking, and the coin spend.
+  /// Extracted from the tail of analyzeFoodImage so a multi-item scan
+  /// (confirmMultiFoodSelection) can't accidentally run it once per item.
+  Future<void> _finalizeScan(String language) async {
+    final todayCalories = await getTodayCalories();
+    _notificationProvider?.updateDailyProgressNotification(todayCalories);
+
+    final weeklySummary = await _databaseHelper.getWeeklySummary();
+    _notificationProvider?.updateWeeklySummaryNotification(
+      weeklySummary['total_foods'] as int,
+      weeklySummary['avg_calories_per_day'] as double,
+    );
+
+    final currentMonthSummary = await _databaseHelper.getCurrentMonthSummary();
+    final monthNumber = currentMonthSummary['month_number'] as int;
+    final prefs = await SharedPreferences.getInstance();
+    final currentLanguage = prefs.getString('selected_language') ?? 'en';
+    final monthKeys = [
+      'january',
+      'february',
+      'march',
+      'april',
+      'may',
+      'june',
+      'july',
+      'august',
+      'september',
+      'october',
+      'november',
+      'december',
+    ];
+    final monthName = AppLocalizations.getString(
+      monthKeys[monthNumber - 1],
+      currentLanguage,
+    );
+    _notificationProvider?.updateMonthlySummaryNotification(
+      currentMonthSummary['total_foods'] as int,
+      monthName,
+    );
+
+    _notificationProvider?.updateLastFoodScanTime();
+
+    await _checkAndNotifyNutrientDeficiency(language);
+
+    _admobProvider?.incrementActionCount();
+
+    if (_subscriptionProvider != null &&
+        !_subscriptionProvider!.hasPremiumFeatures &&
+        _coinProvider != null) {
+      await _coinProvider!.spendCoins(CoinProvider.coinsPerScan);
+    }
+
+    notifyListeners();
   }
 
   Future<void> deleteFood(String foodId) async {

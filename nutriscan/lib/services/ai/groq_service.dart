@@ -262,6 +262,7 @@ class GroqService {
   Future<Map<String, dynamic>> analyzeFoodImage(
     File imageFile, {
     String language = 'en',
+    bool multiFood = false,
   }) async {
     try {
       if (!await _checkNetworkConnectivity()) {
@@ -270,7 +271,9 @@ class GroqService {
 
       final base64Image = await _processAndEncodeImage(imageFile);
       final mimeType = _mimeTypeFromFile(imageFile);
-      final prompt = _getLocalizedPrompt(language);
+      final prompt = multiFood
+          ? _getLocalizedMultiPrompt(language)
+          : _getLocalizedPrompt(language);
 
       final requestBody = {
         "model": _model,
@@ -288,7 +291,19 @@ class GroqService {
         ],
         "temperature": 0.4,
         "top_p": 1,
-        "max_tokens": 2048,
+        // Multi-food (docs/plan.md Phase 7A) asks for up to 8 full item
+        // objects instead of one — 2048 tokens was tuned for a single item
+        // and truncates a multi-item response mid-JSON, which is exactly
+        // the "Could not parse JSON response from AI" failure this guards
+        // against. Single-item mode is untouched.
+        //
+        // Capped at 4096, not higher: the vision prompt's image tokens alone
+        // run ~2300-2900 (measured), and this Groq account's tier enforces
+        // an 8000 tokens-per-minute ceiling per request (prompt + max_tokens
+        // combined) — 6144 blew past it ("Request too large ... Requested
+        // 9076") before this call ever reached the model. 4096 leaves
+        // headroom under 8000 even on the larger end of prompt sizes.
+        "max_tokens": multiFood ? 4096 : 2048,
       };
 
       final responseData = await _callGroq(requestBody);
@@ -424,6 +439,37 @@ Rules:
   "portion_grams": 0
 }''';
 
+  // docs/plan.md Phase 7A — leaner than the single-item schema above on
+  // purpose: health_benefits/health_warnings are dropped and description is
+  // one short phrase instead of 1-3 sentences. Multiplied by up to 8 items,
+  // the full single-item schema was blowing the multi-food max_tokens budget
+  // (a real truncated-JSON failure hit during testing) and burning this
+  // Groq account's 8000 TPM ceiling — and the review sheet
+  // (multi_food_review_sheet.dart) only ever displays name/calories/portion/
+  // source, so those fields were paid for and never shown. Food.fromJson
+  // defaults both to [] when absent, so this is safe; a later detail-view
+  // improvement could re-fetch them per selected item if ever needed.
+  static const String _foodAnalysisMultiJsonSchema = '''
+{
+  "is_food": true,
+  "items": [
+    {
+      "food_name": "string",
+      "description": "string",
+      "calories": 0,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 0,
+      "sodium": 0,
+      "health_score": 0,
+      "serving_size": "string",
+      "portion_grams": 0
+    }
+  ]
+}''';
+
   static const String _mealPlanJsonSchema = '''
 {
   "plan_title": "string",
@@ -492,6 +538,31 @@ Rules:
 - Set "is_food": false ONLY if the image contains clearly NO food (e.g. only person, animal, vehicle, landscape, furniture).
 - healthScore: integer 1–10 based on nutrition.
 - "portion_grams": your best-effort estimate of the total edible weight in grams (a number, e.g. 118), independent of "serving_size"'s free text. Always provide your best estimate, never 0 or null, unless the amount truly cannot be judged from the image.
+- Respond with ONLY one valid JSON object. No markdown.''';
+  }
+
+  // docs/plan.md Phase 7A — only used when multiFood is requested; the
+  // single-item prompt above is completely unchanged and still the default.
+  String _getLocalizedMultiPrompt(String language) {
+    final langName = _languageNameForModel(language);
+    return '''You are a nutrition expert. Analyze the food image, which may contain MORE THAN ONE distinct food item (e.g. a plate with rice, meat, and vegetables). Return exactly one JSON object listing every distinct item you can identify, up to 8.
+
+CRITICAL LANGUAGE RULE: The user's app language is $langName (code: $language). You MUST write ALL text fields in $langName only—no English for bn/hi/es/fr/de/zh/tr/ko/id/ja/ru/ur/pt/ar:
+- "food_name" in $langName for every item.
+- "description" in $langName: ONE short phrase (3–6 words), not a full sentence.
+- "serving_size" in $langName.
+
+Schema:
+$_foodAnalysisMultiJsonSchema
+
+Rules:
+- Keep every field terse — this response lists multiple items and must stay short enough to not get cut off.
+- Set "is_food": true and list every distinct food/dish/drink as a separate object in "items", up to 8 items maximum. If more than 8 are visible, list only the 8 largest/most prominent.
+- If the same food appears more than once (e.g. two spoons of the same rice), merge it into ONE item with a combined "portion_grams" estimate rather than repeating it.
+- If a food is a WELL-KNOWN layered/composite dish whose parts are stacked or wrapped and not individually visible (e.g. a burger, sandwich, bánh mì, wrap, club sandwich), break it into its typical components as separate items (e.g. a cheeseburger → bun, patty, cheese, lettuce, tomato) using common preparation knowledge, splitting a normal serving's total weight across them — do this ONLY for dishes you can confidently name; if you cannot tell what it's made of, keep it as one item instead of guessing. Still list any genuinely separate items visible elsewhere in the photo (e.g. fries or a side salad next to the burger) too.
+- Set "is_food": false with an empty "items" array ONLY if the image contains clearly NO food.
+- Each item's health_score: integer 1–10 based on nutrition.
+- Each item's "portion_grams": best-effort estimate of that item's edible weight in grams, independent of "serving_size" free text. Always provide a best estimate, never 0 or null, unless truly unjudgeable.
 - Respond with ONLY one valid JSON object. No markdown.''';
   }
 

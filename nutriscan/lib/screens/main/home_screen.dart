@@ -20,6 +20,7 @@ import 'package:nutriscan/widgets/dialogs/coin_ad_dialogs.dart';
 import 'package:nutriscan/widgets/food/food_list.dart';
 import 'package:nutriscan/widgets/food/nutrition_summary_card.dart';
 import 'package:nutriscan/widgets/home/image_source_button.dart';
+import 'package:nutriscan/widgets/scan/multi_food_review_sheet.dart';
 import 'package:provider/provider.dart';
 
 
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isInitialLoading = true;
   late AnimationController _loadingController;
   late Animation<double> _loadingRotation;
+  bool _multiFoodSheetOpen = false;
 
   TextStyle _getStyledText(
     ThemeProvider themeProvider, {
@@ -72,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupErrorListener();
+      _setupMultiFoodListener();
     });
   }
 
@@ -126,6 +129,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           }
         });
       }
+    });
+  }
+
+  // docs/plan.md Phase 7A — shows the keep/drop review sheet when a scan
+  // finds more than one food item. Nothing is saved until the user confirms
+  // a selection there; a single-item scan never sets this and is unaffected.
+  void _setupMultiFoodListener() {
+    final foodProvider = context.read<FoodProvider>();
+
+    foodProvider.addListener(() {
+      final pending = foodProvider.pendingMultiFoodCandidates;
+      if (!mounted || pending == null || pending.isEmpty || _multiFoodSheetOpen) {
+        return;
+      }
+      _multiFoodSheetOpen = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) {
+          _multiFoodSheetOpen = false;
+          return;
+        }
+        final currentLanguage = context.read<LanguageProvider>().currentLanguage;
+        await showModalBottomSheet(
+          context: context,
+          isDismissible: false,
+          enableDrag: false,
+          isScrollControlled: true,
+          builder: (_) => MultiFoodReviewSheet(
+            candidates: pending,
+            currentLanguage: currentLanguage,
+          ),
+        );
+        _multiFoodSheetOpen = false;
+      });
     });
   }
 

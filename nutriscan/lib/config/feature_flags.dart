@@ -13,6 +13,7 @@ class FeatureFlags {
 
   static const _fkbMatcherEnabledKey = 'fkb_matcher_enabled';
   static const _aiModelScanKey = 'ai_model_scan';
+  static const _multiFoodScanEnabledKey = 'multi_food_scan_enabled';
 
   FirebaseRemoteConfig? _remoteConfig;
 
@@ -31,6 +32,7 @@ class FeatureFlags {
       await remoteConfig.setDefaults({
         _fkbMatcherEnabledKey: true,
         _aiModelScanKey: ApiConfig.groqModel,
+        _multiFoodScanEnabledKey: false,
       });
       await remoteConfig.fetchAndActivate();
       _remoteConfig = remoteConfig;
@@ -48,10 +50,16 @@ class FeatureFlags {
 
   /// Groq model id used for vision scan calls (food validation + analysis)
   /// and the health coach. Falls back to the hardcoded ApiConfig.groqModel
-  /// default. Changing this has cost/quality implications — verify with
-  /// eval/run_mape.mjs before rolling out a new value in the console.
+  /// default.
   String get aiModelScan {
     final value = _remoteConfig?.getString(_aiModelScanKey) ?? '';
     return value.isEmpty ? ApiConfig.groqModel : value;
   }
+
+  /// Multi-food detection (docs/plan.md Phase 7A). Default OFF — when true,
+  /// a single scan can return several distinct food items for the user to
+  /// review and select from before anything is saved, instead of always
+  /// exactly one.
+  bool get multiFoodScanEnabled =>
+      _remoteConfig?.getBool(_multiFoodScanEnabledKey) ?? false;
 }

@@ -88,6 +88,12 @@ class AppLocalizations {
       'source_verified_subtitle': 'Based on verified food database data',
       'nutrition_disclaimer_short':
           'Nutrition values are estimates for informational purposes only, not medical advice.',
+
+      // Multi-food review sheet (docs/plan.md Phase 7A)
+      'multi_food_review_title': 'We found multiple foods',
+      'multi_food_review_subtitle': 'Uncheck anything that isn\'t part of your meal',
+      'multi_food_review_save': 'Save selected',
+      'multi_food_review_cancel': 'Cancel',
       'calories': 'Calories',
       'protein': 'Protein',
       'carbs': 'Carbs',
