@@ -1829,8 +1829,8 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(label,
-                      style: tp.getBodyFont(
-                          fontSize: 16, color: AppColors.skInk(d))),
+                      style: tp.getSerifFont(
+                          fontSize: 18, color: AppColors.skInk(d))),
                   if (hint != null)
                     Text(hint,
                         style: tp.getBodyFont(
@@ -1869,8 +1869,8 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label,
-                    style: tp.getBodyFont(
-                        fontSize: 16, color: AppColors.skInk(d))),
+                    style: tp.getSerifFont(
+                        fontSize: 18, color: AppColors.skInk(d))),
                 if (hint != null)
                   Text(hint,
                       style: tp.getBodyFont(
@@ -1903,8 +1903,8 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(label,
-                      style: tp.getBodyFont(
-                          fontSize: 16, color: AppColors.skInk(d))),
+                      style: tp.getSerifFont(
+                          fontSize: 18, color: AppColors.skInk(d))),
                   if (hint != null)
                     Text(hint,
                         style: tp.getBodyFont(
