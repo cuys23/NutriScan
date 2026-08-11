@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:iconly/iconly.dart';
 import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/widgets/policy/policy_header.dart';
@@ -14,25 +12,22 @@ class PrivacyPolicyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        final isDarkMode = themeProvider.isDarkMode;
+        final d = themeProvider.isDarkMode;
 
         return Scaffold(
-          backgroundColor: isDarkMode
-              ? AppColors.backgroundDark
-              : AppColors.backgroundLight,
+          backgroundColor: AppColors.skPaper(d),
           appBar: AppBar(
             title: Text(
               'Privacy Policy',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.white,
+              style: themeProvider.getSerifFont(
+                fontSize: 22,
+                color: AppColors.skInk(d),
               ),
             ),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.skPaper(d),
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(IconlyLight.arrow_left, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: AppColors.skInk(d)),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),

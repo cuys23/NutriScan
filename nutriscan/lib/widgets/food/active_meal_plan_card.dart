@@ -197,9 +197,8 @@ class ActiveMealPlanCard extends StatelessWidget {
                 const Spacer(),
                 Text(
                   AppLocalizations.getString('view_meal_plan', language),
-                  style: tp.getBodyFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                  style: tp.getSerifFont(
+                    fontSize: 16,
                     color: AppColors.skAccent(d),
                   ),
                 ),

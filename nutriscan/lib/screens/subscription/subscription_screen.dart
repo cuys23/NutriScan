@@ -75,36 +75,33 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Consumer3<ThemeProvider, LanguageProvider, SubscriptionProvider>(
-      builder:
-          (
-            context,
-            themeProvider,
-            languageProvider,
-            subscriptionProvider,
-            child,
-          ) {
-            final isDarkMode = themeProvider.isDarkMode;
+      builder: (
+        context,
+        themeProvider,
+        languageProvider,
+        subscriptionProvider,
+        child,
+      ) {
+        final isDarkMode = themeProvider.isDarkMode;
+        final d = isDarkMode;
 
             return Scaffold(
-              backgroundColor: isDarkMode
-                  ? AppColors.backgroundDark
-                  : AppColors.backgroundLight,
+              backgroundColor: AppColors.skPaper(d),
               appBar: AppBar(
                 title: Text(
                   AppLocalizations.getString(
                     'premium_subscription',
                     languageProvider.currentLanguage,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.white,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 22,
+                    color: AppColors.skInk(d),
                   ),
                 ),
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.skPaper(d),
                 elevation: 0,
                 leading: IconButton(
-                  icon: const Icon(IconlyLight.arrow_left, color: Colors.white),
+                  icon: Icon(Icons.arrow_back, color: AppColors.skInk(d)),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ),

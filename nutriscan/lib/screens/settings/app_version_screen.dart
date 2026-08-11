@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iconly/iconly.dart';
 import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/config/app_config.dart';
 import 'package:nutriscan/config/app_localizations.dart';
@@ -17,10 +16,10 @@ class AppVersionScreen extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
 
+    final d = isDarkMode;
+
     return Scaffold(
-      backgroundColor: isDarkMode
-          ? AppColors.backgroundDark
-          : AppColors.backgroundLight,
+      backgroundColor: AppColors.skPaper(d),
       appBar: AppBar(
         title: Consumer2<ThemeProvider, LanguageProvider>(
           builder: (context, themeProvider, languageProvider, child) {
@@ -29,18 +28,17 @@ class AppVersionScreen extends StatelessWidget {
                 'app_version',
                 languageProvider.currentLanguage,
               ),
-              style: themeProvider.getFontForCurrentLanguage(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.white,
+              style: themeProvider.getSerifFont(
+                fontSize: 22,
+                color: AppColors.skInk(d),
               ),
             );
           },
         ),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.skPaper(d),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(IconlyLight.arrow_left, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppColors.skInk(d)),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iconly/iconly.dart';
 import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
@@ -45,26 +44,24 @@ class _CloudBackupScreenState extends State<CloudBackupScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
+    final d = isDarkMode;
     final currentLanguage = languageProvider.currentLanguage;
 
     return Scaffold(
-      backgroundColor: isDarkMode
-          ? AppColors.backgroundDark
-          : AppColors.backgroundLight,
+      backgroundColor: AppColors.skPaper(d),
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(IconlyLight.arrow_left, color: Colors.white, size: 24),
+          icon: Icon(Icons.arrow_back, color: AppColors.skInk(d), size: 24),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           AppLocalizations.getString('cloud_backup', currentLanguage),
-          style: themeProvider.getFontForCurrentLanguage(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: Colors.white,
+          style: themeProvider.getSerifFont(
+            fontSize: 22,
+            color: AppColors.skInk(d),
           ),
         ),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.skPaper(d),
         elevation: 0,
         actions: [
           Consumer<CloudBackupProvider>(

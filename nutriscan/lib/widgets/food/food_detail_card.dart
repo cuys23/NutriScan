@@ -11,6 +11,11 @@ import 'package:nutriscan/utils/image_helper.dart';
 import 'package:nutriscan/widgets/food/source_badge.dart';
 import 'package:provider/provider.dart';
 
+/// ─────────────────────────────────────────────────────────────
+/// Slow Kitchen — Food Detail Card / Sheet
+/// Elegant paper container with serif titles, warm muted stat boxes,
+/// sage/accent badges, and SK pill delete button.
+/// ─────────────────────────────────────────────────────────────
 class FoodDetailCard extends StatefulWidget {
   final Food food;
   final VoidCallback? onFoodDeleted;
@@ -22,623 +27,509 @@ class FoodDetailCard extends StatefulWidget {
 }
 
 class _FoodDetailCardState extends State<FoodDetailCard> {
-  // Helper method to get styled text with current language font
-  TextStyle _getStyledText({
-    Color? color,
-    double? fontSize,
-    FontWeight? fontWeight,
-  }) {
-    return context.read<ThemeProvider>().getFontForCurrentLanguage(
-      color: color,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
-    final currentLanguage = languageProvider.currentLanguage;
+    final tp = context.watch<ThemeProvider>();
+    final lang = context.watch<LanguageProvider>().currentLanguage;
+    final d = tp.isDarkMode;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.grey.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.skPaper(d),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        border: Border.all(color: AppColors.skRule(d)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Food Image and Basic Info
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Food Image & Floating Badges ──
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              child: SizedBox(
+                height: 220,
+                width: double.infinity,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ImageHelper.getImageWidget(
+                        widget.food.effectiveImageUrl,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    // Score Badge (Top Right)
+                    Positioned(
+                      top: 14,
+                      right: 14,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: AppColors.skSurface(d).withValues(alpha: 0.92),
+                          border: Border.all(color: AppColors.skSage(d)),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: Text(
+                          '${AppLocalizations.getString('score', lang).toUpperCase()}: ${widget.food.healthScore}',
+                          style: tp.getBodyFont(
+                            color: AppColors.skSage(d),
+                            fontSize: 11,
+                            letterSpacing: 1.2,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Title Banner (Bottom Left)
+                    Positioned(
+                      bottom: 14,
+                      left: 14,
+                      right: 14,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.skSurface(d).withValues(alpha: 0.94),
+                          border: Border.all(color: AppColors.skRule(d)),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          widget.food.name,
+                          style: tp.getSerifFont(
+                            color: AppColors.skInk(d),
+                            fontSize: 20,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            child: SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: Stack(
+
+            Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Positioned.fill(
-                    child: ImageHelper.getImageWidget(
-                      widget.food.effectiveImageUrl,
+                  // ── Description ──
+                  Builder(
+                    builder: (_) {
+                      final isEmpty = widget.food.description.trim().isEmpty ||
+                          widget.food.description == 'No description available';
+                      final text = isEmpty
+                          ? AppLocalizations.getString(
+                              'no_description_available', lang)
+                          : widget.food.description;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.getString('description', lang),
+                            style: tp.getSerifFont(
+                              fontSize: 20,
+                              color: AppColors.skInk(d),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            text,
+                            style: tp.getBodyFont(
+                              fontSize: 14,
+                              color: AppColors.skBody(d),
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      );
+                    },
+                  ),
+
+                  // ── Nutrition Grid ──
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppLocalizations.getString('nutrition', lang),
+                        style: tp.getSerifFont(
+                          fontSize: 20,
+                          color: AppColors.skInk(d),
+                        ),
+                      ),
+                      SourceBadge(
+                        source: widget.food.source,
+                        currentLanguage: lang,
+                      ),
+                    ],
+                  ),
+                  if (widget.food.source == 'verified') ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      AppLocalizations.getString(
+                        'source_verified_subtitle',
+                        lang,
+                      ),
+                      style: tp.getBodyFont(
+                        fontSize: 12,
+                        color: AppColors.skMuted(d),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+
+                  // SK Nutrition Stat Grid (2 columns)
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 2.8,
+                    children: [
+                      _buildNutritionStat(
+                        tp,
+                        d,
+                        AppLocalizations.getString('calories', lang),
+                        '${widget.food.calories.toStringAsFixed(0)} kcal',
+                        AppColors.skAccent(d),
+                      ),
+                      _buildNutritionStat(
+                        tp,
+                        d,
+                        AppLocalizations.getString('protein', lang),
+                        '${widget.food.protein.toStringAsFixed(1)}g',
+                        AppColors.skSage(d),
+                      ),
+                      _buildNutritionStat(
+                        tp,
+                        d,
+                        AppLocalizations.getString('carbs', lang),
+                        '${widget.food.carbs.toStringAsFixed(1)}g',
+                        AppColors.skAccent(d),
+                      ),
+                      _buildNutritionStat(
+                        tp,
+                        d,
+                        AppLocalizations.getString('fat', lang),
+                        '${widget.food.fat.toStringAsFixed(1)}g',
+                        AppColors.skMuted(d),
+                      ),
+                      _buildNutritionStat(
+                        tp,
+                        d,
+                        AppLocalizations.getString('fiber', lang),
+                        '${widget.food.fiber.toStringAsFixed(1)}g',
+                        AppColors.skSage(d),
+                      ),
+                      _buildNutritionStat(
+                        tp,
+                        d,
+                        AppLocalizations.getString('sugar', lang),
+                        '${widget.food.sugar.toStringAsFixed(1)}g',
+                        AppColors.skMuted(d),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  // ── Health Benefits ──
+                  if (widget.food.healthBenefits.isNotEmpty) ...[
+                    Text(
+                      AppLocalizations.getString('health_benefits', lang),
+                      style: tp.getSerifFont(
+                        fontSize: 20,
+                        color: AppColors.skInk(d),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.food.healthBenefits.join('\n'),
+                      style: tp.getBodyFont(
+                        fontSize: 14,
+                        color: AppColors.skBody(d),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // ── Health Warnings ──
+                  if (widget.food.healthWarnings.isNotEmpty) ...[
+                    Text(
+                      AppLocalizations.getString('health_warnings', lang),
+                      style: tp.getSerifFont(
+                        fontSize: 20,
+                        color: AppColors.skInk(d),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.food.healthWarnings.join('\n'),
+                      style: tp.getBodyFont(
+                        fontSize: 14,
+                        color: AppColors.skAccent(d),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // ── Serving Size & Date ──
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.getString('serving_size', lang)
+                                  .toUpperCase(),
+                              style: tp.getBodyFont(
+                                fontSize: 11,
+                                letterSpacing: 1.2,
+                                color: AppColors.skMuted(d),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.food.servingSize,
+                              style: tp.getSerifFont(
+                                fontSize: 18,
+                                color: AppColors.skInk(d),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            AppLocalizations.getString('date', lang)
+                                .toUpperCase(),
+                            style: tp.getBodyFont(
+                              fontSize: 11,
+                              letterSpacing: 1.2,
+                              color: AppColors.skMuted(d),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            DateFormat('dd MMM yyyy')
+                                .format(widget.food.analyzedAt),
+                            style: tp.getSerifFont(
+                              fontSize: 18,
+                              color: AppColors.skInk(d),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Delete Button ──
+                  GestureDetector(
+                    onTap: () => _showDeleteDialog(context),
+                    child: Container(
+                      height: 52,
                       width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
                       decoration: BoxDecoration(
-                        color: _getHealthScoreColor(widget.food.healthScore),
-                        borderRadius: BorderRadius.circular(15),
+                        color: AppColors.skSurface(d),
+                        border: Border.all(color: AppColors.skAccent(d)),
+                        borderRadius: BorderRadius.circular(26),
                       ),
-                      child: Text(
-                        '${AppLocalizations.getString('score', currentLanguage)}: ${widget.food.healthScore}',
-                        style: _getStyledText(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 12,
-                    left: 12,
-                    child: Container(
-                      width:
-                          MediaQuery.of(context).size.width *
-                          0.5, // ইমেজের অর্ধেক জায়গা
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Colors.black.withValues(alpha: 0.7)
-                            : Colors.white.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isDarkMode
-                              ? Colors.black.withValues(alpha: 0.2)
-                              : Colors.white.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        widget.food.name,
-                        style: _getStyledText(
-                          color: isDarkMode
-                              ? AppColors.textPrimaryDark
-                              : AppColors.textPrimaryLight,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(IconlyLight.delete,
+                              size: 18, color: AppColors.skAccent(d)),
+                          const SizedBox(width: 8),
+                          Text(
+                            AppLocalizations.getString('delete', lang),
+                            style: tp.getBodyFont(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.skAccent(d),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Description
-                Builder(
-                  builder: (_) {
-                    final isEmpty =
-                        widget.food.description.trim().isEmpty ||
-                        widget.food.description == 'No description available';
-                    final text = isEmpty
-                        ? AppLocalizations.getString(
-                            'no_description_available',
-                            currentLanguage,
-                          )
-                        : widget.food.description;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.getString(
-                            'description',
-                            currentLanguage,
-                          ),
-                          style: _getStyledText(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimaryLight,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          text,
-                          style: _getStyledText(
-                            fontSize: 14,
-                            color: isDarkMode
-                                ? AppColors.textSecondaryDark
-                                : AppColors.textSecondaryLight,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    );
-                  },
-                ),
-
-                // Nutrition Grid
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppLocalizations.getString('nutrition', currentLanguage),
-                      style: _getStyledText(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
-                      ),
-                    ),
-                    SourceBadge(
-                      source: widget.food.source,
-                      currentLanguage: currentLanguage,
-                    ),
-                  ],
-                ),
-                if (widget.food.source == 'verified') ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    AppLocalizations.getString(
-                      'source_verified_subtitle',
-                      currentLanguage,
-                    ),
-                    style: _getStyledText(
-                      fontSize: 11,
-                      color: isDarkMode
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 3.0,
-                  children: [
-                    _buildNutritionChip(
-                      AppLocalizations.getString('calories', currentLanguage),
-                      '${widget.food.calories.toStringAsFixed(0)} kcal',
-                      Colors.orange,
-                    ),
-                    _buildNutritionChip(
-                      AppLocalizations.getString('protein', currentLanguage),
-                      '${widget.food.protein.toStringAsFixed(1)}g',
-                      Colors.blue,
-                    ),
-                    _buildNutritionChip(
-                      AppLocalizations.getString('carbs', currentLanguage),
-                      '${widget.food.carbs.toStringAsFixed(1)}g',
-                      Colors.green,
-                    ),
-                    _buildNutritionChip(
-                      AppLocalizations.getString('fat', currentLanguage),
-                      '${widget.food.fat.toStringAsFixed(1)}g',
-                      Colors.red,
-                    ),
-                    _buildNutritionChip(
-                      AppLocalizations.getString('fiber', currentLanguage),
-                      '${widget.food.fiber.toStringAsFixed(1)}g',
-                      Colors.purple,
-                    ),
-                    _buildNutritionChip(
-                      AppLocalizations.getString('sugar', currentLanguage),
-                      '${widget.food.sugar.toStringAsFixed(1)}g',
-                      Colors.pink,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Health Benefits
-                if (widget.food.healthBenefits.isNotEmpty) ...[
-                  Text(
-                    AppLocalizations.getString(
-                      'health_benefits',
-                      currentLanguage,
-                    ),
-                    style: _getStyledText(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.food.healthBenefits.join('\n'),
-                    style: _getStyledText(
-                      fontSize: 14,
-                      color: isDarkMode
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Health Warnings
-                if (widget.food.healthWarnings.isNotEmpty) ...[
-                  Text(
-                    AppLocalizations.getString(
-                      'health_warnings',
-                      currentLanguage,
-                    ),
-                    style: _getStyledText(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.food.healthWarnings.join('\n'),
-                    style: _getStyledText(
-                      fontSize: 14,
-                      color: isDarkMode
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Serving Size and Date
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.getString(
-                              'serving_size',
-                              currentLanguage,
-                            ),
-                            style: _getStyledText(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimaryLight,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.food.servingSize,
-                            style: _getStyledText(
-                              fontSize: 14,
-                              color: isDarkMode
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            AppLocalizations.getString('date', currentLanguage),
-                            style: _getStyledText(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimaryLight,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            DateFormat(
-                              'dd MMM yyyy',
-                            ).format(widget.food.analyzedAt),
-                            style: _getStyledText(
-                              fontSize: 12,
-                              color: isDarkMode
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight,
-                            ),
-                            textAlign: TextAlign.end,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Delete Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _showDeleteDialog(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    icon: const Icon(IconlyBold.delete, size: 20),
-                    label: Text(
-                      AppLocalizations.getString('delete', currentLanguage),
-                      style: _getStyledText(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildNutritionChip(String label, String value, Color color) {
+  Widget _buildNutritionStat(
+    ThemeProvider tp,
+    bool d,
+    String label,
+    String value,
+    Color indicatorColor,
+  ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRuleSoft(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            label,
-            style: _getStyledText(
-              fontSize: 11,
-              color: color,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: indicatorColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: tp.getBodyFont(
+                    fontSize: 10,
+                    letterSpacing: 1.1,
+                    color: AppColors.skMuted(d),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           Text(
             value,
-            style: context.read<ThemeProvider>().getFontForCurrentLanguage(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.bold,
+            style: tp.getSerifFont(
+              fontSize: 17,
+              color: AppColors.skInk(d),
             ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
             maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
-  }
-
-  Color _getHealthScoreColor(int score) {
-    if (score >= 8) return Colors.green;
-    if (score >= 6) return Colors.orange;
-    if (score >= 4) return Colors.yellow[700]!;
-    return Colors.red;
   }
 
   void _showDeleteDialog(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final languageProvider = Provider.of<LanguageProvider>(
-      context,
-      listen: false,
-    );
-    final isDarkMode = themeProvider.isDarkMode;
-    final currentLanguage = languageProvider.currentLanguage;
+    final tp = Provider.of<ThemeProvider>(context, listen: false);
+    final lang =
+        Provider.of<LanguageProvider>(context, listen: false).currentLanguage;
+    final d = tp.isDarkMode;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          elevation: 0,
           backgroundColor: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? AppColors.surfaceDark
-                  : AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: isDarkMode
-                      ? Colors.black.withValues(alpha: 0.5)
-                      : Colors.black.withValues(alpha: 0.1),
-                  spreadRadius: 1,
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              color: AppColors.skPaper(d),
+              border: Border.all(color: AppColors.skRule(d)),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Warning Icon
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Icon(
-                    IconlyBold.delete,
-                    size: 48,
-                    color: Colors.red[600],
-                  ),
+                Icon(
+                  IconlyLight.delete,
+                  size: 40,
+                  color: AppColors.skAccent(d),
                 ),
-                const SizedBox(height: 20),
-
-                // Title
+                const SizedBox(height: 16),
                 Text(
-                  AppLocalizations.getString('delete_food', currentLanguage),
-                  style: context
-                      .read<ThemeProvider>()
-                      .getFontForCurrentLanguage(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
-                      ),
+                  AppLocalizations.getString('delete_food', lang),
+                  style: tp.getSerifFont(
+                    fontSize: 22,
+                    color: AppColors.skInk(d),
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
-
-                // Description
+                const SizedBox(height: 10),
                 Text(
-                  '${AppLocalizations.getString('delete_confirmation', currentLanguage)} "${widget.food.name}"?',
-                  style: context
-                      .read<ThemeProvider>()
-                      .getFontForCurrentLanguage(
-                        fontSize: 15,
-                        color: isDarkMode
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
-                        height: 1.4,
-                      ),
+                  '${AppLocalizations.getString('delete_confirmation', lang)} "${widget.food.name}"?',
+                  style: tp.getBodyFont(
+                    fontSize: 14,
+                    color: AppColors.skBody(d),
+                    height: 1.4,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
-
-                // Action Buttons
+                const SizedBox(height: 24),
                 Row(
                   children: [
-                    // Cancel Button
                     Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? AppColors.grey800
-                              : AppColors.grey100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.skRule(d)),
+                            borderRadius: BorderRadius.circular(22),
                           ),
-                          child: Text(
-                            AppLocalizations.getString(
-                              'cancel',
-                              currentLanguage,
+                          child: Center(
+                            child: Text(
+                              AppLocalizations.getString('cancel', lang),
+                              style: tp.getBodyFont(
+                                fontSize: 14,
+                                color: AppColors.skInk(d),
+                              ),
                             ),
-                            style: context
-                                .read<ThemeProvider>()
-                                .getFontForCurrentLanguage(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDarkMode
-                                      ? AppColors.textSecondaryDark
-                                      : AppColors.textSecondaryLight,
-                                ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-
-                    // Delete Button
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.red[500],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: TextButton(
-                          onPressed: () async {
-                            await context.read<FoodProvider>().deleteFood(
-                              widget.food.id,
-                            );
-                            if (!mounted) return;
-                            // ignore: use_build_context_synchronously
-                            Navigator.of(context).pop();
-                            // Notify parent screen to refresh
-                            if (widget.onFoodDeleted != null) {
-                              widget.onFoodDeleted!();
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                      child: GestureDetector(
+                        onTap: () async {
+                          await context
+                              .read<FoodProvider>()
+                              .deleteFood(widget.food.id);
+                          if (!mounted) return;
+                          Navigator.of(context).pop();
+                          if (widget.onFoodDeleted != null) {
+                            widget.onFoodDeleted!();
+                          }
+                        },
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.skInk(d),
+                            borderRadius: BorderRadius.circular(22),
                           ),
-                          child: Text(
-                            AppLocalizations.getString(
-                              'delete',
-                              currentLanguage,
+                          child: Center(
+                            child: Text(
+                              AppLocalizations.getString('delete', lang),
+                              style: tp.getBodyFont(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.skPaper(d),
+                              ),
                             ),
-                            style: context
-                                .read<ThemeProvider>()
-                                .getFontForCurrentLanguage(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
                           ),
                         ),
                       ),

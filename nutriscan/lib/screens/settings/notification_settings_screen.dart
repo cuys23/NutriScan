@@ -32,38 +32,35 @@ class _NotificationSettingsScreenState
       NotificationProvider,
       SubscriptionProvider
     >(
-      builder:
-          (
-            context,
-            themeProvider,
-            languageProvider,
-            notificationProvider,
-            subscriptionProvider,
-            child,
-          ) {
-            final isDarkMode = themeProvider.isDarkMode;
-            final hasPremium = subscriptionProvider.hasPremiumFeatures;
+      builder: (
+        context,
+        themeProvider,
+        languageProvider,
+        notificationProvider,
+        subscriptionProvider,
+        child,
+      ) {
+        final isDarkMode = themeProvider.isDarkMode;
+        final d = isDarkMode;
+        final hasPremium = subscriptionProvider.hasPremiumFeatures;
 
             return Scaffold(
-              backgroundColor: isDarkMode
-                  ? AppColors.backgroundDark
-                  : AppColors.backgroundLight,
+              backgroundColor: AppColors.skPaper(d),
               appBar: AppBar(
                 title: Text(
                   AppLocalizations.getString(
                     'notification_settings',
                     languageProvider.currentLanguage,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.white,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 22,
+                    color: AppColors.skInk(d),
                   ),
                 ),
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.skPaper(d),
                 elevation: 0,
                 leading: IconButton(
-                  icon: const Icon(IconlyLight.arrow_left, color: Colors.white),
+                  icon: Icon(Icons.arrow_back, color: AppColors.skInk(d)),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
