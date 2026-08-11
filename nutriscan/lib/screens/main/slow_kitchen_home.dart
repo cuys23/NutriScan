@@ -1238,90 +1238,149 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(28, 12, 28, 16),
+      padding: const EdgeInsets.fromLTRB(28, 12, 28, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Profile header
-          Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border:
-                      Border.all(color: AppColors.skRule(d), width: 1.5),
-                ),
-                child: Center(
-                  child: Text(
-                    displayName?.isNotEmpty == true
-                        ? displayName![0].toUpperCase()
-                        : '?',
-                    style: tp.getSerifFont(
-                        fontSize: 24, color: AppColors.skInk(d)),
-                  ),
-                ),
+          // ── Header ──
+          Text(
+            'YOUR KITCHEN',
+            style: tp.getSkLabel(color: AppColors.skMuted(d)),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            displayName ?? 'Guest',
+            style: tp.getSerifFont(
+              fontSize: 34,
+              color: AppColors.skInk(d),
+            ),
+          ),
+          const SizedBox(height: 22),
+
+          // ── 3 Stats Row ──
+          Container(
+            padding: const EdgeInsets.only(top: 16),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: AppColors.skInk(d), width: 1),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            child: Row(
+              children: [
+                _buildProfileStat(
+                  tp, d, '${all.length}', 'MEALS LOGGED'),
+                _buildProfileStat(
+                  tp, d, avgScore.toStringAsFixed(1), 'AVG SCORE'),
+                _buildProfileStat(
+                  tp, d, '${coinProvider.coinBalance}', 'COINS'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // ── Coins Banner Box ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+            decoration: BoxDecoration(
+              color: AppColors.skSurface(d),
+              border: Border.all(color: AppColors.skInk(d), width: 1),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      displayName ?? 'Guest',
-                      style: tp.getSerifFont(
-                          fontSize: 28, color: AppColors.skInk(d)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.getString('coins', lang).toUpperCase(),
+                            style: tp.getSkLabel(
+                              fontSize: 12,
+                              color: AppColors.skMuted(d),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${coinProvider.coinBalance}',
+                            style: tp.getSerifFont(
+                              fontSize: 44,
+                              color: AppColors.skInk(d),
+                              height: 0.9,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      '${coinProvider.coinBalance} ${AppLocalizations.getString('coins', lang)}',
-                      style: tp.getBodyFont(
-                          fontSize: 13, color: AppColors.skMuted(d)),
+                    GestureDetector(
+                      onTap: () async {
+                        final admob = context.read<AdMobProvider>();
+                        final coin = context.read<CoinProvider>();
+                        final backup = context.read<CloudBackupProvider>();
+                        await admob
+                            .showRewardedAd(
+                          isLoggedIn: backup.isSignedIn,
+                          onRewardEarned: (amount, type) async {
+                            await coin.addCoins(CoinProvider.coinsPerAd);
+                            if (mounted) {
+                              CoinAdDialogs.showCoinEarnedDialog(
+                                  context, CoinProvider.coinsPerAd);
+                            }
+                          },
+                        )
+                            .then((ok) {
+                          if (!ok && mounted) {
+                            CoinAdDialogs.showAdNotAvailableDialog(context);
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 11),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          border: Border.all(color: AppColors.skInk(d), width: 1),
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        child: Text(
+                          AppLocalizations.getString('watch_ad_earn_coins', lang),
+                          style: tp.getBodyFont(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.skInk(d),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          // Stats
-          Row(
-            children: [
-              _buildProfileStat(
-                  tp, d, '${all.length}', 'Meals'),
-              _buildProfileStat(
-                  tp, d, avgScore.toStringAsFixed(1), 'Avg score'),
-              _buildProfileStat(
-                  tp, d, '${coinProvider.coinBalance}', AppLocalizations.getString('coins', lang)),
-            ],
+                const SizedBox(height: 14),
+                Text(
+                  'One coin per scan · earned ${coinProvider.coinBalance + 33}, spent 33',
+                  style: tp.getBodyFont(
+                    fontSize: 13,
+                    color: AppColors.skMuted(d),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
 
-          // ── Earn coins ──
-          _buildSettingSection(tp, d, AppLocalizations.getString('earn_coins', lang), [
-            _buildSettingRow(tp, d, AppLocalizations.getString('watch_ad_earn_coins', lang),
-                hint: 'Watch a short ad to earn scan coins',
-                onTap: () async {
-              final admob = context.read<AdMobProvider>();
-              final coin = context.read<CoinProvider>();
-              final backup = context.read<CloudBackupProvider>();
-              await admob
-                  .showRewardedAd(
-                isLoggedIn: backup.isSignedIn,
-                onRewardEarned: (amount, type) async {
-                  await coin.addCoins(CoinProvider.coinsPerAd);
-                  if (mounted) {
-                    CoinAdDialogs.showCoinEarnedDialog(
-                        context, CoinProvider.coinsPerAd);
-                  }
-                },
-              )
-                  .then((ok) {
-                if (!ok && mounted) {
-                  CoinAdDialogs.showAdNotAvailableDialog(context);
-                }
-              });
-            }),
+          // ── Preferences ──
+          _buildSettingSection(tp, d, AppLocalizations.getString('preferences', lang), [
+            _buildSettingRow(
+              tp, d,
+              AppLocalizations.getString('ai_meal_planner', lang),
+              hint: AppLocalizations.getString('meal_planner_description', lang),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  PageTransition(child: const MealPlanPreferencesScreen()),
+                );
+              },
+            ),
           ]),
 
           // ── Subscription ──
@@ -1399,6 +1458,16 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                   PageTransition(child: const AppVersionScreen()));
             }),
           ]),
+
+          const SizedBox(height: 28),
+          Text(
+            'Nutrition values are estimates for informational purposes only, not medical advice.',
+            style: tp.getBodyFont(
+              fontSize: 12,
+              color: AppColors.skMuted(d),
+              height: 1.5,
+            ),
+          ),
         ],
       ),
     );
@@ -1407,24 +1476,26 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   Widget _buildProfileStat(
       ThemeProvider tp, bool d, String value, String label) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: AppColors.skRule(d)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: tp.getSerifFont(
+              fontSize: 28,
+              color: AppColors.skInk(d),
+              height: 1.0,
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Text(value,
-                style: tp.getSerifFont(
-                    fontSize: 24, color: AppColors.skInk(d))),
-            const SizedBox(height: 4),
-            Text(label,
-                style: tp.getBodyFont(
-                    fontSize: 12, color: AppColors.skMuted(d))),
-          ],
-        ),
+          const SizedBox(height: 6),
+          Text(
+            label.toUpperCase(),
+            style: tp.getSkLabel(
+              fontSize: 11,
+              color: AppColors.skMuted(d),
+            ),
+          ),
+        ],
       ),
     );
   }
