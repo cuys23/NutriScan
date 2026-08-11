@@ -15,6 +15,8 @@ import 'package:nutriscan/providers/food/meal_plan_provider.dart';
 import 'package:nutriscan/providers/payment/subscription_provider.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
+import 'package:nutriscan/screens/analysis/sk_ledger_screen.dart';
+import 'package:nutriscan/screens/analysis/sk_weekly_review_screen.dart';
 import 'package:nutriscan/screens/chat/health_coach_screen.dart';
 import 'package:nutriscan/screens/food/meal_plan_screen.dart';
 import 'package:nutriscan/screens/legal/privacy_policy_screen.dart';
@@ -27,10 +29,13 @@ import 'package:nutriscan/services/ai/groq_service.dart';
 import 'package:nutriscan/services/media/image_picker_service.dart';
 import 'package:nutriscan/utils/page_transition.dart';
 import 'package:nutriscan/widgets/ads/adaptive_banner_ad.dart';
+import 'package:nutriscan/widgets/analysis/sk_line_chart.dart';
 import 'package:nutriscan/widgets/common/language_dropdown.dart';
+import 'package:nutriscan/widgets/common/sk_torn_divider.dart';
 import 'package:nutriscan/widgets/dialogs/coin_ad_dialogs.dart';
 import 'package:nutriscan/widgets/food/active_meal_plan_card.dart';
 import 'package:nutriscan/widgets/food/food_detail_card.dart';
+import 'package:nutriscan/widgets/home/sk_day_timeline.dart';
 import 'package:nutriscan/widgets/home/sk_scan_button.dart';
 import 'package:nutriscan/widgets/home/sk_tab_bar.dart';
 import 'package:nutriscan/widgets/scan/multi_food_review_sheet.dart';
@@ -57,6 +62,14 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   bool _condensed = false;
   final int _dailyTarget = 2000;
 
+  // History tab
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+  String _sort = 'time';
+
+  // Trends tab
+  String _metric = 'calories';
+
   late AnimationController _loadingController;
 
   // ── lifecycle ──────────────────────────────────────────────
@@ -64,7 +77,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   void initState() {
     super.initState();
     _loadingController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1300),
       vsync: this,
     )..repeat();
 
@@ -78,6 +91,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   @override
   void dispose() {
     _loadingController.dispose();
+    _searchController.dispose();
     try {
       final foodProvider = context.read<FoodProvider>();
       foodProvider.removeListener(_setupErrorListener);
@@ -160,27 +174,15 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
-        padding: const EdgeInsets.fromLTRB(28, 28, 28, 36),
+        padding: const EdgeInsets.fromLTRB(28, 28, 28, 44),
         decoration: BoxDecoration(
           color: AppColors.skPaper(d),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.skRule(d),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 22),
             Text(
               'How shall we look?',
               style: tp.getSerifFont(
@@ -188,7 +190,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 color: AppColors.skInk(d),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               'One coin per scan. You have ${coinProvider.coinBalance}.',
               style: tp.getBodyFont(
@@ -196,11 +198,11 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 color: AppColors.skMuted(d),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
             _buildSheetRow(
-              icon: Icons.camera_alt_outlined,
-              label: 'Camera',
-              hint: 'Take a photo of your plate',
+              icon: Icons.photo_camera_rounded,
+              label: 'Take a photo',
+              hint: 'Best light is by a window',
               onTap: () {
                 Navigator.pop(context);
                 _takePhotoFromCamera();
@@ -208,11 +210,10 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
               d: d,
               tp: tp,
             ),
-            Container(height: 1, color: AppColors.skRule(d)),
             _buildSheetRow(
-              icon: Icons.photo_library_outlined,
-              label: 'Gallery',
-              hint: 'Pick an existing photo',
+              icon: Icons.photo_library_rounded,
+              label: 'Choose from gallery',
+              hint: 'Something you shot earlier',
               onTap: () {
                 Navigator.pop(context);
                 _pickImageFromGallery();
@@ -237,19 +238,25 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 17),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.skRule(d))),
+        ),
         child: Row(
           children: [
-            Icon(icon, size: 22, color: AppColors.skInk(d)),
-            const SizedBox(width: 14),
+            Icon(icon, size: 24, color: AppColors.skInk(d)),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(label,
                       style: tp.getBodyFont(
-                          fontSize: 16, color: AppColors.skInk(d))),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.skInk(d))),
+                  const SizedBox(height: 3),
                   Text(hint,
                       style: tp.getBodyFont(
                           fontSize: 13, color: AppColors.skMuted(d))),
@@ -489,8 +496,13 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     final carbs = fp.getTodayCarbsSync();
     final fat = fp.getTodayFatSync();
     final now = DateTime.now();
-    final dateStr =
-        DateFormat('EEEE, d MMMM').format(now);
+
+    // Where the day lands if the current pace holds until 22:00.
+    final elapsed =
+        ((now.hour + now.minute / 60 - SkDayTimeline.dayStart) / 16)
+            .clamp(0.15, 1.0);
+    final projected = cal / elapsed;
+    final left = _dailyTarget - cal;
 
     return NotificationListener<ScrollNotification>(
       onNotification: (n) {
@@ -504,81 +516,92 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
         children: [
           SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(28, 12, 28, 16),
+            padding: const EdgeInsets.fromLTRB(28, 14, 28, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Date label
+                // ── Greeting ──
                 Text(
-                  dateStr.toUpperCase(),
-                  style: tp.getSkLabel(color: AppColors.skMuted(d)),
+                  DateFormat('EEEE, d MMMM').format(now).toUpperCase(),
+                  style:
+                      tp.getSkLabel(fontSize: 13, color: AppColors.skMuted(d)),
                 ),
-                const SizedBox(height: 14),
-                // Large calorie number
+                const SizedBox(height: 6),
+                Text(
+                  '${_greeting(now)}, ${_displayName()}',
+                  style: tp.getSerifFont(
+                      fontSize: 34, color: AppColors.skInk(d)),
+                ),
+                const SizedBox(height: 26),
+
+                // ── Calories against target ──
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      cal.toStringAsFixed(0),
+                      _fmt(cal),
                       style: tp.getSerifFont(
                           fontSize: 82,
-                          color: AppColors.skInk(d),
-                          height: 0.9),
+                          height: 0.86,
+                          color: AppColors.skInk(d)),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'of $_dailyTarget kcal',
-                          style: tp.getBodyFont(
-                              fontSize: 13, color: AppColors.skMuted(d)),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${((cal / _dailyTarget) * 100).round()}%',
-                          style: tp.getBodyFont(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.skAccent(d),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(width: 10),
+                    Text(
+                      'of ${_fmt(_dailyTarget.toDouble())} kcal',
+                      style: tp.getBodyFont(
+                          fontSize: 15, color: AppColors.skMuted(d)),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                // Calorie progress bar
-                Container(
-                  height: 2,
-                  decoration: BoxDecoration(
-                    color: AppColors.skRuleSoft(d),
-                    borderRadius: BorderRadius.circular(1),
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: FractionallySizedBox(
-                      widthFactor:
-                          (cal / _dailyTarget).clamp(0, 1).toDouble(),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.skAccent(d),
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
+                const SizedBox(height: 20),
+                _buildCalorieBar(tp, d, cal, projected),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      left >= 0
+                          ? '${_fmt(left)} kcal left today'
+                          : '${_fmt(-left)} kcal over target',
+                      style: tp.getBodyFont(
+                          fontSize: 13, color: AppColors.skMuted(d)),
                     ),
-                  ),
+                    Text(
+                      'PROJECTED ${_fmt(projected)}',
+                      style: tp.getSkLabel(
+                          fontSize: 12, color: AppColors.skFaint(d)),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 18),
-                // Macro row
-                _buildMacroRow(tp, d, protein, carbs, fat),
                 const SizedBox(height: 26),
-                // Remaining / projected
-                _buildDayInfo(tp, d, cal, meals),
-                const SizedBox(height: 22),
-                // Active Meal Plan (if any)
+                _buildMacroRow(tp, d, protein, carbs, fat),
+                const SizedBox(height: 30),
+
+                // ── The day so far ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('THE DAY SO FAR',
+                        style: tp.getSkLabel(color: AppColors.skMuted(d))),
+                    Text(SkDayTimeline.gapLabel(meals),
+                        style: tp.getBodyFont(
+                            fontSize: 12, color: AppColors.skFaint(d))),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SkDayTimeline(
+                  meals: meals,
+                  themeProvider: tp,
+                  isDarkMode: d,
+                ),
+                const SizedBox(height: 34),
+
+                // ── Active meal plan (app feature, kept above the meal list) ──
                 Consumer<MealPlanProvider>(
                   builder: (context, mealPlanProvider, _) {
                     final activePlan = mealPlanProvider.activePlan;
@@ -587,7 +610,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                       padding: const EdgeInsets.only(bottom: 22),
                       child: ActiveMealPlanCard(
                         plan: activePlan,
-                        language: Provider.of<LanguageProvider>(context, listen: false).currentLanguage,
+                        language: lp.currentLanguage,
                         themeProvider: tp,
                         isDarkMode: d,
                         onTap: () {
@@ -599,32 +622,78 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                             ),
                           );
                         },
-                        onDismiss: () {
-                          mealPlanProvider.dismissMealPlan();
-                        },
+                        onDismiss: mealPlanProvider.dismissMealPlan,
                       ),
                     );
                   },
                 ),
-                // Section header
-                Text(
-                  'TODAY\'S MEALS',
-                  style: tp.getSkLabel(
-                      fontSize: 11, color: AppColors.skMuted(d)),
+
+                // ── Today's meals ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Today's meals",
+                        style: tp.getSerifFont(
+                            fontSize: 24, color: AppColors.skInk(d))),
+                    Text('${meals.length} logged',
+                        style: tp.getBodyFont(
+                            fontSize: 13, color: AppColors.skMuted(d))),
+                  ],
                 ),
                 const SizedBox(height: 14),
-                // Meal list
                 if (meals.isEmpty)
-                  _buildEmptyState(tp, d)
+                  _buildEmptyState(tp, d, 'Nothing logged yet',
+                      'Photograph your first plate of the day.')
                 else
-                  ...meals.asMap().entries.map(
-                      (e) => _buildMealRow(tp, d, e.value, e.key)),
+                  ...meals.map((f) => _buildMealRow(tp, d, f)),
               ],
             ),
           ),
-          // Condensed header
           if (_condensed) _buildCondensedHeader(tp, d, cal),
         ],
+      ),
+    );
+  }
+
+  /// 2pt target bar with the faint projection tick sitting above it.
+  Widget _buildCalorieBar(
+      ThemeProvider tp, bool d, double cal, double projected) {
+    return SizedBox(
+      height: 10,
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final w = c.maxWidth;
+          return Stack(
+            children: [
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 4,
+                child: Container(height: 2, color: AppColors.skRule(d)),
+              ),
+              Positioned(
+                left: 0,
+                top: 4,
+                child: Container(
+                  height: 2,
+                  width: w * (cal / _dailyTarget).clamp(0.0, 1.0),
+                  color: AppColors.skAccent(d),
+                ),
+              ),
+              Positioned(
+                left: w * (projected / _dailyTarget).clamp(0.0, 1.0) - 0.5,
+                top: 0,
+                child: Container(
+                  width: 1,
+                  height: 10,
+                  color: AppColors.skFaint(d),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -632,14 +701,15 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   Widget _buildMacroRow(
       ThemeProvider tp, bool d, double protein, double carbs, double fat) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildMacroItem(tp, d, 'Protein', '${protein.toStringAsFixed(1)}g',
+        _buildMacroItem(tp, d, 'PROTEIN', '${protein.toStringAsFixed(1)}g',
             protein / 95, AppColors.skSage(d)),
-        const SizedBox(width: 20),
-        _buildMacroItem(tp, d, 'Carbs', '${carbs.toStringAsFixed(0)}g',
+        const SizedBox(width: 24),
+        _buildMacroItem(tp, d, 'CARBS', '${carbs.toStringAsFixed(0)}g',
             carbs / 210, AppColors.skAccent(d)),
-        const SizedBox(width: 20),
-        _buildMacroItem(tp, d, 'Fat', '${fat.toStringAsFixed(1)}g',
+        const SizedBox(width: 24),
+        _buildMacroItem(tp, d, 'FAT', '${fat.toStringAsFixed(1)}g',
             fat / 65, AppColors.skMuted(d)),
       ],
     );
@@ -651,38 +721,21 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label,
-                  style: tp.getBodyFont(
-                      fontSize: 11,
-                      color: AppColors.skMuted(d),
-                      letterSpacing: 1.2)),
-              Text(value,
-                  style: tp.getBodyFont(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.skInk(d))),
-            ],
-          ),
-          const SizedBox(height: 6),
+          Text(label,
+              style: tp.getSkLabel(color: AppColors.skMuted(d))),
+          const SizedBox(height: 8),
+          Text(value,
+              style:
+                  tp.getSerifFont(fontSize: 26, color: AppColors.skInk(d))),
+          const SizedBox(height: 8),
           Container(
             height: 3,
-            decoration: BoxDecoration(
-              color: AppColors.skRuleSoft(d),
-              borderRadius: BorderRadius.circular(1.5),
-            ),
+            color: AppColors.skRuleSoft(d),
             child: Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
-                widthFactor: pct.clamp(0, 1).toDouble(),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(1.5),
-                  ),
-                ),
+                widthFactor: pct.clamp(0.0, 1.0),
+                child: Container(color: color),
               ),
             ),
           ),
@@ -691,131 +744,64 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     );
   }
 
-  Widget _buildDayInfo(
-      ThemeProvider tp, bool d, double cal, List<Food> meals) {
-    final left = _dailyTarget - cal;
-    final leftStr = left >= 0
-        ? '${left.toStringAsFixed(0)} kcal left today'
-        : '${(-left).toStringAsFixed(0)} kcal over target';
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.skSurface(d),
-        border: Border.all(color: AppColors.skRule(d)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  leftStr,
-                  style: tp.getBodyFont(
-                      fontSize: 14, color: AppColors.skBody(d)),
-                ),
-                if (meals.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '${meals.length} ${meals.length == 1 ? 'meal' : 'meals'} logged',
-                    style: tp.getBodyFont(
-                        fontSize: 13, color: AppColors.skMuted(d)),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Text(
-            '${((cal / _dailyTarget) * 100).round()}%',
-            style: tp.getSerifFont(
-                fontSize: 28, color: AppColors.skAccent(d)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMealRow(ThemeProvider tp, bool d, Food food, int index) {
-    final timeStr = DateFormat('HH:mm').format(food.analyzedAt);
+  /// A single meal line. [compact] is the slightly tighter History variant.
+  Widget _buildMealRow(ThemeProvider tp, bool d, Food food,
+      {bool compact = false}) {
     return GestureDetector(
       onTap: () => _showFoodDetail(food),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: compact ? 15 : 16),
         decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: AppColors.skRule(d), width: 1),
-          ),
+          border: Border(top: BorderSide(color: AppColors.skRule(d))),
         ),
         child: Row(
           children: [
-            // Score circle
             Container(
-              width: 44,
-              height: 44,
+              width: compact ? 40 : 44,
+              height: compact ? 40 : 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: food.healthScore >= 7
-                      ? AppColors.skSage(d)
-                      : food.healthScore >= 5
-                          ? AppColors.skAccent(d)
-                          : AppColors.skMuted(d),
-                  width: 1.5,
-                ),
+                border: Border.all(color: AppColors.skRule(d)),
               ),
               child: Center(
                 child: Text(
-                  '${food.healthScore}',
+                  '${food.healthScore}/10',
                   style: tp.getSerifFont(
-                    fontSize: 18,
-                    color: AppColors.skInk(d),
-                  ),
+                      fontSize: compact ? 15 : 16,
+                      color: AppColors.skInk(d)),
                 ),
               ),
             ),
             const SizedBox(width: 14),
-            // Name + time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     food.name,
-                    style: tp.getSerifFont(
-                        fontSize: 18, color: AppColors.skInk(d)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: tp.getBodyFont(
+                      fontSize: compact ? 15 : 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.skInk(d),
+                    ),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Text(
-                        timeStr,
-                        style: tp.getBodyFont(
-                            fontSize: 13, color: AppColors.skMuted(d)),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        food.source == 'verified' ? 'Verified' : 'AI estimate',
-                        style: tp.getBodyFont(
-                          fontSize: 12,
-                          color: food.source == 'verified'
-                              ? AppColors.skSage(d)
-                              : AppColors.skMuted(d),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 3),
+                  Text(
+                    '${DateFormat('HH:mm').format(food.analyzedAt)} · ${_sourceLabel(food)}',
+                    style: tp.getBodyFont(
+                        fontSize: 13, color: AppColors.skMuted(d)),
                   ),
                 ],
               ),
             ),
-            // Kcal
+            const SizedBox(width: 10),
             Text(
-              food.calories.toStringAsFixed(0),
+              _fmt(food.calories),
               style: tp.getSerifFont(
-                  fontSize: 22, color: AppColors.skInk(d)),
+                  fontSize: compact ? 20 : 22, color: AppColors.skInk(d)),
             ),
           ],
         ),
@@ -837,9 +823,9 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
           final d = tp.isDarkMode;
           return Container(
             decoration: BoxDecoration(
-              color: d ? AppColors.surfaceDark : AppColors.surfaceLight,
+              color: AppColors.skPaper(d),
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
+                  const BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: SingleChildScrollView(
               controller: controller,
@@ -858,8 +844,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
 
   Widget _buildCondensedHeader(ThemeProvider tp, bool d, double cal) {
     return Container(
-      padding: EdgeInsets.fromLTRB(
-          28, MediaQuery.of(context).padding.top > 0 ? 8 : 12, 28, 12),
+      padding: const EdgeInsets.fromLTRB(28, 12, 28, 12),
       decoration: BoxDecoration(
         color: AppColors.skPaper(d),
         border: Border(
@@ -867,58 +852,49 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
         ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: [
           Text(
-            cal.toStringAsFixed(0),
-            style: tp.getSerifFont(
-                fontSize: 26, color: AppColors.skInk(d)),
+            _fmt(cal),
+            style: tp.getSerifFont(fontSize: 26, color: AppColors.skInk(d)),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Text(
-            'of $_dailyTarget kcal',
-            style: tp.getBodyFont(
-                fontSize: 13, color: AppColors.skMuted(d)),
+            'of ${_fmt(_dailyTarget.toDouble())} kcal',
+            style:
+                tp.getBodyFont(fontSize: 13, color: AppColors.skMuted(d)),
           ),
           const Spacer(),
           Text(
             '${((cal / _dailyTarget) * 100).round()}%',
-            style: tp.getBodyFont(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.skAccent(d),
-              letterSpacing: 1.2,
-            ),
+            style: tp.getSkLabel(fontSize: 12, color: AppColors.skAccent(d)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState(ThemeProvider tp, bool d) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 60),
-      child: Center(
-        child: Column(
-          children: [
-            Text(
-              '·',
-              style: tp.getSerifFont(
-                  fontSize: 48, color: AppColors.skFaint(d)),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'No meals yet today',
-              style: tp.getSerifFont(
-                  fontSize: 24, color: AppColors.skInk(d)),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap "Scan a meal" to start',
+  Widget _buildEmptyState(
+      ThemeProvider tp, bool d, String title, String hint) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 44),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.skRule(d))),
+      ),
+      child: Column(
+        children: [
+          Text(title,
+              textAlign: TextAlign.center,
+              style:
+                  tp.getSerifFont(fontSize: 26, color: AppColors.skInk(d))),
+          const SizedBox(height: 8),
+          Text(hint,
+              textAlign: TextAlign.center,
               style: tp.getBodyFont(
-                  fontSize: 14, color: AppColors.skMuted(d)),
-            ),
-          ],
-        ),
+                  fontSize: 14, color: AppColors.skMuted(d))),
+        ],
       ),
     );
   }
@@ -928,77 +904,163 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Widget _buildHistoryTab(
       ThemeProvider tp, LanguageProvider lp, FoodProvider fp, bool d) {
-    final all = fp.foods;
+    final q = _query.trim().toLowerCase();
+    final list = fp.foods
+        .where((f) => q.isEmpty || f.name.toLowerCase().contains(q))
+        .toList();
+    switch (_sort) {
+      case 'name':
+        list.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'calories':
+        list.sort((a, b) => b.calories.compareTo(a.calories));
+        break;
+      default:
+        list.sort((a, b) => b.analyzedAt.compareTo(a.analyzedAt));
+    }
 
-    // Group by date
-    final Map<String, List<Food>> grouped = {};
-    for (final f in all) {
-      final key = DateFormat('EEEE, d MMMM').format(f.analyzedAt);
-      grouped.putIfAbsent(key, () => []);
-      grouped[key]!.add(f);
+    // Group by day, preserving the sort order of first appearance.
+    final order = <String>[];
+    final groups = <String, List<Food>>{};
+    for (final f in list) {
+      final key = _dayLabel(f.analyzedAt);
+      if (!groups.containsKey(key)) {
+        groups[key] = [];
+        order.add(key);
+      }
+      groups[key]!.add(f);
     }
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(28, 12, 28, 16),
+      padding: const EdgeInsets.fromLTRB(28, 14, 28, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Text(
-            'HISTORY',
-            style: tp.getSkLabel(color: AppColors.skMuted(d)),
-          ),
+          Text('KITCHEN DIARY',
+              style:
+                  tp.getSkLabel(fontSize: 13, color: AppColors.skMuted(d))),
           const SizedBox(height: 6),
-          Text(
-            'Everything logged',
-            style: tp.getSerifFont(
-                fontSize: 32, color: AppColors.skInk(d)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('History',
+                  style: tp.getSerifFont(
+                      fontSize: 34, color: AppColors.skInk(d))),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                    context, PageTransition(child: const SkLedgerScreen())),
+                behavior: HitTestBehavior.opaque,
+                child: Text('LEDGER',
+                    style: tp.getSkLabel(
+                        fontSize: 12, color: AppColors.skAccent(d))),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
-          if (all.isEmpty)
-            _buildEmptyState(tp, d)
+          // ── Search + sort ──
+          Container(
+            padding: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              border:
+                  Border(bottom: BorderSide(color: AppColors.skRule(d))),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search, size: 18, color: AppColors.skMuted(d)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _query = v),
+                    style: tp.getBodyFont(
+                        fontSize: 15, color: AppColors.skInk(d)),
+                    cursorColor: AppColors.skAccent(d),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      hintText: 'Search your meals',
+                      hintStyle: tp.getBodyFont(
+                          fontSize: 15, color: AppColors.skMuted(d)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => setState(() => _sort = _sort == 'time'
+                      ? 'name'
+                      : _sort == 'name'
+                          ? 'calories'
+                          : 'time'),
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    {
+                      'time': 'BY TIME',
+                      'name': 'BY NAME',
+                      'calories': 'BY CALORIES',
+                    }[_sort]!,
+                    style: tp.getSkLabel(
+                        fontSize: 12, color: AppColors.skAccent(d)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          if (order.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 60),
+              child: Center(
+                child: Column(
+                  children: [
+                    Text(q.isEmpty ? 'Nothing logged yet' : 'No meals match',
+                        style: tp.getSerifFont(
+                            fontSize: 24, color: AppColors.skInk(d))),
+                    const SizedBox(height: 8),
+                    Text(
+                        q.isEmpty
+                            ? 'Photograph your first plate.'
+                            : 'Try a different word.',
+                        style: tp.getBodyFont(
+                            fontSize: 14, color: AppColors.skMuted(d))),
+                  ],
+                ),
+              ),
+            )
           else
-            ...grouped.entries.map((entry) {
-              final dayTotal =
-                  entry.value.fold(0.0, (s, f) => s + f.calories);
+            ...order.map((day) {
+              final items = groups[day]!;
+              final total = items.fold(0.0, (s, f) => s + f.calories);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Day header
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          entry.key.toUpperCase(),
+                  const SizedBox(height: 26),
+                  SkTornDivider(color: AppColors.skRule(d)),
+                  const SizedBox(height: 18),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(day,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: tp.getSerifFont(
+                                fontSize: 22, color: AppColors.skInk(d))),
+                      ),
+                      Text('${_fmt(total)} KCAL',
                           style: tp.getSkLabel(
-                              fontSize: 11,
-                              color: AppColors.skMuted(d)),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              dayTotal.toStringAsFixed(0),
-                              style: tp.getSerifFont(
-                                  fontSize: 16, color: AppColors.skInk(d)),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              'kcal',
-                              style: tp.getBodyFont(
-                                  fontSize: 12, color: AppColors.skMuted(d)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                              fontSize: 12, color: AppColors.skMuted(d))),
+                    ],
                   ),
-                  ...entry.value.asMap().entries.map(
-                      (e) => _buildMealRow(tp, d, e.value, e.key)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
+                  ...items.map(
+                      (f) => _buildMealRow(tp, d, f, compact: true)),
                 ],
               );
             }),
@@ -1012,129 +1074,309 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Widget _buildTrendsTab(ThemeProvider tp, FoodProvider fp, bool d) {
     final all = fp.foods;
+    final now = DateTime.now();
+
+    double metricOf(Food f) => switch (_metric) {
+          'protein' => f.protein,
+          'carbs' => f.carbs,
+          'fat' => f.fat,
+          _ => f.calories,
+        };
+
+    // [0] = six days ago … [6] = today, shifted back by `offset` days.
+    List<double> series(int offset) => List.generate(7, (i) {
+          final day = DateUtils.dateOnly(
+              now.subtract(Duration(days: 6 - i + offset)));
+          return all
+              .where((f) => DateUtils.dateOnly(f.analyzedAt) == day)
+              .fold(0.0, (s, f) => s + metricOf(f));
+        });
+
+    final vals = series(0);
+    final prev = series(7);
+    final labels = List.generate(
+        7, (i) => DateFormat('E').format(now.subtract(Duration(days: 6 - i))));
+    final avg = vals.fold(0.0, (a, b) => a + b) / 7;
+    final prevAvg = prev.fold(0.0, (a, b) => a + b) / 7;
+    final delta =
+        (vals[4] + vals[5] + vals[6]) / 3 - (vals[0] + vals[1] + vals[2]) / 3;
+    final unit = _metric == 'calories' ? 'kcal' : 'g';
+    String fmtMetric(double v) =>
+        _metric == 'calories' ? _fmt(v) : '${v.round()}g';
+
+    // Week macro split, weighted by the calories each macro contributes.
+    final weekFoods = all
+        .where((f) => now.difference(f.analyzedAt).inDays < 7)
+        .toList();
+    final wp = weekFoods.fold(0.0, (s, f) => s + f.protein);
+    final wc = weekFoods.fold(0.0, (s, f) => s + f.carbs);
+    final wf = weekFoods.fold(0.0, (s, f) => s + f.fat);
+    final macroTotal = wp * 4 + wc * 4 + wf * 9;
+
     final avgScore = all.isEmpty
         ? 0.0
         : all.fold(0.0, (s, f) => s + f.healthScore) / all.length;
 
-    // Last 7 days data
-    final now = DateTime.now();
-    final weekData = <String, double>{};
-    for (int i = 6; i >= 0; i--) {
-      final date = now.subtract(Duration(days: i));
-      final key = DateFormat('E').format(date);
-      weekData[key] = 0;
-    }
-    for (final f in all) {
-      final diff = now.difference(f.analyzedAt).inDays;
-      if (diff < 7) {
-        final key = DateFormat('E').format(f.analyzedAt);
-        weekData[key] = (weekData[key] ?? 0) + f.calories;
-      }
-    }
-    final maxCal =
-        weekData.values.fold(1.0, (a, b) => a > b ? a : b);
+    const hPad = EdgeInsets.symmetric(horizontal: 28);
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(28, 12, 28, 16),
+      padding: const EdgeInsets.only(top: 14, bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'THIS WEEK',
-            style: tp.getSkLabel(color: AppColors.skMuted(d)),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Seven-day review',
-            style: tp.getSerifFont(
-                fontSize: 32, color: AppColors.skInk(d)),
-          ),
-          const SizedBox(height: 28),
-
-          // Weekly bars
-          SizedBox(
-            height: 180,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: weekData.entries.map((e) {
-                final pct = (e.value / maxCal).clamp(0, 1).toDouble();
-                return Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (e.value > 0)
-                        Text(
-                          e.value.toStringAsFixed(0),
-                          style: tp.getBodyFont(
-                              fontSize: 11,
-                              color: AppColors.skMuted(d)),
-                        ),
-                      const SizedBox(height: 6),
-                      Container(
-                        height: pct * 130,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.skInk(d),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        e.key,
-                        style: tp.getBodyFont(
-                          fontSize: 11,
-                          color: AppColors.skMuted(d),
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
+          Padding(
+            padding: hPad,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('SEVEN DAYS',
+                    style: tp.getSkLabel(
+                        fontSize: 13, color: AppColors.skMuted(d))),
+                const SizedBox(height: 6),
+                Text('Trends',
+                    style: tp.getSerifFont(
+                        fontSize: 34, color: AppColors.skInk(d))),
+              ],
             ),
           ),
-          const SizedBox(height: 30),
-          Container(height: 1, color: AppColors.skInk(d)),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
-          // Stats row
-          Row(
-            children: [
-              _buildStatItem(tp, d, 'TOTAL',
-                  weekData.values.fold(0.0, (a, b) => a + b).toStringAsFixed(0)),
-              _buildStatItem(tp, d, 'DAILY',
-                  (weekData.values.fold(0.0, (a, b) => a + b) / 7).toStringAsFixed(0)),
-              _buildStatItem(tp, d, 'SCORE', avgScore.toStringAsFixed(1)),
-            ],
-          ),
-          const SizedBox(height: 30),
-
-          // Health score
-          Text(
-            'HEALTH SCORES',
-            style: tp.getSkLabel(
-                fontSize: 11, color: AppColors.skMuted(d)),
-          ),
-          const SizedBox(height: 14),
-          // Score distribution bars
-          _buildScoreDistribution(tp, d, all),
-          const SizedBox(height: 30),
-
-          // Insight box
+          // ── Metric tabs ──
           Container(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.only(left: 28, right: 28),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.skRule(d)),
-              color: AppColors.skSurface(d),
+              border: Border(bottom: BorderSide(color: AppColors.skRule(d))),
             ),
-            child: Text(
-              all.isEmpty
-                  ? 'Start logging meals to see trends and insights here.'
-                  : 'You average ${avgScore.toStringAsFixed(1)} out of 10. Broth-based bowls and fresh rolls score highest — keeping fried and rice-heavy plates to twice a week would lift the score.',
-              style: tp.getBodyFont(
-                  fontSize: 15,
-                  height: 1.6,
-                  color: AppColors.skBody(d)),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final m in const ['calories', 'protein', 'carbs', 'fat'])
+                    GestureDetector(
+                      onTap: () => setState(() => _metric = m),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        margin: EdgeInsets.only(right: m == 'fat' ? 0 : 26),
+                        padding: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              width: 2,
+                              color: _metric == m
+                                  ? AppColors.skAccent(d)
+                                  : Colors.transparent,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          _metricLabel(m),
+                          style: tp.getBodyFont(
+                            fontSize: 14,
+                            fontWeight: _metric == m
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: _metric == m
+                                ? AppColors.skInk(d)
+                                : AppColors.skTabOff(d),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Average + delta + chart ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(fmtMetric(avg),
+                        style: tp.getSerifFont(
+                            fontSize: 64,
+                            height: 0.9,
+                            color: AppColors.skInk(d))),
+                    const SizedBox(width: 10),
+                    Text('daily average',
+                        style: tp.getBodyFont(
+                            fontSize: 14, color: AppColors.skMuted(d))),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${delta >= 0 ? 'Up' : 'Down'} ${delta.abs().round()} $unit against the start of the week',
+                  style: tp.getBodyFont(
+                    fontSize: 14,
+                    color: delta >= 0
+                        ? AppColors.skSage(d)
+                        : AppColors.skAccent(d),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Container(
+                        width: 18, height: 1, color: AppColors.skFaint(d)),
+                    const SizedBox(width: 8),
+                    Text('Last week, ${fmtMetric(prevAvg)} average',
+                        style: tp.getBodyFont(
+                            fontSize: 12, color: AppColors.skFaint(d))),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                SkLineChart(
+                  values: vals,
+                  previousValues: prev,
+                  labels: labels,
+                  format: fmtMetric,
+                  lineColor: AppColors.skInk(d),
+                  dotColor: AppColors.skAccent(d),
+                  gridColor: AppColors.skRuleSoft(d),
+                  faintColor: AppColors.skFaint(d),
+                  labelStyle: tp.getBodyFont(
+                      fontSize: 12, color: AppColors.skMuted(d)),
+                  valueStyle: tp.getBodyFont(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.skInk(d)),
+                  noteStyle: tp.getBodyFont(
+                      fontSize: 11, color: AppColors.skAccent(d)),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Where the calories come from ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 34, 28, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Where the calories come from',
+                    style: tp.getSerifFont(
+                        fontSize: 24, color: AppColors.skInk(d))),
+                const SizedBox(height: 18),
+                SizedBox(
+                  height: 14,
+                  child: Row(
+                    children: macroTotal <= 0
+                        ? [
+                            Expanded(
+                                child: Container(
+                                    color: AppColors.skRuleSoft(d)))
+                          ]
+                        // Zero-weight segments are dropped: Expanded(flex: 0)
+                        // would be laid out unbounded.
+                        : [
+                            for (final seg in [
+                              (wp * 4, AppColors.skSage(d)),
+                              (wc * 4, AppColors.skAccent(d)),
+                              (wf * 9, AppColors.skMuted(d)),
+                            ])
+                              if (seg.$1 >= 1)
+                                Expanded(
+                                    flex: seg.$1.round(),
+                                    child: Container(color: seg.$2)),
+                          ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildSplitLegend(tp, d, 'Protein', AppColors.skSage(d),
+                    wp * 4 / (macroTotal == 0 ? 1 : macroTotal), wp),
+                _buildSplitLegend(tp, d, 'Carbohydrate',
+                    AppColors.skAccent(d),
+                    wc * 4 / (macroTotal == 0 ? 1 : macroTotal), wc),
+                _buildSplitLegend(tp, d, 'Fat', AppColors.skMuted(d),
+                    wf * 9 / (macroTotal == 0 ? 1 : macroTotal), wf),
+              ],
+            ),
+          ),
+
+          // ── Health scores ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 34, 28, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Health scores',
+                    style: tp.getSerifFont(
+                        fontSize: 24, color: AppColors.skInk(d))),
+                const SizedBox(height: 6),
+                Text(
+                  'Average ${avgScore.toStringAsFixed(1)} out of 10 across ${all.length} meals',
+                  style: tp.getBodyFont(
+                      fontSize: 14, color: AppColors.skMuted(d)),
+                ),
+                const SizedBox(height: 20),
+                _buildScoreDistribution(tp, d, all),
+              ],
+            ),
+          ),
+
+          // ── Note from the coach ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 34, 28, 0),
+            child: Container(
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: AppColors.skSurface(d),
+                border: Border.all(color: AppColors.skRule(d)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('NOTE FROM THE COACH',
+                      style: tp.getSkLabel(color: AppColors.skAccent(d))),
+                  const SizedBox(height: 10),
+                  Text(
+                    all.isEmpty
+                        ? 'Log a few meals and this is where the week gets read back to you.'
+                        : delta >= 0
+                            ? 'Your intake climbs through the week and dips at the weekend. Evening bowls are doing most of the work — keep one protein-forward meal before 8pm and the curve flattens.'
+                            : 'Your intake eases off through the week. The weekend is the lightest stretch by a wide margin; if you are training, a larger lunch would carry you better than a late snack.',
+                    style: tp.getBodyFont(
+                        fontSize: 15,
+                        height: 1.55,
+                        color: AppColors.skBody(d)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
+            child: GestureDetector(
+              onTap: () => Navigator.push(context,
+                  PageTransition(child: const SkWeeklyReviewScreen())),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.skInk(d)),
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Open weekly review',
+                        style: tp.getBodyFont(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.skInk(d))),
+                    const SizedBox(width: 10),
+                    Icon(Icons.chevron_right,
+                        size: 18, color: AppColors.skInk(d)),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -1142,37 +1384,42 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     );
   }
 
-  Widget _buildStatItem(
-      ThemeProvider tp, bool d, String label, String value) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildSplitLegend(ThemeProvider tp, bool d, String label, Color color,
+      double pct, double grams) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.skRule(d))),
+      ),
+      child: Row(
         children: [
-          Text(
-            label,
-            style: tp.getBodyFont(
-              fontSize: 11,
-              color: AppColors.skMuted(d),
-              letterSpacing: 1.4,
-            ),
+          Container(width: 10, height: 10, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(label,
+                style: tp.getBodyFont(
+                    fontSize: 15, color: AppColors.skInk(d))),
           ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: tp.getSerifFont(
-                fontSize: 30, color: AppColors.skInk(d)),
+          Text('${(pct * 100).round()}%',
+              style: tp.getBodyFont(
+                  fontSize: 13, color: AppColors.skMuted(d))),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 64,
+            child: Text('${grams.toStringAsFixed(0)}g',
+                textAlign: TextAlign.right,
+                style: tp.getSerifFont(
+                    fontSize: 20, color: AppColors.skInk(d))),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildScoreDistribution(
-      ThemeProvider tp, bool d, List<Food> all) {
+  Widget _buildScoreDistribution(ThemeProvider tp, bool d, List<Food> all) {
     final counts = List.filled(10, 0);
     for (final f in all) {
-      final idx = (f.healthScore - 1).clamp(0, 9);
-      counts[idx]++;
+      counts[(f.healthScore - 1).clamp(0, 9)]++;
     }
     final maxCount = counts.fold(1, (a, b) => a > b ? a : b);
 
@@ -1181,34 +1428,78 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(10, (i) {
-          final pct = (counts[i] / maxCount).clamp(0, 1).toDouble();
-          final color = i >= 7
+          final color = i + 1 >= 8
               ? AppColors.skSage(d)
-              : i >= 5
+              : i + 1 >= 6
                   ? AppColors.skAccent(d)
                   : AppColors.skFaint(d);
           return Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  height: (pct * 80).clamp(2, 80),
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  color: color,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${i + 1}',
-                  style: tp.getBodyFont(
-                      fontSize: 11, color: AppColors.skMuted(d)),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2.5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(counts[i] > 0 ? '${counts[i]}' : '',
+                      style: tp.getBodyFont(
+                          fontSize: 10, color: AppColors.skFaint(d))),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: double.infinity,
+                    height: (counts[i] / maxCount * 96).clamp(2.0, 96.0),
+                    color: color,
+                  ),
+                  const SizedBox(height: 8),
+                  Text('${i + 1}',
+                      style: tp.getBodyFont(
+                          fontSize: 11, color: AppColors.skMuted(d))),
+                ],
+              ),
             ),
           );
         }),
       ),
     );
   }
+
+  // ── shared formatting ──────────────────────────────────────
+  static final NumberFormat _thousands = NumberFormat('#,##0');
+
+  String _fmt(double v) => _thousands.format(v.round());
+
+  String _greeting(DateTime now) => now.hour < 12
+      ? 'Good morning'
+      : now.hour < 18
+          ? 'Good afternoon'
+          : 'Good evening';
+
+  String _displayName() {
+    final user = FirebaseAuth.instance.currentUser;
+    final name = user?.displayName ?? user?.email?.split('@').first;
+    return (name == null || name.isEmpty) ? 'friend' : name;
+  }
+
+  String _sourceLabel(Food food) => switch (food.source) {
+        'verified' => 'Verified',
+        'user_edited' => 'Edited by you',
+        _ => 'AI estimate',
+      };
+
+  String _metricLabel(String m) => switch (m) {
+        'protein' => 'Protein',
+        'carbs' => 'Carbs',
+        'fat' => 'Fat',
+        _ => 'Calories',
+      };
+
+  String _dayLabel(DateTime t) {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final day = DateUtils.dateOnly(t);
+    final diff = today.difference(day).inDays;
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Yesterday';
+    return DateFormat('EEEE, d MMMM').format(t);
+  }
+
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // COACH TAB
@@ -1690,25 +1981,69 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // A 230pt plate block with an accent line sweeping down it.
           SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: AppColors.skAccent(d),
+            width: 230,
+            height: 230,
+            child: ClipRect(
+              child: Stack(
+                children: [
+                  Container(
+                    color: AppColors.skImage(d),
+                    child: Center(
+                      child: Icon(Icons.image_outlined,
+                          size: 72, color: AppColors.skFaint(d)),
+                    ),
+                  ),
+                  AnimatedBuilder(
+                    animation: _loadingController,
+                    builder: (context, _) {
+                      final t = _loadingController.value;
+                      return Positioned(
+                        left: 0,
+                        right: 0,
+                        top: 230 * (0.06 + t * 0.88),
+                        child: Opacity(
+                          // Fade in over the first 12% and out over the last.
+                          opacity: (t < 0.12
+                                  ? t / 0.12
+                                  : t > 0.88
+                                      ? (1 - t) / 0.12
+                                      : 1.0)
+                              .clamp(0.0, 1.0),
+                          child: Container(
+                            height: 1.5,
+                            decoration: BoxDecoration(
+                              color: AppColors.skAccent(d),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.skAccent(d)
+                                      .withValues(alpha: 0.4),
+                                  blurRadius: 14,
+                                  spreadRadius: 3,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 34),
           Text(
             'Reading your plate',
-            style: tp.getSerifFont(
-                fontSize: 20, color: AppColors.skInk(d)),
+            style:
+                tp.getSerifFont(fontSize: 30, color: AppColors.skInk(d)),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           Text(
-            'Matching ingredients and estimating nutrients',
+            'Matching against the food database…',
             style: tp.getBodyFont(
-                fontSize: 13, color: AppColors.skMuted(d)),
+                fontSize: 14, color: AppColors.skMuted(d)),
           ),
         ],
       ),
