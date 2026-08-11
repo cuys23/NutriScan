@@ -86,129 +86,112 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
-
-    final textPrimary = isDarkMode
-        ? AppColors.textPrimaryDark
-        : AppColors.textPrimaryLight;
-    final textSecondary = isDarkMode
-        ? AppColors.textSecondaryDark
-        : AppColors.textSecondaryLight;
+    final tp = Provider.of<ThemeProvider>(context);
+    final d = tp.isDarkMode;
 
     return PopScope(
       canPop: !_isDeleting,
       child: Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: SingleChildScrollView(
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? AppColors.surfaceDark
-                  : AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: isDarkMode
-                      ? Colors.black.withValues(alpha: 0.5)
-                      : Colors.black.withValues(alpha: 0.1),
-                  spreadRadius: 1,
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              color: AppColors.skPaper(d),
+              border: Border.all(color: AppColors.skRule(d)),
+              borderRadius: BorderRadius.circular(4),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Icon(
-                    Icons.person_remove_alt_1,
-                    size: 44,
-                    color: Colors.red[600],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                Text(
-                  _t('delete_account_title'),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-
-                Text(
-                  _t('delete_account_description'),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 15,
-                    color: textSecondary,
-                    height: 1.4,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-
-                // Store-required clarification: deleting the account does not
-                // cancel an active App Store subscription.
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? AppColors.grey800 : AppColors.grey100,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                // ── Header ──
+                Center(
                   child: Text(
-                    _t('delete_account_purchase_note'),
-                    style: themeProvider.getFontForCurrentLanguage(
-                      fontSize: 13,
-                      color: textSecondary,
-                      height: 1.35,
+                    _t('delete_account_title'),
+                    style: tp.getSerifFont(
+                      fontSize: 24,
+                      color: AppColors.skInk(d),
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
+                const SizedBox(height: 16),
+
+                // ── Description ──
+                Text(
+                  _t('delete_account_description'),
+                  style: tp.getBodyFont(
+                    fontSize: 14,
+                    color: AppColors.skMuted(d),
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+
+                // ── Store-required note ──
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.skSurface(d),
+                    border: Border.all(color: AppColors.skRule(d)),
+                  ),
+                  child: Text(
+                    _t('delete_account_purchase_note'),
+                    style: tp.getBodyFont(
+                      fontSize: 12,
+                      color: AppColors.skMuted(d),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
 
+                // ── Confirm input ──
+                Text(
+                  _t('delete_account_confirm_hint'),
+                  style: tp.getSkLabel(
+                    fontSize: 11,
+                    color: AppColors.skMuted(d),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: _controller,
                   enabled: !_isDeleting,
                   autocorrect: false,
                   textCapitalization: TextCapitalization.characters,
                   onChanged: (_) => setState(() {}),
-                  style: themeProvider.getFontForCurrentLanguage(
+                  style: tp.getBodyFont(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: textPrimary,
+                    color: AppColors.skInk(d),
                   ),
                   decoration: InputDecoration(
-                    hintText: _t('delete_account_confirm_hint'),
-                    hintStyle: themeProvider.getFontForCurrentLanguage(
-                      fontSize: 14,
-                      color: textSecondary,
-                    ),
                     filled: true,
-                    fillColor: isDarkMode
-                        ? AppColors.grey800
-                        : AppColors.grey100,
+                    fillColor: AppColors.skSurface(d),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 14,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(color: AppColors.skRule(d)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(color: AppColors.skRule(d)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(
+                        color: AppColors.skInk(d),
+                        width: 1.5,
+                      ),
                     ),
                   ),
                 ),
@@ -217,9 +200,9 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   const SizedBox(height: 12),
                   Text(
                     _errorMessage!,
-                    style: themeProvider.getFontForCurrentLanguage(
+                    style: tp.getBodyFont(
                       fontSize: 13,
-                      color: Colors.red[600],
+                      color: const Color(0xFFC44545),
                       height: 1.35,
                     ),
                     textAlign: TextAlign.center,
@@ -228,55 +211,53 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
                 const SizedBox(height: 24),
 
+                // ── Divider ──
+                Divider(color: AppColors.skRule(d), height: 1),
+                const SizedBox(height: 20),
+
+                // ── Buttons ──
                 Row(
                   children: [
+                    // Cancel
                     Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? AppColors.grey800
-                              : AppColors.grey100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: TextButton(
-                          onPressed: _isDeleting
-                              ? null
-                              : () => Navigator.of(context).pop(false),
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                      child: GestureDetector(
+                        onTap: _isDeleting
+                            ? null
+                            : () => Navigator.of(context).pop(false),
+                        child: Container(
+                          height: 48,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            border: Border.all(color: AppColors.skRule(d)),
+                            borderRadius: BorderRadius.circular(24),
                           ),
                           child: Text(
                             _t('cancel'),
-                            style: themeProvider.getFontForCurrentLanguage(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: textSecondary,
+                            style: tp.getBodyFont(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.skMuted(d),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
+                    // Delete
                     Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: _canDelete && !_isDeleting
-                              ? Colors.red[600]
-                              : Colors.red.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: TextButton(
-                          onPressed: _canDelete && !_isDeleting
-                              ? _handleDelete
-                              : null,
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                      child: GestureDetector(
+                        onTap: _canDelete && !_isDeleting
+                            ? _handleDelete
+                            : null,
+                        child: Container(
+                          height: 48,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: _canDelete && !_isDeleting
+                                ? const Color(0xFFC44545)
+                                : const Color(0xFFC44545).withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(24),
                           ),
                           child: _isDeleting
                               ? const SizedBox(
@@ -291,12 +272,11 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                                 )
                               : Text(
                                   _t('delete_account_button'),
-                                  style: themeProvider
-                                      .getFontForCurrentLanguage(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
+                                  style: tp.getBodyFont(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
                                 ),
                         ),
                       ),

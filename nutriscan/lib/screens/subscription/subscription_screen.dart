@@ -362,6 +362,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     LanguageProvider languageProvider,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -370,12 +371,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             'choose_your_plan',
             languageProvider.currentLanguage,
           ),
-          style: themeProvider.getFontForCurrentLanguage(
+          style: themeProvider.getSerifFont(
             fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
+            color: AppColors.skInk(d),
           ),
         ),
         const SizedBox(height: 16),
@@ -443,8 +441,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       listen: false,
     );
     final isSelected = _selectedPlan == planId;
-
     final d = isDarkMode;
+
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan = planId),
       child: Container(
@@ -465,19 +463,19 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppColors.primary : Colors.transparent,
+                color: isSelected ? AppColors.skInk(d) : Colors.transparent,
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.primary
-                      : (isDarkMode ? AppColors.grey600 : AppColors.grey300),
-                  width: 2,
+                      ? AppColors.skInk(d)
+                      : AppColors.skMuted(d),
+                  width: 1.5,
                 ),
               ),
               child: isSelected
-                  ? const Icon(
-                      IconlyBold.tick_square,
-                      color: Colors.white,
-                      size: 16,
+                  ? Icon(
+                      Icons.check,
+                      color: AppColors.skPaper(d),
+                      size: 14,
                     )
                   : null,
             ),
@@ -493,12 +491,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       Expanded(
                         child: Text(
                           title,
-                          style: themeProvider.getFontForCurrentLanguage(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimaryLight,
+                          style: themeProvider.getSerifFont(
+                            fontSize: 18,
+                            color: AppColors.skInk(d),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -511,7 +506,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: AppColors.skSage(d),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -519,10 +514,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               'popular',
                               languageProvider.currentLanguage,
                             ).toUpperCase(),
-                            style: themeProvider.getFontForCurrentLanguage(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                            style: themeProvider.getSkLabel(
+                              fontSize: 9,
+                              color: AppColors.skPaper(d),
                             ),
                           ),
                         ),
@@ -535,7 +529,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: AppColors.skSage(d),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -543,10 +537,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               'best_value',
                               languageProvider.currentLanguage,
                             ).toUpperCase(),
-                            style: themeProvider.getFontForCurrentLanguage(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                            style: themeProvider.getSkLabel(
+                              fontSize: 9,
+                              color: AppColors.skPaper(d),
                             ),
                           ),
                         ),
@@ -556,11 +549,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: themeProvider.getFontForCurrentLanguage(
-                      fontSize: 12,
-                      color: isDarkMode
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
+                    style: themeProvider.getBodyFont(
+                      fontSize: 13,
+                      color: AppColors.skMuted(d),
                     ),
                   ),
                 ],
@@ -577,19 +568,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   children: [
                     Text(
                       price,
-                      style: themeProvider.getFontForCurrentLanguage(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                      style: themeProvider.getSerifFont(
+                        fontSize: 22,
+                        color: AppColors.skInk(d),
                       ),
                     ),
                     Text(
                       period,
-                      style: themeProvider.getFontForCurrentLanguage(
+                      style: themeProvider.getBodyFont(
                         fontSize: 12,
-                        color: isDarkMode
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
+                        color: AppColors.skMuted(d),
                       ),
                     ),
                   ],
@@ -602,10 +590,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         'save_percentage',
                         languageProvider.currentLanguage,
                       ),
-                      style: themeProvider.getFontForCurrentLanguage(
+                      style: themeProvider.getSkLabel(
                         fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: AppColors.skSage(d),
                       ),
                     ),
                   ),
@@ -735,6 +722,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     bool isDarkMode,
     SubscriptionProvider subscriptionProvider,
   ) {
+    final d = isDarkMode;
     return Column(
       children: [
         Text(
@@ -742,11 +730,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             'subscription_terms_detailed',
             languageProvider.currentLanguage,
           ),
-          style: themeProvider.getFontForCurrentLanguage(
+          style: themeProvider.getBodyFont(
             fontSize: 12,
-            color: isDarkMode
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
+            color: AppColors.skMuted(d),
             height: 1.4,
           ),
           textAlign: TextAlign.center,
@@ -766,19 +752,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   'terms_of_service',
                   languageProvider.currentLanguage,
                 ),
-                style: themeProvider.getFontForCurrentLanguage(
+                style: themeProvider.getBodyFont(
                   fontSize: 12,
-                  color: AppColors.primary,
+                  color: AppColors.skInk(d),
                   decoration: TextDecoration.underline,
                 ),
               ),
             ),
             Text(
-              ' • ',
+              ' · ',
               style: TextStyle(
-                color: isDarkMode
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
+                color: AppColors.skMuted(d),
               ),
             ),
             TextButton(
@@ -792,9 +776,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   'privacy_policy',
                   languageProvider.currentLanguage,
                 ),
-                style: themeProvider.getFontForCurrentLanguage(
+                style: themeProvider.getBodyFont(
                   fontSize: 12,
-                  color: AppColors.primary,
+                  color: AppColors.skInk(d),
                   decoration: TextDecoration.underline,
                 ),
               ),
@@ -824,10 +808,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           },
           child: Text(
             'Already subscribed? Restore',
-            style: themeProvider.getFontForCurrentLanguage(
+            style: themeProvider.getBodyFont(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              fontWeight: FontWeight.w500,
+              color: AppColors.skInk(d),
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
@@ -844,7 +829,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     final subscriptionType = subscriptionProvider.subscriptionType ?? 'Unknown';
     String planName = '';
     String planDescription = '';
-    IconData planIcon = IconlyBold.star;
 
     switch (subscriptionType) {
         case 'monthly':
@@ -856,7 +840,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             'billed_monthly_desc',
             languageProvider.currentLanguage,
           );
-          planIcon = IconlyBold.calendar;
           break;
         case 'yearly':
           planName = AppLocalizations.getString(
@@ -867,82 +850,72 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             'billed_annually_desc',
             languageProvider.currentLanguage,
           );
-          planIcon = IconlyBold.calendar;
           break;
       }
 
+    final d = isDarkMode;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skInk(d), width: 1.5),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(IconlyBold.tick_square, size: 32, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  AppLocalizations.getString(
-                    'active_premium_subscription',
-                    languageProvider.currentLanguage,
-                  ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            'ACTIVE',
+            style: themeProvider.getSkLabel(
+              fontSize: 11,
+              color: AppColors.skSage(d),
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 6),
+          Text(
+            AppLocalizations.getString(
+              'active_premium_subscription',
+              languageProvider.currentLanguage,
+            ),
+            style: themeProvider.getSerifFont(
+              fontSize: 24,
+              color: AppColors.skInk(d),
+            ),
+          ),
+          const SizedBox(height: 18),
 
           // Plan Details
           Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.skPaper(d),
+              border: Border.all(color: AppColors.skRule(d)),
+              borderRadius: BorderRadius.circular(4),
             ),
-            child: Column(
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Icon(planIcon, color: Colors.white, size: 24),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            planName,
-                            style: themeProvider.getFontForCurrentLanguage(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            planDescription,
-                            style: themeProvider.getFontForCurrentLanguage(
-                              fontSize: 14,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        planName,
+                        style: themeProvider.getSerifFont(
+                          fontSize: 18,
+                          color: AppColors.skInk(d),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        planDescription,
+                        style: themeProvider.getBodyFont(
+                          fontSize: 13,
+                          color: AppColors.skMuted(d),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -958,19 +931,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     LanguageProvider languageProvider,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Column(
       children: [
         // Warning message
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+            color: AppColors.skSurface(d),
+            border: Border.all(color: AppColors.skRule(d)),
+            borderRadius: BorderRadius.circular(4),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(IconlyLight.danger, color: AppColors.primary, size: 24),
+              Icon(Icons.info_outline,
+                  color: AppColors.skMuted(d), size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -978,9 +954,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     'cancel_subscription_warning',
                     languageProvider.currentLanguage,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 14,
-                    color: AppColors.primary,
+                  style: themeProvider.getBodyFont(
+                    fontSize: 13,
+                    color: AppColors.skMuted(d),
+                    height: 1.4,
                   ),
                 ),
               ),
@@ -992,9 +969,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         // Cancel button
         SizedBox(
           width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: subscriptionProvider.isLoading
+          height: 52,
+          child: GestureDetector(
+            onTap: subscriptionProvider.isLoading
                 ? null
                 : () => _showCancelConfirmationDialog(
                     subscriptionProvider,
@@ -1002,40 +979,33 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     languageProvider,
                     isDarkMode,
                   ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[600],
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFC44545),
+                borderRadius: BorderRadius.circular(26),
               ),
-              elevation: 0,
-            ),
-            child: subscriptionProvider.isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(IconlyLight.close_square, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        AppLocalizations.getString(
-                          'cancel_subscription',
-                          languageProvider.currentLanguage,
-                        ),
-                        style: themeProvider.getFontForCurrentLanguage(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+              child: subscriptionProvider.isLoading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
                       ),
-                    ],
-                  ),
+                    )
+                  : Text(
+                      AppLocalizations.getString(
+                        'cancel_subscription',
+                        languageProvider.currentLanguage,
+                      ),
+                      style: themeProvider.getBodyFont(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
           ),
         ),
       ],
@@ -1048,57 +1018,43 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     LanguageProvider languageProvider,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(4),
           ),
-          elevation: 20,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? AppColors.surfaceDark
-                  : AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(20),
+              color: AppColors.skPaper(d),
+              border: Border.all(color: AppColors.skRule(d)),
+              borderRadius: BorderRadius.circular(4),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Warning Icon
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    IconlyBold.danger,
-                    size: 32,
-                    color: Colors.red[600],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
                 // Title
-                Text(
-                  AppLocalizations.getString(
-                    'cancel_subscription_question',
-                    languageProvider.currentLanguage,
+                Center(
+                  child: Text(
+                    AppLocalizations.getString(
+                      'cancel_subscription_question',
+                      languageProvider.currentLanguage,
+                    ),
+                    style: themeProvider.getSerifFont(
+                      fontSize: 22,
+                      color: AppColors.skInk(d),
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
                 // Description
                 Text(
@@ -1106,44 +1062,41 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     'cancel_subscription_description',
                     languageProvider.currentLanguage,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
+                  style: themeProvider.getBodyFont(
                     fontSize: 14,
-                    color: isDarkMode
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
-                    height: 1.4,
+                    color: AppColors.skMuted(d),
+                    height: 1.5,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
 
                 // Warning Box
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.orange.withValues(alpha: 0.3),
-                    ),
+                    color: AppColors.skSurface(d),
+                    border: Border.all(color: AppColors.skRule(d)),
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        IconlyLight.info_circle,
-                        color: Colors.orange[700],
-                        size: 20,
+                        Icons.info_outline,
+                        color: AppColors.skMuted(d),
+                        size: 18,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           AppLocalizations.getString(
                             'resubscribe_info',
                             languageProvider.currentLanguage,
                           ),
-                          style: themeProvider.getFontForCurrentLanguage(
+                          style: themeProvider.getBodyFont(
                             fontSize: 12,
-                            color: Colors.orange[700],
+                            color: AppColors.skMuted(d),
+                            height: 1.4,
                           ),
                         ),
                       ),
@@ -1152,47 +1105,36 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 ),
                 const SizedBox(height: 24),
 
+                // Divider
+                Divider(color: AppColors.skRule(d), height: 1),
+                const SizedBox(height: 20),
+
                 // Action Buttons
                 Column(
                   children: [
                     // Keep Subscription Button
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary.withValues(
-                            alpha: 0.1,
+                      height: 48,
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: AppColors.skInk(d),
+                            borderRadius: BorderRadius.circular(24),
                           ),
-                          foregroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                          child: Text(
+                            AppLocalizations.getString(
+                              'keep_subscription',
+                              languageProvider.currentLanguage,
+                            ),
+                            style: themeProvider.getBodyFont(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.skPaper(d),
+                            ),
                           ),
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              IconlyBold.tick_square,
-                              size: 20,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppLocalizations.getString(
-                                'keep_subscription',
-                                languageProvider.currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ),
@@ -1201,45 +1143,30 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     // Cancel Subscription Button
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: () async {
+                      height: 48,
+                      child: GestureDetector(
+                        onTap: () async {
                           Navigator.of(context).pop();
                           await subscriptionProvider.cancelSubscription();
-                          if (mounted) {
-                            // Subscription cancelled - no snackbar shown
-                          }
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[600],
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            border: Border.all(color: const Color(0xFFC44545)),
+                            borderRadius: BorderRadius.circular(24),
                           ),
-                          elevation: 2,
-                          shadowColor: Colors.red.withValues(alpha: 0.3),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              IconlyBold.close_square,
-                              size: 20,
-                              color: Colors.white,
+                          child: Text(
+                            AppLocalizations.getString(
+                              'cancel_subscription',
+                              languageProvider.currentLanguage,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppLocalizations.getString(
-                                'cancel_subscription',
-                                languageProvider.currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            style: themeProvider.getBodyFont(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFFC44545),
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
