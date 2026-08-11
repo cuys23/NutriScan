@@ -5,6 +5,7 @@ import 'package:nutriscan/providers/ads/admob_provider.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/screens/auth/onboarding_screen.dart';
+import 'package:nutriscan/screens/auth/login_screen.dart';
 import 'package:nutriscan/screens/main/main_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -162,10 +163,12 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     final Widget target;
-    if (isLoggedIn || hasSeenOnboarding) {
-      target = const MainNavigation();
-    } else {
+    if (!hasSeenOnboarding) {
       target = const OnboardingScreen();
+    } else if (!isLoggedIn) {
+      target = const LoginScreen();
+    } else {
+      target = const MainNavigation();
     }
 
     Navigator.of(context).pushReplacement(
