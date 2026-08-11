@@ -477,7 +477,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
       case 'history':
         return _buildHistoryTab(tp, lp, fp, d);
       case 'trends':
-        return _buildTrendsTab(tp, fp, d);
+        return _buildTrendsTab(tp, lp, fp, d);
       case 'coach':
         return _buildCoachTab(tp, d);
       case 'you':
@@ -492,6 +492,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Widget _buildTodayTab(
       ThemeProvider tp, LanguageProvider lp, FoodProvider fp, bool d) {
+    final lang = lp.currentLanguage;
     final meals = fp.getTodayFoodsSync();
     final cal = fp.getTodayCaloriesSync();
     final protein = fp.getTodayProteinSync();
@@ -530,7 +531,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${_greeting(now)}, ${_displayName()}',
+                  '${_greeting(now, lang)}, ${_displayName(lang)}',
                   style: tp.getSerifFont(
                       fontSize: 34, color: AppColors.skInk(d)),
                 ),
@@ -588,7 +589,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                   textBaseline: TextBaseline.alphabetic,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('THE DAY SO FAR',
+                    Text(AppLocalizations.getString('sk_the_day_so_far', lang),
                         style: tp.getSkLabel(color: AppColors.skMuted(d))),
                     Text(SkDayTimeline.gapLabel(meals),
                         style: tp.getBodyFont(
@@ -649,7 +650,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                   _buildEmptyState(tp, d, 'Nothing logged yet',
                       'Photograph your first plate of the day.')
                 else
-                  ...meals.map((f) => _buildMealRow(tp, d, f)),
+                  ...meals.map((f) => _buildMealRow(tp, d, f, lang)),
               ],
             ),
           ),
@@ -747,7 +748,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   }
 
   /// A single meal line. [compact] is the slightly tighter History variant.
-  Widget _buildMealRow(ThemeProvider tp, bool d, Food food,
+  Widget _buildMealRow(ThemeProvider tp, bool d, Food food, String lang,
       {bool compact = false}) {
     return GestureDetector(
       onTap: () => _showFoodDetail(food),
@@ -792,7 +793,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '${DateFormat('HH:mm').format(food.analyzedAt)} · ${_sourceLabel(food)}',
+                    '${DateFormat('HH:mm').format(food.analyzedAt)} · ${_sourceLabel(food, lang)}',
                     style: tp.getBodyFont(
                         fontSize: 13, color: AppColors.skMuted(d)),
                   ),
@@ -906,6 +907,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Widget _buildHistoryTab(
       ThemeProvider tp, LanguageProvider lp, FoodProvider fp, bool d) {
+    final lang = lp.currentLanguage;
     final q = _query.trim().toLowerCase();
     final list = fp.foods
         .where((f) => q.isEmpty || f.name.toLowerCase().contains(q))
@@ -925,7 +927,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     final order = <String>[];
     final groups = <String, List<Food>>{};
     for (final f in list) {
-      final key = _dayLabel(f.analyzedAt);
+      final key = _dayLabel(f.analyzedAt, lang);
       if (!groups.containsKey(key)) {
         groups[key] = [];
         order.add(key);
@@ -939,7 +941,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('KITCHEN DIARY',
+          Text(AppLocalizations.getString('sk_kitchen_diary', lang),
               style:
                   tp.getSkLabel(fontSize: 13, color: AppColors.skMuted(d))),
           const SizedBox(height: 6),
@@ -948,14 +950,14 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
             textBaseline: TextBaseline.alphabetic,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('History',
+              Text(AppLocalizations.getString('sk_history', lang),
                   style: tp.getSerifFont(
                       fontSize: 34, color: AppColors.skInk(d))),
               GestureDetector(
                 onTap: () => Navigator.push(
                     context, PageTransition(child: const SkLedgerScreen())),
                 behavior: HitTestBehavior.opaque,
-                child: Text('LEDGER',
+                child: Text(AppLocalizations.getString('sk_ledger', lang),
                     style: tp.getSkLabel(
                         fontSize: 12, color: AppColors.skAccent(d))),
               ),
@@ -1062,7 +1064,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                   ),
                   const SizedBox(height: 10),
                   ...items.map(
-                      (f) => _buildMealRow(tp, d, f, compact: true)),
+                      (f) => _buildMealRow(tp, d, f, lang, compact: true)),
                 ],
               );
             }),
@@ -1074,7 +1076,8 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // TRENDS TAB
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Widget _buildTrendsTab(ThemeProvider tp, FoodProvider fp, bool d) {
+  Widget _buildTrendsTab(ThemeProvider tp, LanguageProvider lp, FoodProvider fp, bool d) {
+    final lang = lp.currentLanguage;
     final all = fp.foods;
     final now = DateTime.now();
 
@@ -1132,11 +1135,11 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('SEVEN DAYS',
+                Text(AppLocalizations.getString('sk_seven_days', lang),
                     style: tp.getSkLabel(
                         fontSize: 13, color: AppColors.skMuted(d))),
                 const SizedBox(height: 6),
-                Text('Trends',
+                Text(AppLocalizations.getString('sk_trends', lang),
                     style: tp.getSerifFont(
                         fontSize: 34, color: AppColors.skInk(d))),
               ],
@@ -1172,7 +1175,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                           ),
                         ),
                         child: Text(
-                          _metricLabel(m),
+                          _metricLabel(m, lang),
                           style: tp.getBodyFont(
                             fontSize: 14,
                             fontWeight: _metric == m
@@ -1206,14 +1209,16 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                             height: 0.9,
                             color: AppColors.skInk(d))),
                     const SizedBox(width: 10),
-                    Text('daily average',
+                    Text(AppLocalizations.getString('sk_daily_average', lang),
                         style: tp.getBodyFont(
                             fontSize: 14, color: AppColors.skMuted(d))),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${delta >= 0 ? 'Up' : 'Down'} ${delta.abs().round()} $unit against the start of the week',
+                  AppLocalizations.getString(delta >= 0 ? 'sk_up_delta' : 'sk_down_delta', lang)
+                      .replaceAll('{delta}', delta.abs().round().toString())
+                      .replaceAll('{unit}', unit),
                   style: tp.getBodyFont(
                     fontSize: 14,
                     color: delta >= 0
@@ -1227,7 +1232,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                     Container(
                         width: 18, height: 1, color: AppColors.skFaint(d)),
                     const SizedBox(width: 8),
-                    Text('Last week, ${fmtMetric(prevAvg)} average',
+                    Text(AppLocalizations.getString('sk_last_week_avg', lang).replaceAll('{avg}', fmtMetric(prevAvg)),
                         style: tp.getBodyFont(
                             fontSize: 12, color: AppColors.skFaint(d))),
                   ],
@@ -1261,7 +1266,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Where the calories come from',
+                Text(AppLocalizations.getString('sk_where_calories_from', lang),
                     style: tp.getSerifFont(
                         fontSize: 24, color: AppColors.skInk(d))),
                 const SizedBox(height: 18),
@@ -1290,12 +1295,12 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildSplitLegend(tp, d, 'Protein', AppColors.skSage(d),
+                _buildSplitLegend(tp, d, AppLocalizations.getString('sk_protein_label', lang), AppColors.skSage(d),
                     wp * 4 / (macroTotal == 0 ? 1 : macroTotal), wp),
-                _buildSplitLegend(tp, d, 'Carbohydrate',
+                _buildSplitLegend(tp, d, AppLocalizations.getString('sk_carbohydrate_label', lang),
                     AppColors.skAccent(d),
                     wc * 4 / (macroTotal == 0 ? 1 : macroTotal), wc),
-                _buildSplitLegend(tp, d, 'Fat', AppColors.skMuted(d),
+                _buildSplitLegend(tp, d, AppLocalizations.getString('sk_fat_label', lang), AppColors.skMuted(d),
                     wf * 9 / (macroTotal == 0 ? 1 : macroTotal), wf),
               ],
             ),
@@ -1307,12 +1312,14 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Health scores',
+                Text(AppLocalizations.getString('sk_health_scores', lang),
                     style: tp.getSerifFont(
                         fontSize: 24, color: AppColors.skInk(d))),
                 const SizedBox(height: 6),
                 Text(
-                  'Average ${avgScore.toStringAsFixed(1)} out of 10 across ${all.length} meals',
+                  AppLocalizations.getString('sk_health_scores_subtitle', lang)
+                      .replaceAll('{score}', avgScore.toStringAsFixed(1))
+                      .replaceAll('{count}', all.length.toString()),
                   style: tp.getBodyFont(
                       fontSize: 14, color: AppColors.skMuted(d)),
                 ),
@@ -1334,15 +1341,15 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('NOTE FROM THE COACH',
+                  Text(AppLocalizations.getString('sk_note_from_coach', lang),
                       style: tp.getSkLabel(color: AppColors.skAccent(d))),
                   const SizedBox(height: 10),
                   Text(
                     all.isEmpty
-                        ? 'Log a few meals and this is where the week gets read back to you.'
+                        ? AppLocalizations.getString('sk_coach_empty', lang)
                         : delta >= 0
-                            ? 'Your intake climbs through the week and dips at the weekend. Evening bowls are doing most of the work — keep one protein-forward meal before 8pm and the curve flattens.'
-                            : 'Your intake eases off through the week. The weekend is the lightest stretch by a wide margin; if you are training, a larger lunch would carry you better than a late snack.',
+                            ? AppLocalizations.getString('sk_coach_up', lang)
+                            : AppLocalizations.getString('sk_coach_down', lang),
                     style: tp.getBodyFont(
                         fontSize: 15,
                         height: 1.55,
@@ -1368,7 +1375,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Open weekly review',
+                    Text(AppLocalizations.getString('sk_open_weekly_review', lang),
                         style: tp.getBodyFont(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -1468,37 +1475,37 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
 
   String _fmt(double v) => _thousands.format(v.round());
 
-  String _greeting(DateTime now) => now.hour < 12
-      ? 'Good morning'
+  String _greeting(DateTime now, String lang) => now.hour < 12
+      ? AppLocalizations.getString('sk_good_morning', lang)
       : now.hour < 18
-          ? 'Good afternoon'
-          : 'Good evening';
+          ? AppLocalizations.getString('sk_good_afternoon', lang)
+          : AppLocalizations.getString('sk_good_evening', lang);
 
-  String _displayName() {
+  String _displayName(String lang) {
     final user = FirebaseAuth.instance.currentUser;
     final name = user?.displayName ?? user?.email?.split('@').first;
-    return (name == null || name.isEmpty) ? 'friend' : name;
+    return (name == null || name.isEmpty) ? AppLocalizations.getString('sk_friend', lang) : name;
   }
 
-  String _sourceLabel(Food food) => switch (food.source) {
-        'verified' => 'Verified',
-        'user_edited' => 'Edited by you',
-        _ => 'AI estimate',
+  String _sourceLabel(Food food, String lang) => switch (food.source) {
+        'verified' => AppLocalizations.getString('sk_source_verified', lang),
+        'user_edited' => AppLocalizations.getString('sk_source_user_edited', lang),
+        _ => AppLocalizations.getString('sk_source_ai_estimate', lang),
       };
 
-  String _metricLabel(String m) => switch (m) {
-        'protein' => 'Protein',
-        'carbs' => 'Carbs',
-        'fat' => 'Fat',
-        _ => 'Calories',
+  String _metricLabel(String m, String lang) => switch (m) {
+        'protein' => AppLocalizations.getString('sk_metric_protein', lang),
+        'carbs' => AppLocalizations.getString('sk_metric_carbs', lang),
+        'fat' => AppLocalizations.getString('sk_metric_fat', lang),
+        _ => AppLocalizations.getString('sk_metric_calories', lang),
       };
 
-  String _dayLabel(DateTime t) {
+  String _dayLabel(DateTime t, String lang) {
     final today = DateUtils.dateOnly(DateTime.now());
     final day = DateUtils.dateOnly(t);
     final diff = today.difference(day).inDays;
-    if (diff == 0) return 'Today';
-    if (diff == 1) return 'Yesterday';
+    if (diff == 0) return AppLocalizations.getString('today', lang);
+    if (diff == 1) return AppLocalizations.getString('yesterday', lang);
     return DateFormat('EEEE, d MMMM').format(t);
   }
 
