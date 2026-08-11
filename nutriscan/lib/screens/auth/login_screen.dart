@@ -318,20 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                       ),
-                      const SizedBox(height: 24),
 
-                      // Skip Button
-                      SkipButton(
-                        onPressed: () async {
-                          // Save that user skipped login
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setBool('has_logged_in', false);
-
-                          // Navigate to main app
-                          if (!context.mounted) return;
-                          Navigator.of(context).pushReplacementNamed('/main');
-                        },
-                      ),
                     ],
                   ),
                 ),
