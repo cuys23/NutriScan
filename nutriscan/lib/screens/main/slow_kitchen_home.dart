@@ -33,6 +33,7 @@ import 'package:nutriscan/widgets/analysis/sk_line_chart.dart';
 import 'package:nutriscan/widgets/common/language_dropdown.dart';
 import 'package:nutriscan/widgets/common/sk_torn_divider.dart';
 import 'package:nutriscan/widgets/dialogs/coin_ad_dialogs.dart';
+import 'package:nutriscan/widgets/settings/delete_account_dialog.dart';
 import 'package:nutriscan/widgets/food/active_meal_plan_card.dart';
 import 'package:nutriscan/widgets/food/food_detail_card.dart';
 import 'package:nutriscan/widgets/home/sk_day_timeline.dart';
@@ -1750,6 +1751,15 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
             }),
           ]),
 
+          // ── Delete Account (only when signed in) ──
+          if (backupProvider.isSignedIn)
+            _buildSettingSection(tp, d, AppLocalizations.getString('delete_account', lang), [
+              _buildSettingRow(tp, d,
+                  AppLocalizations.getString('delete_account', lang),
+                  hint: AppLocalizations.getString('delete_account_subtitle', lang),
+                  onTap: () => _showDeleteAccountDialog(lang)),
+            ]),
+
           const SizedBox(height: 28),
           Text(
             'Nutrition values are estimates for informational purposes only, not medical advice.',
@@ -1760,6 +1770,33 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _showDeleteAccountDialog(String currentLanguage) async {
+    final deleted = await DeleteAccountDialog.show(context, currentLanguage);
+    if (!deleted || !mounted) return;
+
+    final foodProvider = context.read<FoodProvider>();
+    await foodProvider.loadFoods();
+
+    if (!mounted) return;
+    await context.read<SubscriptionProvider>().reloadSubscriptionStatus();
+
+    if (!mounted) return;
+    await context.read<CoinProvider>().reloadCoins();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.getString(
+            'delete_account_success',
+            currentLanguage,
+          ),
+        ),
+        backgroundColor: Colors.green[600],
       ),
     );
   }
