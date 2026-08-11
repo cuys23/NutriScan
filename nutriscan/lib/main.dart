@@ -29,6 +29,7 @@ import 'package:nutriscan/screens/auth/splash_screen.dart';
 import 'package:nutriscan/screens/main/main_navigation.dart';
 import 'package:nutriscan/screens/main/no_internet_screen.dart';
 import 'package:nutriscan/services/notifications/notification_service.dart';
+import 'package:nutriscan/utils/image_helper.dart';
 import 'package:nutriscan/widgets/common/app_lifecycle_wrapper.dart';
 import 'package:provider/provider.dart';
 
@@ -66,6 +67,10 @@ Future<void> _requestTrackingAuthorization() async {
 
 Future<void> _bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Cache the current documents-directory path so ImageHelper can resolve
+  // stale absolute paths (iOS container UUID changes on rebuild).
+  await ImageHelper.init();
 
   try {
     // Initialize Firebase

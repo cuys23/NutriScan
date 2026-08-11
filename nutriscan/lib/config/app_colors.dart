@@ -45,4 +45,53 @@ class AppColors {
   static const Color grey700 = Color(0xFF616161);
   static const Color grey800 = Color(0xFF424242);
   static const Color grey900 = Color(0xFF212121);
+
+  // ──────────────────────────────────────────────────────────────
+  // Slow Kitchen — warm editorial color palette
+  // ──────────────────────────────────────────────────────────────
+
+  /// Resolve an SK color for the current brightness.
+  static Color sk(Color light, Color dark, bool isDark) => isDark ? dark : light;
+
+  // Light
+  static const Color skPaperLight = Color(0xFFF4EFE7);
+  static const Color skSurfaceLight = Color(0xFFFBF8F2);
+  static const Color skInkLight = Color(0xFF1C1A17);
+  static const Color skMutedLight = Color(0xFF8A8578);
+  static const Color skRuleLight = Color(0xFFDFD8CB);
+  static const Color skRuleSoftLight = Color(0xFFE3DDD2);
+  static const Color skImageLight = Color(0xFFEAE4D9);
+  static const Color skAccentLight = Color(0xFFC4552F);
+  static const Color skSageLight = Color(0xFF6B7F5C);
+  static const Color skBodyLight = Color(0xFF57534C);
+  static const Color skFaintLight = Color(0xFFC9C1B2);
+  static const Color skTabOffLight = Color(0xFFA8A296);
+
+  // Dark
+  static const Color skPaperDark = Color(0xFF17150F);
+  static const Color skSurfaceDark = Color(0xFF201C15);
+  static const Color skInkDark = Color(0xFFF0EAE0);
+  static const Color skMutedDark = Color(0xFF9C9484);
+  static const Color skRuleDark = Color(0xFF342E24);
+  static const Color skRuleSoftDark = Color(0xFF2B261D);
+  static const Color skImageDark = Color(0xFF262117);
+  static const Color skAccentDark = Color(0xFFE2814F);
+  static const Color skSageDark = Color(0xFF9DB487);
+  static const Color skBodyDark = Color(0xFFC2BAA9);
+  static const Color skFaintDark = Color(0xFF4A4335);
+  static const Color skTabOffDark = Color(0xFF6E675A);
+
+  // Convenience getters — pass isDarkMode
+  static Color skPaper(bool d) => sk(skPaperLight, skPaperDark, d);
+  static Color skSurface(bool d) => sk(skSurfaceLight, skSurfaceDark, d);
+  static Color skInk(bool d) => sk(skInkLight, skInkDark, d);
+  static Color skMuted(bool d) => sk(skMutedLight, skMutedDark, d);
+  static Color skRule(bool d) => sk(skRuleLight, skRuleDark, d);
+  static Color skRuleSoft(bool d) => sk(skRuleSoftLight, skRuleSoftDark, d);
+  static Color skImage(bool d) => sk(skImageLight, skImageDark, d);
+  static Color skAccent(bool d) => sk(skAccentLight, skAccentDark, d);
+  static Color skSage(bool d) => sk(skSageLight, skSageDark, d);
+  static Color skBody(bool d) => sk(skBodyLight, skBodyDark, d);
+  static Color skFaint(bool d) => sk(skFaintLight, skFaintDark, d);
+  static Color skTabOff(bool d) => sk(skTabOffLight, skTabOffDark, d);
 }
