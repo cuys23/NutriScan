@@ -240,7 +240,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: FadeTransition(
                     opacity: _titleFade,
                     child: Text(
-                      'NutriScan',
+                      'NutriSnap',
                       style: tp.getSerifFont(
                           fontSize: 46, color: AppColors.skInk(d)),
                     ),

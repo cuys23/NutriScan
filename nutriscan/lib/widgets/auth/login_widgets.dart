@@ -26,7 +26,7 @@ class LoginWelcomeText extends StatelessWidget {
                   'welcome_to_nutriscan',
                   currentLanguage,
                 ).replaceAll(
-                  'NutriScan',
+                  'NutriSnap',
                   AppLocalizations.getString('nutriscan', currentLanguage),
                 ),
           ),
@@ -201,7 +201,7 @@ class LoginLogo extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'NutriScan',
+          'NutriSnap',
           style: tp.getSerifFont(
             fontSize: 40,
             color: AppColors.skInk(d),

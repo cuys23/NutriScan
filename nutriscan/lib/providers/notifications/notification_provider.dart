@@ -256,7 +256,7 @@ class NotificationProvider with ChangeNotifier {
 
       await _notificationService.scheduleMealReminder(
         id: reminder.id,
-        title: 'NutriScan 🍽️',
+        title: 'NutriSnap 🍽️',
         body: message,
         hour: reminder.time.hour,
         minute: reminder.time.minute,
