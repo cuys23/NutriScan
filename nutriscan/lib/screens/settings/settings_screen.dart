@@ -5,6 +5,7 @@ import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/config/exports/providers.dart';
 import 'package:nutriscan/config/exports/screens.dart';
 import 'package:nutriscan/config/exports/widgets.dart';
+import 'package:nutriscan/widgets/common/sk_snackbar.dart';
 import 'package:nutriscan/utils/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -504,15 +505,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await context.read<CoinProvider>().reloadCoins();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.getString(
-            'delete_account_success',
-            currentLanguage,
-          ),
-        ),
-        backgroundColor: Colors.green[600],
+    SkSnackBar.success(
+      context,
+      message: AppLocalizations.getString(
+        'delete_account_success',
+        currentLanguage,
       ),
     );
   }

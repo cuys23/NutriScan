@@ -7,6 +7,7 @@ import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/widgets/auth/login_widgets.dart';
+import 'package:nutriscan/widgets/common/sk_snackbar.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -112,37 +113,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                             context,
                                           ).pushReplacementNamed('/main');
                                         } else {
-                                          ScaffoldMessenger.of(
+                                          SkSnackBar.error(
                                             context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                AppLocalizations.getString(
-                                                  'login_failed',
-                                                  currentLanguage,
-                                                ),
-                                              ),
-                                              backgroundColor: Colors.red,
+                                            message: AppLocalizations.getString(
+                                              'login_failed',
+                                              currentLanguage,
                                             ),
                                           );
                                         }
                                       } else {
                                         if (!context.mounted) return;
-                                        final errorMessage =
-                                            AppLocalizations.getString(
-                                              'login_failed',
-                                              currentLanguage,
-                                            );
-
-                                        ScaffoldMessenger.of(
+                                        SkSnackBar.error(
                                           context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(errorMessage),
-                                            backgroundColor: Colors.red,
-                                            duration: const Duration(
-                                              seconds: 4,
-                                            ),
+                                          message: AppLocalizations.getString(
+                                            'login_failed',
+                                            currentLanguage,
                                           ),
                                         );
                                       }
@@ -252,20 +237,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                         }
                                       } else {
                                         if (!context.mounted) return;
-                                        ScaffoldMessenger.of(
+                                        SkSnackBar.error(
                                           context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              AppLocalizations.getString(
-                                                'login_failed',
-                                                currentLanguage,
-                                              ),
-                                            ),
-                                            backgroundColor: Colors.red,
-                                            duration: const Duration(
-                                              seconds: 4,
-                                            ),
+                                          message: AppLocalizations.getString(
+                                            'login_failed',
+                                            currentLanguage,
                                           ),
                                         );
                                       }

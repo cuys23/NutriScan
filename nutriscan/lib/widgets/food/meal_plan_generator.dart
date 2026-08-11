@@ -6,6 +6,7 @@ import 'package:nutriscan/models/meal_plan.dart';
 import 'package:nutriscan/providers/food/meal_plan_provider.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
+import 'package:nutriscan/widgets/common/sk_snackbar.dart';
 import 'package:provider/provider.dart';
 
 class MealPlanGenerator extends StatefulWidget {
@@ -753,13 +754,9 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
                 });
               } else if (!noError || !hasPlan) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        '${AppLocalizations.getString('meal_plan_error_title', language)}: ${mealPlanProvider.errorMessage ?? "Unknown error"}',
-                      ),
-                      backgroundColor: AppColors.error,
-                    ),
+                  SkSnackBar.error(
+                    context,
+                    message: '${AppLocalizations.getString('meal_plan_error_title', language)}: ${mealPlanProvider.errorMessage ?? "Unknown error"}',
                   );
                 }
               }

@@ -33,6 +33,7 @@ import 'package:nutriscan/widgets/analysis/sk_line_chart.dart';
 import 'package:nutriscan/widgets/common/language_dropdown.dart';
 import 'package:nutriscan/widgets/common/sk_torn_divider.dart';
 import 'package:nutriscan/widgets/dialogs/coin_ad_dialogs.dart';
+import 'package:nutriscan/widgets/common/sk_snackbar.dart';
 import 'package:nutriscan/widgets/settings/delete_account_dialog.dart';
 import 'package:nutriscan/widgets/food/active_meal_plan_card.dart';
 import 'package:nutriscan/widgets/food/food_detail_card.dart';
@@ -1788,15 +1789,11 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     await context.read<CoinProvider>().reloadCoins();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.getString(
-            'delete_account_success',
-            currentLanguage,
-          ),
-        ),
-        backgroundColor: Colors.green[600],
+    SkSnackBar.success(
+      context,
+      message: AppLocalizations.getString(
+        'delete_account_success',
+        currentLanguage,
       ),
     );
   }

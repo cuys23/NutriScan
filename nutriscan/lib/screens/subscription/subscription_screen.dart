@@ -11,6 +11,7 @@ import 'package:nutriscan/screens/legal/privacy_policy_screen.dart';
 import 'package:nutriscan/screens/legal/terms_of_service_screen.dart';
 import 'package:nutriscan/services/payment/iap_service.dart';
 import 'package:nutriscan/widgets/subscription/subscription_widgets.dart';
+import 'package:nutriscan/widgets/common/sk_snackbar.dart';
 import 'package:provider/provider.dart';
 
 
@@ -788,21 +789,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         const SizedBox(height: 16),
         TextButton(
           onPressed: () async {
-            final scaffoldMessenger = ScaffoldMessenger.of(context);
             final success = await subscriptionProvider.restoreSubscription();
+            if (!context.mounted) return;
             if (success) {
-              scaffoldMessenger.showSnackBar(
-                const SnackBar(
-                  content: Text('Subscription successfully restored from cloud!'),
-                  backgroundColor: Colors.green,
-                ),
+              SkSnackBar.success(
+                context,
+                message: 'Subscription successfully restored!',
               );
             } else {
-              scaffoldMessenger.showSnackBar(
-                SnackBar(
-                  content: Text(subscriptionProvider.error ?? 'Restoration failed'),
-                  backgroundColor: Colors.red,
-                ),
+              SkSnackBar.error(
+                context,
+                message: subscriptionProvider.error ?? 'Restoration failed',
               );
             }
           },
