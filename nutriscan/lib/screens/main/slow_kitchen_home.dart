@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nutriscan/config/app_colors.dart';
+import 'package:nutriscan/config/app_config.dart';
 import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/models/food.dart';
 import 'package:nutriscan/providers/ads/admob_provider.dart';
@@ -1486,7 +1487,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
             }),
             _buildSettingRow(tp, d,
                 AppLocalizations.getString('app_version', lang),
-                value: '2.1.2', showChevron: false,
+                value: AppConfig.appVersion, showChevron: false,
                 onTap: () {
               Navigator.push(context,
                   PageTransition(child: const AppVersionScreen()));
