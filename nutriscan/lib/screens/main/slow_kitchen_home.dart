@@ -783,8 +783,8 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 children: [
                   Text(
                     food.name,
-                    style: tp.getBodyFont(
-                        fontSize: 16, color: AppColors.skInk(d)),
+                    style: tp.getSerifFont(
+                        fontSize: 18, color: AppColors.skInk(d)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -978,11 +978,20 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                               fontSize: 11,
                               color: AppColors.skMuted(d)),
                         ),
-                        Text(
-                          '${dayTotal.toStringAsFixed(0)} kcal',
-                          style: tp.getBodyFont(
-                              fontSize: 13,
-                              color: AppColors.skMuted(d)),
+                        Row(
+                          children: [
+                            Text(
+                              dayTotal.toStringAsFixed(0),
+                              style: tp.getSerifFont(
+                                  fontSize: 16, color: AppColors.skInk(d)),
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              'kcal',
+                              style: tp.getBodyFont(
+                                  fontSize: 12, color: AppColors.skMuted(d)),
+                            ),
+                          ],
                         ),
                       ],
                     ),
