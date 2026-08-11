@@ -1424,7 +1424,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     final maxCount = counts.fold(1, (a, b) => a > b ? a : b);
 
     return SizedBox(
-      height: 120,
+      height: 160,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(10, (i) {
