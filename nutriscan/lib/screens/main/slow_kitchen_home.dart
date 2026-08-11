@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nutriscan/config/app_colors.dart';
@@ -13,10 +14,22 @@ import 'package:nutriscan/providers/food/meal_plan_provider.dart';
 import 'package:nutriscan/providers/payment/subscription_provider.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
+import 'package:nutriscan/screens/chat/health_coach_screen.dart';
+import 'package:nutriscan/screens/food/meal_plan_screen.dart';
+import 'package:nutriscan/screens/legal/privacy_policy_screen.dart';
+import 'package:nutriscan/screens/legal/terms_of_service_screen.dart';
+import 'package:nutriscan/screens/settings/app_version_screen.dart';
+import 'package:nutriscan/screens/settings/cloud_backup_screen.dart';
+import 'package:nutriscan/screens/settings/notification_settings_screen.dart';
+import 'package:nutriscan/screens/subscription/subscription_screen.dart';
 import 'package:nutriscan/services/ai/groq_service.dart';
 import 'package:nutriscan/services/media/image_picker_service.dart';
+import 'package:nutriscan/utils/page_transition.dart';
 import 'package:nutriscan/widgets/ads/adaptive_banner_ad.dart';
+import 'package:nutriscan/widgets/common/language_dropdown.dart';
 import 'package:nutriscan/widgets/dialogs/coin_ad_dialogs.dart';
+import 'package:nutriscan/widgets/food/active_meal_plan_card.dart';
+import 'package:nutriscan/widgets/food/food_detail_card.dart';
 import 'package:nutriscan/widgets/home/sk_scan_button.dart';
 import 'package:nutriscan/widgets/home/sk_tab_bar.dart';
 import 'package:nutriscan/widgets/scan/multi_food_review_sheet.dart';
@@ -564,6 +577,34 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 // Remaining / projected
                 _buildDayInfo(tp, d, cal, meals),
                 const SizedBox(height: 22),
+                // Active Meal Plan (if any)
+                Consumer<MealPlanProvider>(
+                  builder: (context, mealPlanProvider, _) {
+                    final activePlan = mealPlanProvider.activePlan;
+                    if (activePlan == null) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 22),
+                      child: ActiveMealPlanCard(
+                        plan: activePlan,
+                        language: Provider.of<LanguageProvider>(context, listen: false).currentLanguage,
+                        themeProvider: tp,
+                        isDarkMode: d,
+                        onTap: () {
+                          mealPlanProvider.showActivePlan();
+                          Navigator.push(
+                            context,
+                            PageTransition(
+                              child: const MealPlanPreferencesScreen(),
+                            ),
+                          );
+                        },
+                        onDismiss: () {
+                          mealPlanProvider.dismissMealPlan();
+                        },
+                      ),
+                    );
+                  },
+                ),
                 // Section header
                 Text(
                   'TODAY\'S MEALS',
@@ -782,14 +823,35 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   }
 
   void _showFoodDetail(Food food) {
-    final tp = Provider.of<ThemeProvider>(context, listen: false);
-    final d = tp.isDarkMode;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _SkFoodDetailSheet(food: food, tp: tp, isDark: d),
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (sheetCtx, controller) {
+          final tp = Provider.of<ThemeProvider>(context, listen: false);
+          final d = tp.isDarkMode;
+          return Container(
+            decoration: BoxDecoration(
+              color: d ? AppColors.surfaceDark : AppColors.surfaceLight,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: SingleChildScrollView(
+              controller: controller,
+              child: FoodDetailCard(
+                food: food,
+                onFoodDeleted: () {
+                  Navigator.pop(sheetCtx);
+                },
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -1158,13 +1220,56 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 fontSize: 32, color: AppColors.skInk(d)),
           ),
           const SizedBox(height: 28),
+          // Full chat button
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                PageTransition(child: const HealthCoachScreen()),
+              );
+            },
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.skInk(d),
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.chat_outlined,
+                      size: 20, color: AppColors.skPaper(d)),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Open Health Coach',
+                    style: tp.getBodyFont(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.skPaper(d),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
           // Prompt suggestions
+          Text(
+            'QUICK PROMPTS',
+            style: tp.getSkLabel(
+                fontSize: 11, color: AppColors.skMuted(d)),
+          ),
+          const SizedBox(height: 12),
           ...['How am I doing today?', 'Are these numbers reliable?', 'What should I change this week?']
               .map((text) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: GestureDetector(
                       onTap: () {
-                        // TODO: Navigate to full chat screen with prompt
+                        Navigator.push(
+                          context,
+                          PageTransition(
+                              child: const HealthCoachScreen()),
+                        );
                       },
                       child: Container(
                         width: double.infinity,
@@ -1174,11 +1279,20 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                           border: Border.all(color: AppColors.skRule(d)),
                           color: AppColors.skSurface(d),
                         ),
-                        child: Text(
-                          text,
-                          style: tp.getBodyFont(
-                              fontSize: 15,
-                              color: AppColors.skInk(d)),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                text,
+                                style: tp.getBodyFont(
+                                    fontSize: 15,
+                                    color: AppColors.skInk(d)),
+                              ),
+                            ),
+                            Icon(Icons.chevron_right,
+                                size: 18,
+                                color: AppColors.skMuted(d)),
+                          ],
                         ),
                       ),
                     ),
@@ -1202,10 +1316,18 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   Widget _buildYouTab(ThemeProvider tp, LanguageProvider lp, bool d) {
     final coinProvider = context.watch<CoinProvider>();
     final fp = context.watch<FoodProvider>();
+    final backupProvider = context.watch<CloudBackupProvider>();
+    final subProvider = context.watch<SubscriptionProvider>();
     final all = fp.foods;
     final avgScore = all.isEmpty
         ? 0.0
         : all.fold(0.0, (s, f) => s + f.healthScore) / all.length;
+    final lang = lp.currentLanguage;
+
+    final user = backupProvider.isSignedIn
+        ? FirebaseAuth.instance.currentUser
+        : null;
+    final displayName = user?.displayName ?? user?.email?.split('@').first;
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -1226,27 +1348,31 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 ),
                 child: Center(
                   child: Text(
-                    'M',
+                    displayName?.isNotEmpty == true
+                        ? displayName![0].toUpperCase()
+                        : '?',
                     style: tp.getSerifFont(
                         fontSize: 24, color: AppColors.skInk(d)),
                   ),
                 ),
               ),
               const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Minh',
-                    style: tp.getSerifFont(
-                        fontSize: 28, color: AppColors.skInk(d)),
-                  ),
-                  Text(
-                    '${coinProvider.coinBalance} coins',
-                    style: tp.getBodyFont(
-                        fontSize: 13, color: AppColors.skMuted(d)),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName ?? 'Guest',
+                      style: tp.getSerifFont(
+                          fontSize: 28, color: AppColors.skInk(d)),
+                    ),
+                    Text(
+                      '${coinProvider.coinBalance} ${AppLocalizations.getString('coins', lang)}',
+                      style: tp.getBodyFont(
+                          fontSize: 13, color: AppColors.skMuted(d)),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1254,50 +1380,117 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
           // Stats
           Row(
             children: [
-              _buildProfileStat(tp, d, '12', 'Day streak'),
               _buildProfileStat(
-                  tp, d, '${all.length}', 'Meals logged'),
+                  tp, d, '${all.length}', 'Meals'),
               _buildProfileStat(
                   tp, d, avgScore.toStringAsFixed(1), 'Avg score'),
+              _buildProfileStat(
+                  tp, d, '${coinProvider.coinBalance}', AppLocalizations.getString('coins', lang)),
             ],
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 10),
 
-          // Settings sections
-          _buildSettingSection(tp, d, 'Your diary', [
-            _buildSettingRow(tp, d, 'Daily target',
-                hint: 'What an ordinary day should look like',
-                value: '$_dailyTarget kcal'),
-            _buildSettingRow(tp, d, 'Notification settings',
-                hint: 'Meal reminders and weekly progress'),
+          // ── Earn coins ──
+          _buildSettingSection(tp, d, AppLocalizations.getString('earn_coins', lang), [
+            _buildSettingRow(tp, d, AppLocalizations.getString('watch_ad_earn_coins', lang),
+                hint: 'Watch a short ad to earn scan coins',
+                onTap: () async {
+              final admob = context.read<AdMobProvider>();
+              final coin = context.read<CoinProvider>();
+              final backup = context.read<CloudBackupProvider>();
+              await admob
+                  .showRewardedAd(
+                isLoggedIn: backup.isSignedIn,
+                onRewardEarned: (amount, type) async {
+                  await coin.addCoins(CoinProvider.coinsPerAd);
+                  if (mounted) {
+                    CoinAdDialogs.showCoinEarnedDialog(
+                        context, CoinProvider.coinsPerAd);
+                  }
+                },
+              )
+                  .then((ok) {
+                if (!ok && mounted) {
+                  CoinAdDialogs.showAdNotAvailableDialog(context);
+                }
+              });
+            }),
           ]),
-          _buildSettingSection(tp, d, 'The app', [
-            _buildSettingToggleRow(tp, d, 'Dark mode',
-                hint: tp.isDarkMode
-                    ? 'Ink and lamplight'
-                    : 'Switch between light and dark themes',
+
+          // ── Subscription ──
+          _buildSettingSection(tp, d, AppLocalizations.getString('subscription', lang), [
+            _buildSettingRow(tp, d,
+                subProvider.isSubscribed
+                    ? AppLocalizations.getString('premium_active', lang)
+                    : AppLocalizations.getString('upgrade_to_premium', lang),
+                hint: subProvider.isSubscribed
+                    ? AppLocalizations.getString('manage_subscription', lang)
+                    : AppLocalizations.getString('remove_ads_unlock_features', lang),
+                onTap: () {
+              Navigator.push(context,
+                  PageTransition(child: const SubscriptionScreen()));
+            }),
+          ]),
+
+          // ── Your diary ──
+          _buildSettingSection(tp, d, AppLocalizations.getString('notification_settings', lang), [
+            _buildSettingRow(tp, d,
+                AppLocalizations.getString('notification_settings', lang),
+                hint: AppLocalizations.getString('notification_settings_subtitle', lang),
+                onTap: () {
+              Navigator.push(context,
+                  PageTransition(child: const NotificationSettingsScreen()));
+            }),
+          ]),
+
+          // ── The app ──
+          _buildSettingSection(tp, d, AppLocalizations.getString('app_settings', lang), [
+            _buildSettingToggleRow(tp, d,
+                AppLocalizations.getString('dark_mode', lang),
+                hint: AppLocalizations.getString('dark_mode_subtitle', lang),
                 value: tp.isDarkMode, onTap: () {
               tp.toggleTheme();
             }),
-            _buildSettingRow(tp, d, 'Language',
-                hint: 'Select your preferred language',
-                value: lp.currentLanguage == 'vi'
-                    ? 'Tiếng Việt'
-                    : 'English'),
+            _buildSettingRowWithTrailing(tp, d,
+                AppLocalizations.getString('language', lang),
+                hint: AppLocalizations.getString('language_subtitle', lang),
+                trailing: const LanguageDropdown()),
           ]),
-          _buildSettingSection(tp, d, 'Data & privacy', [
-            _buildSettingRow(tp, d, 'Cloud backup',
-                hint: 'Backup and restore your data'),
-            _buildSettingRow(tp, d, 'Export diary',
-                hint: 'CSV or PDF of every logged meal'),
+
+          // ── Data & privacy ──
+          _buildSettingSection(tp, d, AppLocalizations.getString('data_privacy', lang), [
+            _buildSettingRow(tp, d,
+                AppLocalizations.getString('cloud_backup_settings', lang),
+                hint: AppLocalizations.getString('cloud_backup_settings_subtitle', lang),
+                onTap: () {
+              Navigator.push(context,
+                  PageTransition(child: const CloudBackupScreen()));
+            }),
           ]),
-          _buildSettingSection(tp, d, 'About', [
-            _buildSettingRow(tp, d, 'Privacy policy',
-                hint: 'Read our privacy guidelines'),
-            _buildSettingRow(tp, d, 'Terms of service',
-                hint: 'Read our terms and conditions'),
-            _buildSettingRow(tp, d, 'App version',
-                value: '2.1.2', showChevron: false),
+
+          // ── About ──
+          _buildSettingSection(tp, d, AppLocalizations.getString('about', lang), [
+            _buildSettingRow(tp, d,
+                AppLocalizations.getString('privacy_policy', lang),
+                hint: AppLocalizations.getString('privacy_policy_subtitle', lang),
+                onTap: () {
+              Navigator.push(context,
+                  PageTransition(child: const PrivacyPolicyScreen()));
+            }),
+            _buildSettingRow(tp, d,
+                AppLocalizations.getString('terms_of_service', lang),
+                hint: AppLocalizations.getString('terms_of_service_subtitle', lang),
+                onTap: () {
+              Navigator.push(context,
+                  PageTransition(child: const TermsOfServiceScreen()));
+            }),
+            _buildSettingRow(tp, d,
+                AppLocalizations.getString('app_version', lang),
+                value: '2.1.2', showChevron: false,
+                onTap: () {
+              Navigator.push(context,
+                  PageTransition(child: const AppVersionScreen()));
+            }),
           ]),
         ],
       ),
@@ -1348,7 +1541,51 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   }
 
   Widget _buildSettingRow(ThemeProvider tp, bool d, String label,
-      {String? hint, String? value, bool showChevron = true}) {
+      {String? hint, String? value, bool showChevron = true,
+       VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: AppColors.skRule(d)),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: tp.getBodyFont(
+                          fontSize: 16, color: AppColors.skInk(d))),
+                  if (hint != null)
+                    Text(hint,
+                        style: tp.getBodyFont(
+                            fontSize: 13, color: AppColors.skMuted(d))),
+                ],
+              ),
+            ),
+            if (value != null)
+              Text(value,
+                  style: tp.getBodyFont(
+                      fontSize: 14, color: AppColors.skMuted(d))),
+            if (showChevron) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right,
+                  size: 18, color: AppColors.skMuted(d)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingRowWithTrailing(ThemeProvider tp, bool d, String label,
+      {String? hint, required Widget trailing}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
@@ -1372,15 +1609,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
               ],
             ),
           ),
-          if (value != null)
-            Text(value,
-                style: tp.getBodyFont(
-                    fontSize: 14, color: AppColors.skMuted(d))),
-          if (showChevron) ...[
-            const SizedBox(width: 8),
-            Icon(Icons.chevron_right,
-                size: 18, color: AppColors.skMuted(d)),
-          ],
+          trailing,
         ],
       ),
     );
@@ -1509,276 +1738,3 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
   }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// FOOD DETAIL BOTTOM SHEET
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-class _SkFoodDetailSheet extends StatelessWidget {
-  final Food food;
-  final ThemeProvider tp;
-  final bool isDark;
-
-  const _SkFoodDetailSheet({
-    required this.food,
-    required this.tp,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final nutrients = [
-      _Nutrient('Protein', '${food.protein.toStringAsFixed(1)}g',
-          (food.protein / 40).clamp(0, 1), AppColors.skSage(isDark)),
-      _Nutrient('Carbohydrate', '${food.carbs.toStringAsFixed(1)}g',
-          (food.carbs / 90).clamp(0, 1), AppColors.skAccent(isDark)),
-      _Nutrient('Fat', '${food.fat.toStringAsFixed(1)}g',
-          (food.fat / 30).clamp(0, 1), AppColors.skMuted(isDark)),
-      _Nutrient('Fibre', '${food.fiber.toStringAsFixed(1)}g',
-          (food.fiber / 8).clamp(0, 1), AppColors.skSage(isDark)),
-      _Nutrient('Sugar', '${food.sugar.toStringAsFixed(1)}g',
-          (food.sugar / 35).clamp(0, 1), AppColors.skAccent(isDark)),
-    ];
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.85,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (_, controller) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.skPaper(isDark),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: ListView(
-          controller: controller,
-          padding: const EdgeInsets.fromLTRB(28, 14, 28, 36),
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.skRule(isDark),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 22),
-            // Source badge
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: food.source == 'verified'
-                          ? AppColors.skSage(isDark)
-                          : AppColors.skMuted(isDark),
-                    ),
-                  ),
-                  child: Text(
-                    food.source == 'verified' ? 'Verified' : 'AI estimate',
-                    style: tp.getBodyFont(
-                      fontSize: 11,
-                      letterSpacing: 1.2,
-                      color: food.source == 'verified'
-                          ? AppColors.skSage(isDark)
-                          : AppColors.skMuted(isDark),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Food name
-            Text(
-              food.name,
-              style: tp.getSerifFont(
-                  fontSize: 32, color: AppColors.skInk(isDark)),
-            ),
-            if (food.description.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                food.description,
-                style: tp.getBodyFont(
-                    fontSize: 15,
-                    height: 1.55,
-                    color: AppColors.skBody(isDark)),
-              ),
-            ],
-            const SizedBox(height: 20),
-            // Calorie big number
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  food.calories.toStringAsFixed(0),
-                  style: tp.getSerifFont(
-                      fontSize: 56, color: AppColors.skInk(isDark)),
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('kcal',
-                        style: tp.getBodyFont(
-                            fontSize: 13,
-                            color: AppColors.skMuted(isDark))),
-                    Text(food.servingSize,
-                        style: tp.getBodyFont(
-                            fontSize: 13,
-                            color: AppColors.skMuted(isDark))),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Health score
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.skRule(isDark)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: AppColors.skAccent(isDark), width: 2),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${food.healthScore}',
-                        style: tp.getSerifFont(
-                            fontSize: 24,
-                            color: AppColors.skAccent(isDark)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('OUT OF TEN',
-                            style: tp.getBodyFont(
-                                fontSize: 11,
-                                letterSpacing: 1.5,
-                                color: AppColors.skMuted(isDark))),
-                        const SizedBox(height: 2),
-                        Text('Health score',
-                            style: tp.getSerifFont(
-                                fontSize: 18,
-                                color: AppColors.skInk(isDark))),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Nutrients
-            Text('NUTRIENTS',
-                style: tp.getSkLabel(
-                    fontSize: 11, color: AppColors.skMuted(isDark))),
-            const SizedBox(height: 10),
-            ...nutrients.map((n) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(n.label,
-                              style: tp.getBodyFont(
-                                  fontSize: 14,
-                                  color: AppColors.skInk(isDark))),
-                          Text(n.value,
-                              style: tp.getBodyFont(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.skInk(isDark))),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.skRuleSoft(isDark),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: FractionallySizedBox(
-                            widthFactor: n.pct.toDouble(),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: n.color,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
-            const SizedBox(height: 8),
-            // Benefits
-            if (food.healthBenefits.isNotEmpty) ...[
-              Text('BENEFITS',
-                  style: tp.getSkLabel(
-                      fontSize: 11, color: AppColors.skMuted(isDark))),
-              const SizedBox(height: 8),
-              ...food.healthBenefits.map((b) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      b,
-                      style: tp.getBodyFont(
-                          fontSize: 14,
-                          height: 1.5,
-                          color: AppColors.skBody(isDark)),
-                    ),
-                  )),
-              const SizedBox(height: 16),
-            ],
-            // Done button
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.skInk(isDark),
-                  borderRadius: BorderRadius.circular(26),
-                ),
-                child: Center(
-                  child: Text(
-                    'Done',
-                    style: tp.getBodyFont(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.skPaper(isDark),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Nutrient {
-  final String label;
-  final String value;
-  final num pct;
-  final Color color;
-  const _Nutrient(this.label, this.value, this.pct, this.color);
-}
