@@ -428,6 +428,7 @@ class AppLocalizations {
       'portuguese': 'Portuguese',
       'arabic': 'Arabic',
       'brazilian_portuguese': 'Brazilian Portuguese',
+      'vietnamese': 'Vietnamese',
 
       // Subscription
       'subscription': 'Subscription',
@@ -1168,6 +1169,7 @@ class AppLocalizations {
       'arabic': 'আরবি',
       'russian': 'রাশিয়ান',
       'brazilian_portuguese': 'ব্রাজিলিয়ান পর্তুগিজ',
+      'vietnamese': 'ভিয়েতনামী',
       'chinese': 'চাইনিজ',
       'turkish': 'তুর্কি',
       'urdu': 'উর্দু',
@@ -1769,6 +1771,7 @@ class AppLocalizations {
 
       'russian': 'रूसी',
       'brazilian_portuguese': 'ब्राज़ीलियाई पुर्तगाली',
+      'vietnamese': 'वियतनामी',
       'chinese': 'चीनी',
 
       'turkish': 'तुर्की',
@@ -2237,6 +2240,7 @@ class AppLocalizations {
       // Common
       'delete': 'Eliminar',
       'brazilian_portuguese': 'Portugués brasileño',
+      'vietnamese': 'Vietnamita',
       'clear': 'Borrar',
       'close': 'Cerrar',
       'ok': 'OK',
@@ -2860,6 +2864,7 @@ class AppLocalizations {
       'clear': 'Effacer',
       'close': 'Fermer',
       'brazilian_portuguese': 'Portugais brésilien',
+      'vietnamese': 'Vietnamien',
       'ok': 'OK',
       'yes': 'Oui',
       'no': 'Non',
@@ -3489,6 +3494,7 @@ class AppLocalizations {
       'no': 'Nein',
 
       'brazilian_portuguese': 'Brasilianisches Portugiesisch',
+      'vietnamese': 'Vietnamesisch',
       // Subscription Screen German Translations
       'subscription': 'Abonnement',
       'premium_subscription': 'Premium-Abonnement',
@@ -4044,6 +4050,7 @@ class AppLocalizations {
       'arabic': '阿拉伯语',
       'portuguese': '葡萄牙语',
       'brazilian_portuguese': '巴西葡萄牙语',
+      'vietnamese': '越南语',
 
       // Subscription
       'subscription': '订阅',
@@ -4627,6 +4634,7 @@ class AppLocalizations {
       'arabic': 'Arapça',
 
       'brazilian_portuguese': 'Brezilya Portekizcesi',
+      'vietnamese': 'Vietnamca',
       // Subscription
       'subscription': 'Abonelik',
       'premium_subscription': 'Premium Abonelik',
@@ -5161,6 +5169,7 @@ class AppLocalizations {
 
       'subscription': '구독',
       'brazilian_portuguese': '브라질 포르투갈어',
+      'vietnamese': '베트남어',
       'premium_subscription': '프리미엄 구독',
       'unlock_premium': '프리미엄 잠금 해제',
       'premium_description': '광고 제거 및 모든 프리미엄 기능 잠금 해제',
@@ -5708,6 +5717,7 @@ class AppLocalizations {
       'premium_subscription': 'Langganan Premium',
       'unlock_premium': 'Buka Premium',
       'brazilian_portuguese': 'Bahasa Portugis Brasil',
+      'vietnamese': 'Bahasa Vietnam',
       'premium_description': 'Hapus iklan dan buka semua fitur premium',
       'choose_plan': 'Pilih Paket Anda',
       'popular': 'Populer',
@@ -6237,6 +6247,7 @@ class AppLocalizations {
       'premium_description': '広告を削除してすべてのプレミアム機能のロックを解除',
       'choose_plan': 'プランを選択',
       'brazilian_portuguese': 'ブラジルポルトガル語',
+      'vietnamese': 'ベトナム語',
       'popular': '人気',
       'premium_features': 'プレミアム機能',
       'unlimited_scans': '無制限の食品スキャン',
@@ -6783,6 +6794,7 @@ class AppLocalizations {
       'choose_plan': 'Выберите план',
       'popular': 'Популярное',
       'brazilian_portuguese': 'Бразильский португальский',
+      'vietnamese': 'Вьетнамский',
       'premium_features': 'Премиум функции',
       'unlimited_scans': 'Неограниченное сканирование еды',
       'no_ads': 'Без рекламы',
@@ -7343,6 +7355,7 @@ class AppLocalizations {
       'arabic': 'عربی',
 
       'brazilian_portuguese': 'برازیلی پرتگالی',
+      'vietnamese': 'ویتنامی',
       'subscription': 'سبسکرپشن',
       'premium_subscription': 'پریمیم سبسکرپشن',
       'unlock_premium': 'پریمیم ان لاک کریں',
@@ -7908,6 +7921,7 @@ class AppLocalizations {
       'arabic': 'Árabe',
       'subscription': 'Assinatura',
       'brazilian_portuguese': 'Português Brasileiro',
+      'vietnamese': 'Vietnamita',
       'premium_subscription': 'Assinatura Premium',
       'unlock_premium': 'Desbloquear Premium',
       'premium_description':
@@ -8476,6 +8490,7 @@ class AppLocalizations {
       'urdu': 'Urdu',
       'portuguese': 'Português',
       'brazilian_portuguese': 'Português (Brasil)',
+      'vietnamese': 'Vietnamita',
       'arabic': 'Árabe',
       'subscription': 'Assinatura',
       'premium_subscription': 'Assinatura Premium',
@@ -9065,6 +9080,7 @@ class AppLocalizations {
       'portuguese': 'البرتغالية',
       'arabic': 'العربية',
       'brazilian_portuguese': 'البرتغالية البرازيلية',
+      'vietnamese': 'الفيتنامية',
 
       // Subscription
       'subscription': 'الاشتراك',
@@ -9256,6 +9272,631 @@ class AppLocalizations {
       'i_understand': 'مفهوم',
       'cancel': 'إلغاء',
     },
+    'vi': {
+      // Settings Screen
+      'settings': 'Cài đặt',
+      'app_settings': 'Cài đặt ứng dụng',
+      'dark_mode': 'Chế độ tối',
+      'dark_mode_subtitle': 'Chuyển đổi giữa giao diện sáng và tối',
+      'language': 'Ngôn ngữ',
+      'language_subtitle': 'Chọn ngôn ngữ ưa thích',
+      'data_privacy': 'Dữ liệu & Quyền riêng tư',
+      'cloud_backup_settings': 'Sao lưu đám mây',
+      'cloud_backup_settings_subtitle': 'Sao lưu và khôi phục dữ liệu',
+      'clear_all_data': 'Xoá tất cả dữ liệu',
+      'clear_all_data_subtitle': 'Xoá toàn bộ lịch sử và cài đặt',
+      'clear_all_data_description':
+          'Hành động này không thể hoàn tác. Toàn bộ lịch sử thực phẩm và cài đặt sẽ bị xoá vĩnh viễn.',
+      'clear_all': 'Xoá tất cả',
+      'logout': 'Đăng xuất',
+      'logout_subtitle': 'Đăng xuất khỏi tài khoản Google',
+      'logout_title': 'Đăng xuất',
+      'logout_description':
+          'Bạn có chắc muốn đăng xuất khỏi tài khoản Google? Bạn sẽ cần đăng nhập lại để sử dụng tính năng sao lưu đám mây.',
+
+      // Delete Account
+      'delete_account': 'Xoá tài khoản',
+      'delete_account_subtitle':
+          'Xoá vĩnh viễn tài khoản và tất cả dữ liệu',
+      'delete_account_title': 'Xoá tài khoản?',
+      'delete_account_description':
+          'Hành động này sẽ xoá vĩnh viễn tài khoản và tất cả dữ liệu liên quan: lịch sử thực phẩm, bản sao lưu đám mây, hình ảnh đã lưu và cài đặt. Không thể hoàn tác.',
+      'delete_account_confirm_hint': 'Nhập DELETE để xác nhận',
+      'delete_account_confirm_word': 'DELETE',
+      'delete_account_button': 'Xoá vĩnh viễn',
+      'delete_account_deleting': 'Đang xoá tài khoản...',
+      'delete_account_success': 'Tài khoản và dữ liệu đã được xoá.',
+      'delete_account_failed':
+          'Không thể xoá tài khoản. Vui lòng kiểm tra kết nối và thử lại.',
+      'delete_account_requires_login':
+          'Vì lý do bảo mật, vui lòng đăng nhập lại rồi thử xoá tài khoản.',
+      'delete_account_purchase_note':
+          'Các gói đăng ký đang hoạt động được quản lý bởi App Store và không bị huỷ khi xoá tài khoản. Hãy huỷ chúng trong Cài đặt thiết bị.',
+      'about': 'Giới thiệu',
+      'privacy_policy': 'Chính sách bảo mật',
+      'privacy_policy_subtitle': 'Đọc hướng dẫn bảo mật',
+      'terms_of_service': 'Điều khoản dịch vụ',
+      'terms_of_service_subtitle': 'Đọc điều khoản và điều kiện',
+      'app_version': 'Phiên bản ứng dụng',
+      'app_version_subtitle': '1.0.0',
+
+      // App Version Screen
+      'version': 'Phiên bản',
+      'build_number': 'Số bản dựng',
+      'developer': 'Nhà phát triển',
+      'platform_support': 'Hỗ trợ nền tảng',
+      'app_details': 'Chi tiết ứng dụng',
+      'check_for_updates': 'Kiểm tra cập nhật',
+      'checking_for_updates': 'Đang kiểm tra cập nhật...',
+
+      // History Screen
+      'food_history': 'Lịch sử thực phẩm',
+      'loading': 'Đang tải...',
+      'loading_subtitle': 'Đang chuẩn bị lịch sử thực phẩm...',
+      'refreshing': 'Đang làm mới...',
+      'updating': 'Đang cập nhật lịch sử...',
+      'search_foods': 'Tìm kiếm thực phẩm...',
+      'sort_by_date': 'Sắp xếp theo ngày',
+      'sort_by_name': 'Sắp xếp theo tên',
+      'sort_by_calories': 'Sắp xếp theo calo',
+      'total': 'Tổng cộng',
+      'no_food_history': 'Chưa có lịch sử thực phẩm',
+      'no_foods_found': 'Không tìm thấy thực phẩm',
+      'no_history_subtitle': 'Bắt đầu thêm thực phẩm để xem lịch sử',
+      'no_foods_subtitle': 'Thử điều chỉnh từ khoá tìm kiếm',
+      'clear_all_history': 'Xoá toàn bộ lịch sử',
+      'clear_history_description':
+          'Bạn có chắc muốn xoá toàn bộ lịch sử thực phẩm? Hành động này không thể hoàn tác.',
+      'delete_all': 'Xoá tất cả',
+
+      // FoodDetailCard
+      'score': 'Điểm',
+      'description': 'Mô tả',
+      'no_description_available': 'Không có mô tả',
+      'nutrition': 'Dinh dưỡng',
+      'source_verified': 'Đã xác minh',
+      'source_estimated': 'Ước tính AI',
+      'source_user_edited': 'Bạn đã chỉnh sửa',
+      'source_verified_subtitle': 'Dựa trên dữ liệu thực phẩm đã xác minh',
+      'nutrition_disclaimer_short':
+          'Giá trị dinh dưỡng chỉ là ước tính cho mục đích tham khảo, không phải lời khuyên y tế.',
+
+      // Multi-food review
+      'multi_food_review_title': 'Chúng tôi tìm thấy nhiều món',
+      'multi_food_review_subtitle': 'Bỏ chọn những món không thuộc bữa ăn của bạn',
+      'multi_food_review_save': 'Lưu đã chọn',
+      'multi_food_review_cancel': 'Huỷ',
+      'calories': 'Calo',
+      'protein': 'Protein',
+      'carbs': 'Carbs',
+      'fat': 'Chất béo',
+      'fiber': 'Chất xơ',
+      'sugar': 'Đường',
+      'sodium': 'Natri',
+      'health_benefits': 'Lợi ích sức khoẻ',
+      'health_warnings': 'Cảnh báo sức khoẻ',
+      'serving_size': 'Khẩu phần',
+      'date': 'Ngày',
+      'delete_food': 'Xoá thực phẩm',
+      'delete_food_description': 'Bạn có chắc muốn xoá',
+      'delete_confirmation': 'Bạn có chắc muốn xoá',
+
+      // Home Screen
+      'todays_food': 'Thực phẩm hôm nay',
+      'no_food_today': 'Chưa thêm thực phẩm hôm nay',
+      'start_with_photo': 'Bắt đầu bằng cách chụp ảnh thực phẩm',
+      'try_again': 'Thử lại',
+      'internet_check':
+          'Nếu vấn đề vẫn tiếp diễn, vui lòng kiểm tra kết nối internet',
+
+      // Home Screen Additional
+      'choose_method': 'Chọn phương thức',
+      'select_scan_method': 'Chọn cách quét thực phẩm',
+      'camera': 'Máy ảnh',
+      'take_photo': 'Chụp ảnh',
+      'gallery': 'Thư viện',
+      'choose_existing': 'Chọn ảnh có sẵn',
+      'camera_error': 'Lỗi máy ảnh',
+      'gallery_error': 'Lỗi thư viện',
+      'clear_todays_data': 'Xoá dữ liệu hôm nay',
+      'clear_todays_data_description':
+          'Bạn có chắc muốn xoá toàn bộ dữ liệu thực phẩm hôm nay?',
+      'hello': 'Xin chào, 👋',
+      'calorie_tracker': 'NutriSnap',
+      'clear_todays_data_tooltip': 'Xoá dữ liệu hôm nay',
+      'app_info_tooltip': 'Thông tin ứng dụng',
+      'app_information': 'Thông tin ứng dụng',
+      'calorie_tracker_version': 'NutriSnap v1.0.0',
+      'app_description':
+          'Ứng dụng phân tích dinh dưỡng bằng AI, quét hình ảnh thực phẩm để cung cấp thông tin dinh dưỡng chi tiết.',
+      'features': 'Tính năng:',
+      'camera_gallery_support': 'Hỗ trợ chụp ảnh và thư viện',
+      'ai_nutrition_analysis': 'Phân tích dinh dưỡng bằng AI',
+      'daily_nutrition_tracking': 'Theo dõi dinh dưỡng hàng ngày',
+
+      // Daily Progress Notification
+      'daily_progress': 'Tiến độ hàng ngày',
+      'daily_progress_subtitle': 'Nhận tổng kết calo hàng ngày lúc 21:00',
+      'daily_progress_message': 'Hôm nay bạn đã ăn {calories} calo',
+
+      // Inactivity Notification
+      'inactivity_reminder': 'Nhắc nhở hoạt động',
+      'inactivity_reminder_subtitle':
+          'Được nhắc lúc 10:00 nếu không hoạt động 24 giờ',
+      'inactivity_reminder_message':
+          'Chúng tôi nhớ bạn! Bạn có muốn ghi nhận bữa ăn hôm nay không? 📸',
+
+      // Weekly Summary Notification
+      'weekly_summary': 'Tổng kết tuần',
+      'weekly_summary_subtitle': 'Nhận tổng kết hàng tuần vào Chủ nhật lúc 18:00',
+      'weekly_summary_message':
+          'Tổng kết tuần: {foods} bữa, trung bình {calories} cal/ngày. Tiếp tục nhé! 🎉',
+
+      // Monthly Summary Notification
+      'monthly_summary': 'Tổng kết tháng',
+      'monthly_summary_subtitle':
+          'Nhận tổng kết hàng tháng vào ngày 1 lúc 18:00',
+      'monthly_summary_message':
+          '{month} đã kết thúc! {foods} bữa ăn đã ghi nhận. Xem báo cáo đầy đủ.',
+
+      // Premium Promotion Notification
+      'premium_promotion': 'Khuyến mãi Premium',
+      'premium_promotion_subtitle': 'Nhận ưu đãi Premium mỗi thứ Ba lúc 11:00',
+      'premium_promotion_message': 'Thử Premium và nhận báo cáo không giới hạn! 🚀',
+      'upgrade_required': 'Cần nâng cấp',
+      'upgrade_to_disable_promotion':
+          'Để tắt thông báo khuyến mãi, vui lòng nâng cấp lên Premium. Người dùng Premium có thể tuỳ chỉnh tất cả cài đặt thông báo.',
+      'upgrade_now': 'Nâng cấp ngay',
+
+      // Report Screens
+      'last_7_days': '7 ngày qua',
+      'weekly_report': 'Báo cáo tuần',
+      'monthly_report': 'Báo cáo tháng',
+      'statistics': 'Thống kê',
+      'daily_breakdown': 'Chi tiết hàng ngày',
+      'all_meals': 'Tất cả bữa ăn',
+      'avg_calories_per_day': 'Calo trung bình/ngày',
+      'total_meals': 'Tổng bữa ăn',
+      'total_calories': 'Tổng calo',
+      'meals': 'Bữa ăn',
+      'avg_cal_day': 'TB Cal/Ngày',
+      'cal': 'cal',
+      'today': 'Hôm nay',
+      'yesterday': 'Hôm qua',
+      'days_ago': '{days} ngày trước',
+      'last_month': 'Tháng trước',
+      'no_meals_recorded_week': 'Không có bữa ăn nào trong 7 ngày qua',
+      'no_meals_recorded_month': 'Không có bữa ăn nào trong tháng này',
+      'no_data_available': 'Không có dữ liệu',
+      'premium_feature': 'Tính năng Premium',
+      'premium_reports_only':
+          'Báo cáo tuần và tháng chỉ dành cho người dùng Premium',
+      'upgrade_to_premium': 'Nâng cấp lên Premium',
+      'unlock_detailed_reports':
+          'Mở khoá báo cáo chi tiết, phân tích nâng cao và các tính năng độc quyền!',
+
+      // Month Names
+      'january': 'Tháng 1',
+      'february': 'Tháng 2',
+      'march': 'Tháng 3',
+      'april': 'Tháng 4',
+      'may': 'Tháng 5',
+      'june': 'Tháng 6',
+      'july': 'Tháng 7',
+      'august': 'Tháng 8',
+      'september': 'Tháng 9',
+      'october': 'Tháng 10',
+      'november': 'Tháng 11',
+      'december': 'Tháng 12',
+
+      // Analysis Screen
+      'analysis': 'Phân tích',
+      'week': 'Tuần',
+      'month': 'Tháng',
+      'year': 'Năm',
+      'trends': 'Xu hướng',
+      'insights': 'Nhận định',
+      'total_nutrition': 'Tổng dinh dưỡng',
+      'top_foods': 'Thực phẩm hàng đầu',
+      'trend_analysis': 'Phân tích xu hướng',
+      'average_calories': 'Calo trung bình',
+      'insufficient_data': 'Không đủ dữ liệu để phân tích xu hướng',
+      'no_data_for_analysis': 'Không có dữ liệu để phân tích',
+      'start_adding_food_analysis': 'Bắt đầu thêm thực phẩm để xem phân tích',
+      'macronutrient_distribution': 'Phân bố chất dinh dưỡng đa lượng',
+      'health_score_distribution': 'Phân bố điểm sức khoẻ',
+      'analysis_info': 'Thông tin phân tích',
+      'analysis_info_description':
+          'Màn hình phân tích cung cấp cái nhìn toàn diện về mô hình tiêu thụ thực phẩm, xu hướng dinh dưỡng và khuyến nghị sức khoẻ.',
+      'meal_plan': 'Kế hoạch bữa ăn',
+      'meal_plan_settings_title': 'Kế hoạch bữa ăn AI',
+      'meal_plan_settings_subtitle':
+          'Tạo thực đơn hàng ngày được cá nhân hoá với AI.',
+      'meal_plan_result_title': 'Kế hoạch bữa ăn của bạn',
+      'meal_plan_generator_title': 'Tạo kế hoạch bữa ăn AI',
+      'meal_plan_generator_subtitle':
+          'Kết hợp mục tiêu calo, phong cách ăn uống và hạn chế. Chúng tôi sẽ thiết kế một kế hoạch cân bằng, ngon miệng cho bạn.',
+      'meal_plan_generator_prompt':
+          'Đặt tuỳ chọn, nhấn tạo và nhận lộ trình dinh dưỡng trong vài giây.',
+      'target_calories_label': 'Mục tiêu calo hàng ngày',
+      'target_calories_helper':
+          'Mẹo: điều chỉnh từ 1.200 – 3.500 kcal phù hợp với nhu cầu năng lượng.',
+      'diet_style_label': 'Phong cách ăn uống',
+      'diet_balanced': 'Cân bằng',
+      'diet_high_protein': 'Giàu Protein',
+      'diet_low_carb': 'Ít Carb',
+      'diet_keto': 'Keto',
+      'diet_vegetarian': 'Ăn chay',
+      'diet_vegan': 'Thuần chay',
+      'diet_mediterranean': 'Địa Trung Hải',
+      'meals_per_day_label': 'Số bữa & bữa phụ mỗi ngày',
+      'avoid_foods_label': 'Thực phẩm cần tránh hoặc dị ứng',
+      'avoid_foods_hint': 'VD: đậu phộng, hải sản, thịt đỏ',
+      'avoid_foods_helper':
+          'Phân cách bằng dấu phẩy. Chúng tôi sẽ không bao gồm những nguyên liệu này.',
+      'generate_meal_plan': 'Tạo kế hoạch',
+      'meal_plan_generating': 'Đang thiết kế kế hoạch bữa ăn...',
+      'meal_plan_generating_subtitle':
+          'Cân bằng dinh dưỡng, hương vị và nhắc nhở uống nước cho bạn.',
+      'meal_plan_generating_button': 'Đang tạo kế hoạch...',
+      'meal_plan_error_title': 'Không thể tạo kế hoạch',
+      'meal_plan_empty_title': 'Sẵn sàng cho kế hoạch bữa ăn?',
+      'meal_plan_empty_subtitle':
+          'Chọn mục tiêu calo, phong cách ăn và hạn chế, sau đó nhấn tạo để bắt đầu.',
+      'meal_plan_suggested_for_you':
+          'Gợi ý cho bạn dựa trên lịch sử thực phẩm',
+      'active_meal_plan': 'Kế hoạch bữa ăn hôm nay',
+      'view_meal_plan': 'Xem chi tiết',
+      'hydration_and_tips': 'Nhắc nhở uống nước & lối sống',
+      'grocery_list_label': 'Danh sách mua sắm thông minh',
+      'ingredients_label': 'Nguyên liệu',
+      'instructions_label': 'Cách chế biến',
+      'meal_type_breakfast': 'Bữa sáng',
+      'meal_type_lunch': 'Bữa trưa',
+      'meal_type_dinner': 'Bữa tối',
+      'meal_type_snack': 'Bữa phụ',
+      'meal_type_generic': '{meal}',
+      'overview_tab': 'Tab Tổng quan',
+      'overview_description_1':
+          'Xem tổng kết dinh dưỡng hàng ngày với phân bố chất dinh dưỡng đa lượng',
+      'overview_description_2':
+          'Xem thực phẩm được tiêu thụ nhiều nhất và giá trị dinh dưỡng',
+      'overview_description_3': 'Đánh giá nhanh điểm sức khoẻ',
+      'trends_tab': 'Tab Xu hướng',
+      'trends_description_1': 'Phân tích mô hình dinh dưỡng theo thời gian',
+      'trends_description_2': 'Xem xu hướng tiêu thụ calo và chất dinh dưỡng',
+      'trends_description_3': 'Nhận biết mô hình trong thói quen ăn uống',
+      'insights_tab': 'Tab Nhận định',
+      'insights_description_1': 'Nhận khuyến nghị sức khoẻ cá nhân hoá',
+      'insights_description_2': 'Xem phân tích dinh dưỡng và điểm chi tiết',
+      'insights_description_3': 'Hiểu các chỉ số sức khoẻ tổng thể',
+      'period_selector': 'Chọn khoảng thời gian',
+      'period_selector_description_1':
+          'Chọn giữa chế độ xem tuần, tháng hoặc năm',
+      'period_selector_description_2':
+          'So sánh dữ liệu giữa các khoảng thời gian',
+      'metric_selector': 'Chỉ số dinh dưỡng',
+      'metric_selector_description_1':
+          'Tập trung vào chất dinh dưỡng cụ thể: calo, protein, carbs hoặc chất béo',
+      'metric_selector_description_2':
+          'Theo dõi tiến trình trong các lĩnh vực dinh dưỡng khác nhau',
+      'analysis_tip':
+          'Mẹo: Sử dụng các khoảng thời gian khác nhau để phát hiện xu hướng dài hạn',
+      'quick_navigation': 'Điều hướng nhanh',
+      'overview': 'Tổng quan',
+      'tools': 'Công cụ',
+      'analysis_tools': 'Công cụ phân tích',
+      'got_it': 'Đã hiểu!',
+      'analyzing_data': 'Đang phân tích dữ liệu',
+      'generating_insights': 'Đang tạo nhận định cá nhân hoá...',
+      'excellent_health_choices': 'Lựa chọn sức khoẻ xuất sắc',
+      'excellent_health_description':
+          'Lựa chọn thực phẩm của bạn có điểm sức khoẻ trung bình {score}/10. Hãy tiếp tục!',
+      'good_health_choices': 'Lựa chọn sức khoẻ tốt',
+      'good_health_description':
+          'Lựa chọn thực phẩm của bạn có điểm sức khoẻ trung bình {score}/10. Hãy thêm nhiều lựa chọn bổ dưỡng hơn.',
+      'health_improvement_needed': 'Cần cải thiện sức khoẻ',
+      'health_improvement_description':
+          'Lựa chọn thực phẩm của bạn có điểm sức khoẻ trung bình {score}/10. Hãy tập trung vào thực phẩm bổ dưỡng hơn.',
+      'great_food_variety': 'Đa dạng thực phẩm tuyệt vời',
+      'great_variety_description':
+          'Bạn đang ăn đa dạng các loại thực phẩm. Điều này giúp đảm bảo dinh dưỡng cân bằng.',
+      'limited_food_variety': 'Đa dạng thực phẩm hạn chế',
+      'limited_variety_description':
+          'Hãy thêm nhiều loại thực phẩm vào chế độ ăn để cân bằng dinh dưỡng tốt hơn.',
+      'high_calorie_intake': 'Lượng calo cao',
+      'high_calorie_description':
+          'Tổng lượng calo của bạn là {calories} kcal. Hãy cân nhắc kiểm soát khẩu phần.',
+      'low_calorie_intake': 'Lượng calo thấp',
+      'low_calorie_description':
+          'Tổng lượng calo của bạn là {calories} kcal. Hãy đảm bảo đáp ứng nhu cầu hàng ngày.',
+      'food_history_management': 'Quản lý lịch sử thực phẩm',
+
+      // Loading and Scanning
+      'preparing_food_data': 'Đang chuẩn bị dữ liệu thực phẩm...',
+      'scanning': 'Đang quét...',
+      'scanning_food_image': 'Đang quét hình ảnh thực phẩm...',
+      'loading_error_title':
+          'Chúng tôi gặp sự cố khi tải dữ liệu. Có thể do:',
+      'internet_connection_problem': 'Vấn đề kết nối internet',
+      'server_unavailable': 'Máy chủ tạm thời không khả dụng',
+      'app_configuration_issue': 'Vấn đề cấu hình ứng dụng',
+
+      // Bottom Navigation
+      'home': 'Trang chủ',
+      'history': 'Lịch sử',
+
+      // Error Messages
+      'oops_something_went_wrong': 'Ôi! Đã xảy ra lỗi',
+
+      // Splash Screen
+      'track_nutrition_journey': 'Theo dõi hành trình dinh dưỡng',
+      'preparing_app': 'Đang chuẩn bị ứng dụng...',
+      'powered_by_groq_ai': 'Hỗ trợ bởi Groq AI',
+      'splash_version': 'v1.0.0',
+
+      // Login Screen
+      'welcome_to_nutriscan': 'Chào mừng đến NutriSnap',
+      'login_description':
+          'Đăng nhập bằng tài khoản Google để sao lưu đám mây và đồng bộ dữ liệu trên tất cả thiết bị.',
+      'sign_in_with_google': 'Đăng nhập với Google',
+      'sign_in_with_apple': 'Đăng nhập với Apple',
+      'signing_in': 'Đang đăng nhập...',
+      'skip_for_now': 'Bỏ qua',
+      'login_failed': 'Đăng nhập thất bại. Vui lòng thử lại.',
+      'google': 'Google',
+      'nutriscan': 'NutriSnap',
+
+      // Cloud Backup Screen
+      'cloud_backup': 'Sao lưu đám mây',
+      'signed_in': 'Đã đăng nhập',
+      'not_signed_in': 'Chưa đăng nhập',
+      'backup_actions': 'Thao tác sao lưu',
+      'premium_badge': 'PREMIUM',
+      'premium': 'Premium',
+      'backing_up': 'Đang sao lưu...',
+      'backup_to_cloud': 'Sao lưu lên đám mây',
+      'backup_to_cloud_premium': 'Sao lưu lên đám mây (Premium)',
+      'restoring': 'Đang khôi phục...',
+      'restore_from_cloud': 'Khôi phục từ đám mây',
+      'restore_from_cloud_premium': 'Khôi phục từ đám mây (Premium)',
+      'cloud_backup_premium_only':
+          'Sao lưu đám mây chỉ dành cho người dùng Premium',
+      'cloud_restore_premium_only':
+          'Khôi phục đám mây chỉ dành cho người dùng Premium',
+      'auto_backup': 'Tự động sao lưu',
+      'auto_backup_description':
+          'Tự động sao lưu dữ liệu khi bạn thêm thực phẩm mới',
+      'enable_auto_backup': 'Bật tự động sao lưu',
+      'restore_data': 'Khôi phục dữ liệu',
+      'restore_data_warning':
+          'Hành động này sẽ thay thế toàn bộ dữ liệu hiện tại bằng bản sao lưu đám mây. Không thể hoàn tác.',
+      'restore': 'Khôi phục',
+      'cancel_btn': 'Huỷ',
+
+      // FoodList Widget
+      'no_food_found': 'Không tìm thấy thực phẩm',
+      'start_adding_food': 'Bắt đầu thêm thực phẩm',
+
+      // NutritionSummaryCard Widget
+      'todays_nutrition': 'Dinh dưỡng hôm nay',
+
+      // Language Names
+      'english': 'Tiếng Anh',
+      'bangla': 'Tiếng Bengal',
+      'hindi': 'Tiếng Hindi',
+      'spanish': 'Tiếng Tây Ban Nha',
+      'french': 'Tiếng Pháp',
+      'german': 'Tiếng Đức',
+      'chinese': 'Tiếng Trung',
+      'turkish': 'Tiếng Thổ Nhĩ Kỳ',
+      'korean': 'Tiếng Hàn',
+      'indonesian': 'Tiếng Indonesia',
+      'japanese': 'Tiếng Nhật',
+      'russian': 'Tiếng Nga',
+      'urdu': 'Tiếng Urdu',
+      'portuguese': 'Tiếng Bồ Đào Nha',
+      'arabic': 'Tiếng Ả Rập',
+      'brazilian_portuguese': 'Tiếng Bồ Đào Nha Brazil',
+      'vietnamese': 'Tiếng Việt',
+
+      // Subscription
+      'subscription': 'Đăng ký',
+      'premium_subscription': 'Đăng ký Premium',
+      'unlock_premium': 'Mở khoá Premium',
+      'premium_description': 'Loại bỏ quảng cáo và mở khoá tất cả tính năng Premium',
+      'choose_plan': 'Chọn gói của bạn',
+      'popular': 'Phổ biến',
+      'premium_features': 'Tính năng Premium',
+      'unlimited_scans': 'Quét thực phẩm không giới hạn',
+      'no_ads': 'Không quảng cáo',
+      'advanced_insights': 'Phân tích dinh dưỡng nâng cao',
+      'export_data': 'Xuất dữ liệu',
+      'priority_support': 'Hỗ trợ ưu tiên',
+      'subscribe_now': 'Đăng ký ngay',
+      'subscription_terms':
+          'Đăng ký tuân theo điều khoản dịch vụ và chính sách bảo mật',
+      'premium_active': 'Premium đang hoạt động',
+      'manage_subscription': 'Quản lý đăng ký',
+      'remove_ads_unlock_features': 'Loại bỏ quảng cáo và mở khoá tất cả tính năng',
+      'subscription_id': 'Mã đăng ký',
+      'expires_on': 'Hết hạn vào',
+      'days_remaining': 'Ngày còn lại',
+      'cancel_subscription': 'Huỷ đăng ký',
+      'subscription_success': 'Đăng ký thành công!',
+      'subscription_error': 'Đăng ký thất bại, vui lòng thử lại',
+      'subscription_cancelled': 'Đã huỷ đăng ký',
+      'cancellation_error': 'Huỷ thất bại, vui lòng thử lại',
+
+      // Additional Subscription
+      'ad_free_experience': 'Trải nghiệm không quảng cáo',
+      'ad_free_description': 'Tận hưởng ứng dụng không bị gián đoạn',
+      'unlimited_scans_description': 'Quét bao nhiêu thực phẩm tuỳ thích',
+      'advanced_analytics': 'Phân tích nâng cao',
+      'advanced_analytics_description': 'Nhận phân tích dinh dưỡng chi tiết',
+      'priority_support_description': 'Nhận hỗ trợ khi bạn cần',
+      'choose_your_plan': 'Chọn gói của bạn',
+      'monthly_plan': 'Gói tháng',
+      'yearly_plan': 'Gói năm',
+      'lifetime_plan': 'Gói trọn đời',
+      'billed_monthly': 'Thanh toán hàng tháng • Huỷ bất cứ lúc nào',
+      'billed_annually': 'Thanh toán hàng năm • Tiết kiệm 17% • Giá trị nhất',
+      'pay_once_forever': 'Thanh toán một lần • Dùng mãi mãi • Không phí định kỳ',
+      'best_value': 'GIÁ TRỊ NHẤT',
+      'save_percentage': 'Tiết kiệm 17%',
+      'subscription_successful': 'Đăng ký thành công! Chào mừng đến Premium!',
+      'subscription_terms_detailed':
+          'Thanh toán sẽ được tính vào tài khoản khi xác nhận mua. Đăng ký tự động gia hạn trừ khi bị huỷ ít nhất 24 giờ trước khi kết thúc kỳ hiện tại. Tài khoản sẽ bị tính phí gia hạn trong vòng 24 giờ trước khi kết thúc kỳ hiện tại. Bạn có thể quản lý hoặc huỷ đăng ký bất cứ lúc nào trong cài đặt tài khoản App Store. Bằng cách đăng ký, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.',
+      'active_premium_subscription': 'Đăng ký Premium đang hoạt động',
+      'billed_monthly_desc': 'Thanh toán hàng tháng',
+      'billed_annually_desc': 'Thanh toán hàng năm',
+      'one_time_payment': 'Thanh toán một lần',
+      'next_billing': 'Thanh toán tiếp theo:',
+      'never_expires': 'Không bao giờ hết hạn - Truy cập trọn đời',
+      'cancel_subscription_warning':
+          'Huỷ đăng ký sẽ xoá quyền truy cập tính năng Premium vào cuối kỳ thanh toán hiện tại.',
+      'cancel_subscription_question': 'Huỷ đăng ký?',
+      'cancel_subscription_description':
+          'Bạn có chắc muốn huỷ đăng ký? Bạn sẽ mất quyền truy cập tính năng Premium vào cuối kỳ thanh toán hiện tại.',
+      'resubscribe_info':
+          'Bạn có thể đăng ký lại bất cứ lúc nào để lấy lại quyền truy cập tính năng Premium.',
+      'keep_subscription': 'Giữ đăng ký',
+      'subscription_cancelled_successfully':
+          'Đã huỷ đăng ký thành công',
+
+      // Free Trial
+      'subscribe_now_button': 'Đăng ký ngay',
+      'maybe_later_button': 'Để sau',
+
+      // Notifications
+      'notification_settings': 'Cài đặt thông báo',
+      'notification_settings_subtitle':
+          'Nhắc bữa ăn, tiến độ hàng ngày/tuần & cảnh báo',
+      'enable_notifications': 'Nhắc nhở bữa ăn',
+      'notification_description':
+          'Nhận thông báo cho bữa sáng, trưa, phụ & tối',
+      'meal_reminders': 'Nhắc nhở bữa ăn',
+      'pause_category': 'Kiểm soát thông báo',
+      'meal_reminders_category': 'Nhắc nhở bữa ăn',
+      'progress_category': 'Thông báo tiến độ',
+      'inactivity_category': 'Thông báo không hoạt động',
+      'summary_category': 'Thông báo tổng kết',
+      'promotion_category': 'Thông báo khuyến mãi',
+      'breakfast': 'Bữa sáng',
+      'lunch': 'Bữa trưa',
+      'snack': 'Bữa phụ',
+      'dinner': 'Bữa tối',
+      'meal_reminder_message':
+          'Đến giờ {meal} rồi! 🍽️ Đừng quên ghi nhận.',
+      'breakfast_notification':
+          'Đến giờ ăn sáng! 🍽️ Đừng quên ghi nhận.',
+      'lunch_notification': 'Đến giờ ăn trưa! 🍽️ Đừng quên ghi nhận.',
+      'snack_notification': 'Đến giờ ăn phụ! 🍽️ Đừng quên ghi nhận.',
+      'dinner_notification': 'Đến giờ ăn tối! 🍽️ Đừng quên ghi nhận.',
+      'test_notification': 'Thông báo thử',
+      'send_test_notification': 'Gửi thông báo thử',
+      'test_notification_sent':
+          'Đã gửi thông báo thử! Kiểm tra thanh thông báo.',
+      'test_notification_failed':
+          'Gửi thông báo thử thất bại. Vui lòng kiểm tra quyền.',
+      'push_notifications': 'Thông báo đẩy',
+      'fcm_token': 'Token thiết bị FCM',
+      'fcm_token_description':
+          'Token này dùng để gửi thông báo đẩy đến thiết bị.',
+      'copied_to_clipboard': 'Đã sao chép!',
+      'fcm_daily_limit': 'Giới hạn thông báo đẩy FCM (tối đa 3/ngày)',
+      'notifications_remaining': 'còn lại hôm nay',
+      'fcm_limit_note': 'Thông báo cục bộ (bữa ăn, tiến độ) không giới hạn',
+      'pause_notifications': 'Tạm dừng thông báo 3 ngày',
+      'pause_subtitle': 'Tạm dừng tất cả thông báo trong 7 ngày (Chỉ quan trọng)',
+      'pause_7_days': 'Tạm dừng 3 ngày',
+      'pause_active': 'Đã tạm dừng thông báo',
+      'pause_days_remaining': 'Ngày còn lại',
+      'resume_now': 'Tiếp tục thông báo',
+      'pause_confirm_title': 'Tạm dừng thông báo?',
+      'pause_confirm_message':
+          'Tất cả thông báo sẽ bị tạm dừng trong 7 ngày. Thông báo hệ thống quan trọng vẫn được gửi.',
+      'pause_confirm': 'Tạm dừng',
+      'pause_info_message':
+          'Tất cả thông báo hiện đang tạm dừng. Bạn chỉ nhận được thông báo hệ thống quan trọng trong thời gian này.',
+      'remaining': 'còn lại',
+      'days': 'ngày',
+      'instant_test': 'Thử ngay',
+      '1_min_test': 'Thử 1 phút',
+      'test_scheduled_1min':
+          'Thông báo thử đã được lên lịch sau 1 phút. Đợi và kiểm tra!',
+      'scheduled_notifications': 'Thông báo đã lên lịch',
+      'notifications_active': 'thông báo đang hoạt động',
+      'no_notifications_scheduled':
+          'Chưa có thông báo nào được lên lịch. Bật nhắc nhở ở trên.',
+      'pending_notifications_info': 'Thông tin thông báo đang chờ',
+      'pending_notifications_count': 'Thông báo đang chờ: {count}',
+      'refresh': 'Làm mới',
+      'debug_info': 'Thông tin gỡ lỗi',
+      'no_pending_notifications': 'Không có thông báo đang chờ',
+
+      // Nutrient deficiency
+      'nutrient_deficiency_title': 'Mẹo dinh dưỡng',
+      'nutrient_deficiency_protein':
+          'Thực phẩm của bạn thiếu protein. Hãy thêm protein trong bữa ăn tiếp theo.',
+      'nutrient_deficiency_carbs':
+          'Thực phẩm của bạn thiếu carbs. Hãy thêm carbs trong bữa ăn tiếp theo.',
+      'nutrient_deficiency_fat':
+          'Thực phẩm của bạn thiếu chất béo. Hãy thêm chất béo lành mạnh trong bữa ăn tiếp theo.',
+      'nutrient_deficiency_fiber':
+          'Thực phẩm của bạn thiếu chất xơ. Hãy thêm chất xơ trong bữa ăn tiếp theo.',
+
+      'free': 'miễn phí',
+
+      // Common
+      'delete': 'Xoá',
+      'clear': 'Xoá',
+      'close': 'Đóng',
+      'ok': 'OK',
+      'cancel': 'Huỷ',
+      'yes': 'Có',
+      'no': 'Không',
+      'watch_ad_for_rewards': 'Xem quảng cáo nhận thưởng',
+      'remaining_today': 'Còn lại hôm nay',
+      'available_in': 'Có sẵn trong',
+      'loading_ad': 'Đang tải quảng cáo...',
+      'reward_earned': 'Đã nhận thưởng!',
+      'reward_earned_description':
+          'Cảm ơn bạn đã xem! Phần thưởng đã được cộng.',
+      'ad_not_available': 'Quảng cáo không khả dụng',
+      'ad_not_available_description':
+          'Vui lòng thử lại sau. Quảng cáo có thể cần một chút thời gian để tải.',
+      'ad_for_rewards': 'Xem quảng cáo nhận xu',
+      'ad_for_rewards_subtitle': 'Xem quảng cáo để kiếm xu',
+      'your_coins': 'Xu của bạn',
+      'earn_coins': 'Kiếm xu',
+      'preferences': 'Tuỳ chọn',
+      'ai_meal_planner': 'Lập kế hoạch bữa ăn AI',
+      'meal_planner_description': 'Tạo kế hoạch bữa ăn hàng tuần dựa trên thói quen ăn uống',
+      'watch_ad_earn_coins': 'Xem quảng cáo',
+      'coins_earned': 'Đã nhận xu!',
+      'you_earned_coins': 'Bạn đã nhận {amount} xu!',
+      'coin_balance': 'Số dư xu',
+      'total_earned': 'Tổng đã nhận',
+      'total_spent': 'Tổng đã dùng',
+      'coins': 'Xu',
+      'coin': 'Xu',
+      'not_enough_coins': 'Không đủ xu',
+      'not_enough_coins_description':
+          'Xem quảng cáo để kiếm thêm xu và tiếp tục quét.',
+      'scan_costs': 'Quét tốn {amount} xu',
+      'scan_costs_plural': 'Quét tốn {amount} xu',
+      'please_wait': 'Vui lòng đợi',
+      'health_coach_title': 'Huấn luyện viên sức khoẻ',
+      'chat_placeholder': 'Hỏi Huấn luyện viên...',
+      'chat_clear_confirm': 'Xoá lịch sử trò chuyện',
+      'chat_clear_description': 'Bạn có chắc muốn xoá toàn bộ lịch sử trò chuyện? Hành động này không thể hoàn tác.',
+      'coach_welcome': 'Xin chào! Tôi là Huấn luyện viên sức khoẻ AI. Tôi có thể giúp gì cho bạn hôm nay?',
+      'typing': 'Huấn luyện viên đang nhập...',
+      'store_setup_required': 'Cần thiết lập cửa hàng',
+      'store_setup_unavailable_msg': 'Đăng ký hiện không khả dụng vì cấu hình cửa hàng chưa hoàn chỉnh. Vui lòng đảm bảo:\n\n• Ứng dụng đã được tải lên Play Store / App Store Console.\n• Mã sản phẩm khớp với cấu hình Console.\n• Bạn đang dùng thiết bị thật với tài khoản thử nghiệm hợp lệ.',
+      'i_understand': 'Tôi hiểu',
+    },
   };
 
   static String getString(String key, String languageCode) {
@@ -9282,6 +9923,7 @@ class AppLocalizations {
       'pt': _localizedValues['pt']!['portuguese']!,
       'pt-BR': _localizedValues['pt-BR']!['brazilian_portuguese']!,
       'ar': _localizedValues['ar']!['arabic']!,
+      'vi': _localizedValues['vi']!['vietnamese']!,
     };
   }
 }

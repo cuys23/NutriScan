@@ -83,6 +83,8 @@ class LanguageProvider extends ChangeNotifier {
         return 'Português (Brasil)';
       case 'ar':
         return 'العربية';
+      case 'vi':
+        return 'Tiếng Việt';
       default:
         return 'English';
     }
@@ -111,6 +113,7 @@ class LanguageProvider extends ChangeNotifier {
         'nativeName': 'Português (Brasil)',
       },
       {'code': 'ar', 'name': 'Arabic', 'nativeName': 'العربية'},
+      {'code': 'vi', 'name': 'Vietnamese', 'nativeName': 'Tiếng Việt'},
     ];
   }
   // Get specific font family for each language
@@ -148,6 +151,8 @@ class LanguageProvider extends ChangeNotifier {
         return 'Poppins';
       case 'ar':
         return 'Cairo';
+      case 'vi':
+        return 'Poppins';
       default:
         return 'Poppins';
     }

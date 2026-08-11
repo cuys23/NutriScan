@@ -34,6 +34,7 @@ class LanguageDropdown extends StatelessWidget {
     ('pt', '🇵🇹', 'portuguese'),
     ('pt-BR', '🇧🇷', 'brazilian_portuguese'),
     ('ar', '🇸🇦', 'arabic'),
+    ('vi', '🇻🇳', 'vietnamese'),
   ];
 
   @override
