@@ -216,68 +216,66 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                 const SizedBox(height: 20),
 
                 // ── Buttons ──
-                Row(
+                Column(
                   children: [
-                    // Cancel
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _isDeleting
-                            ? null
-                            : () => Navigator.of(context).pop(false),
-                        child: Container(
-                          height: 48,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            border: Border.all(color: AppColors.skRule(d)),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Text(
-                            _t('cancel'),
-                            style: tp.getBodyFont(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.skMuted(d),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     // Delete
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _canDelete && !_isDeleting
-                            ? _handleDelete
-                            : null,
-                        child: Container(
-                          height: 48,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: _canDelete && !_isDeleting
-                                ? const Color(0xFFC44545)
-                                : const Color(0xFFC44545).withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: _isDeleting
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : Text(
-                                  _t('delete_account_button'),
-                                  style: tp.getBodyFont(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                    GestureDetector(
+                      onTap: _canDelete && !_isDeleting
+                          ? _handleDelete
+                          : null,
+                      child: Container(
+                        width: double.infinity,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _canDelete && !_isDeleting
+                              ? const Color(0xFFC44545)
+                              : const Color(0xFFC44545).withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: _isDeleting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
                                   ),
                                 ),
+                              )
+                            : Text(
+                                _t('delete_account_button'),
+                                style: tp.getBodyFont(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Cancel
+                    GestureDetector(
+                      onTap: _isDeleting
+                          ? null
+                          : () => Navigator.of(context).pop(false),
+                      child: Container(
+                        width: double.infinity,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          border: Border.all(color: AppColors.skRule(d)),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Text(
+                          _t('cancel'),
+                          style: tp.getBodyFont(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.skMuted(d),
+                          ),
                         ),
                       ),
                     ),
