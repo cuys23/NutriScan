@@ -191,7 +191,7 @@ class _FoodDetailCardState extends State<FoodDetailCard> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 2.8,
+                    childAspectRatio: 2.3,
                     children: [
                       _buildNutritionStat(
                         tp,
@@ -383,7 +383,7 @@ class _FoodDetailCardState extends State<FoodDetailCard> {
     Color indicatorColor,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.skSurface(d),
         border: Border.all(color: AppColors.skRuleSoft(d)),
