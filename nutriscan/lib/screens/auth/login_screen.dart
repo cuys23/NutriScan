@@ -24,11 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final languageProvider = Provider.of<LanguageProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
     final currentLanguage = languageProvider.currentLanguage;
-
+    final d = isDarkMode;
     return Scaffold(
-      backgroundColor: isDarkMode
-          ? AppColors.backgroundDark
-          : AppColors.backgroundLight,
+      backgroundColor: AppColors.skPaper(d),
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,

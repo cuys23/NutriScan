@@ -477,58 +477,96 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
             ),
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: _dietOptions.map((option) {
-              final isSelected = mealPlanProvider.dietStyle == option['value'];
-              final labelKey = 'diet_${option['value']}';
-              return GestureDetector(
-                onTap: () => mealPlanProvider.setDietStyle(option['value']!),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.skInk(d)
-                        : AppColors.skPaper(d),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.skInk(d)
-                          : AppColors.skRule(d),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final List<Widget> rows = [];
+              for (int i = 0; i < _dietOptions.length; i += 2) {
+                final isLastSingle = i + 1 >= _dietOptions.length;
+                final opt1 = _dietOptions[i];
+                final opt2 = isLastSingle ? null : _dietOptions[i + 1];
+
+                rows.add(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildDietChip(
+                            option: opt1,
+                            mealPlanProvider: mealPlanProvider,
+                            themeProvider: themeProvider,
+                            language: language,
+                            d: d,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: opt2 != null
+                              ? _buildDietChip(
+                                  option: opt2,
+                                  mealPlanProvider: mealPlanProvider,
+                                  themeProvider: themeProvider,
+                                  language: language,
+                                  d: d,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        option['icon']!,
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        AppLocalizations.getString(labelKey, language),
-                        style: themeProvider.getBodyFont(
-                          fontSize: 14,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                          color: isSelected
-                              ? AppColors.skPaper(d)
-                              : AppColors.skInk(d),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
+                );
+              }
+              return Column(children: rows);
+            },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDietChip({
+    required Map<String, String> option,
+    required MealPlanProvider mealPlanProvider,
+    required ThemeProvider themeProvider,
+    required String language,
+    required bool d,
+  }) {
+    final isSelected = mealPlanProvider.dietStyle == option['value'];
+    final labelKey = 'diet_${option['value']}';
+    return GestureDetector(
+      onTap: () => mealPlanProvider.setDietStyle(option['value']!),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.skInk(d) : AppColors.skPaper(d),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? AppColors.skInk(d) : AppColors.skRule(d),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              option['icon']!,
+              style: const TextStyle(fontSize: 15),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                AppLocalizations.getString(labelKey, language),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: themeProvider.getBodyFont(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? AppColors.skPaper(d) : AppColors.skInk(d),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
