@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iconly/iconly.dart';
 import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/config/exports/providers.dart';
@@ -15,29 +14,26 @@ class MealPlanPreferencesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
-        final isDarkMode = themeProvider.isDarkMode;
+        final d = themeProvider.isDarkMode;
         final currentLanguage = languageProvider.currentLanguage;
 
         return Scaffold(
-          backgroundColor: isDarkMode
-              ? AppColors.backgroundDark
-              : AppColors.backgroundLight,
+          backgroundColor: AppColors.skPaper(d),
           appBar: AppBar(
             title: Text(
               AppLocalizations.getString(
                 'meal_plan_settings_title',
                 currentLanguage,
               ),
-              style: themeProvider.getFontForCurrentLanguage(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.white,
+              style: themeProvider.getSerifFont(
+                fontSize: 22,
+                color: AppColors.skInk(d),
               ),
             ),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.skPaper(d),
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(IconlyLight.arrow_left, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: AppColors.skInk(d)),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
@@ -73,61 +69,58 @@ class MealPlanResultScreen extends StatelessWidget {
     return Consumer3<ThemeProvider, LanguageProvider, MealPlanProvider>(
       builder:
           (context, themeProvider, languageProvider, mealPlanProvider, child) {
-            final isDarkMode = themeProvider.isDarkMode;
-            final currentLanguage = languageProvider.currentLanguage;
+        final d = themeProvider.isDarkMode;
+        final currentLanguage = languageProvider.currentLanguage;
 
-            return Scaffold(
-              backgroundColor: isDarkMode
-                  ? AppColors.backgroundDark
-                  : AppColors.backgroundLight,
-              appBar: AppBar(
-                title: Text(
-                  AppLocalizations.getString(
-                    'meal_plan_result_title',
-                    currentLanguage,
-                  ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                ),
-                backgroundColor: AppColors.primary,
-                elevation: 0,
-                leading: IconButton(
-                  icon: const Icon(IconlyLight.arrow_left, color: Colors.white),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.refresh, color: Colors.white),
-                    onPressed: mealPlanProvider.isLoading
-                        ? null
-                        : () async {
-                            await mealPlanProvider.generateMealPlan(
-                              languageCode: currentLanguage,
-                            );
-                          },
-                    tooltip: AppLocalizations.getString(
-                      'refresh',
-                      currentLanguage,
-                    ),
-                  ),
-                ],
+        return Scaffold(
+          backgroundColor: AppColors.skPaper(d),
+          appBar: AppBar(
+            title: Text(
+              AppLocalizations.getString(
+                'meal_plan_result_title',
+                currentLanguage,
               ),
-              body: Column(
-                children: const [
-                  Expanded(
-                    child: MealPlanGenerator(
-                      showPreferences: false,
-                      showResults: true,
-                    ),
-                  ),
-                  AdaptiveBannerAd(),
-                ],
+              style: themeProvider.getSerifFont(
+                fontSize: 22,
+                color: AppColors.skInk(d),
               ),
-            );
-          },
+            ),
+            backgroundColor: AppColors.skPaper(d),
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: AppColors.skInk(d)),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.refresh, color: AppColors.skInk(d)),
+                onPressed: mealPlanProvider.isLoading
+                    ? null
+                    : () async {
+                        await mealPlanProvider.generateMealPlan(
+                          languageCode: currentLanguage,
+                        );
+                      },
+                tooltip: AppLocalizations.getString(
+                  'refresh',
+                  currentLanguage,
+                ),
+              ),
+            ],
+          ),
+          body: Column(
+            children: const [
+              Expanded(
+                child: MealPlanGenerator(
+                  showPreferences: false,
+                  showResults: true,
+                ),
+              ),
+              AdaptiveBannerAd(),
+            ],
+          ),
+        );
+      },
     );
   }
 }

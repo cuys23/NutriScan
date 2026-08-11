@@ -235,25 +235,13 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withValues(alpha: 0.85),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.25),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,70 +249,69 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.skSage(d)),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                child: const Icon(
-                  IconlyBold.discovery,
-                  color: Colors.white,
-                  size: 28,
+                child: Icon(
+                  IconlyLight.discovery,
+                  color: AppColors.skSage(d),
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   AppLocalizations.getString(
                     'meal_plan_generator_title',
                     language,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 22,
+                    color: AppColors.skInk(d),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Text(
             AppLocalizations.getString(
               'meal_plan_generator_subtitle',
               language,
             ),
-            style: themeProvider.getFontForCurrentLanguage(
+            style: themeProvider.getBodyFont(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.skBody(d),
               height: 1.5,
             ),
           ),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(18),
+              color: AppColors.skPaper(d),
+              border: Border.all(color: AppColors.skRuleSoft(d)),
+              borderRadius: BorderRadius.circular(2),
             ),
             child: Row(
               children: [
                 Icon(
-                  IconlyBold.shield_done,
-                  color: Colors.white.withValues(alpha: 0.9),
-                  size: 24,
+                  IconlyLight.shield_done,
+                  color: AppColors.skAccent(d),
+                  size: 20,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     AppLocalizations.getString(
                       'meal_plan_generator_prompt',
                       language,
                     ),
-                    style: themeProvider.getFontForCurrentLanguage(
+                    style: themeProvider.getBodyFont(
                       fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: AppColors.skInk(d),
                     ),
                   ),
                 ),
@@ -342,19 +329,20 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     final insight = mealPlanProvider.lastInsight;
     if (insight == null || !insight.hasData) return const SizedBox.shrink();
     final dietLabelKey = 'diet_${insight.suggestedDietStyle}';
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skSage(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
         children: [
-          Icon(IconlyBold.tick_square, color: AppColors.primary, size: 22),
+          Icon(IconlyLight.tick_square, color: AppColors.skSage(d), size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -366,20 +354,17 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
                     'meal_plan_suggested_for_you',
                     language,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
+                  style: themeProvider.getBodyFont(
                     fontSize: 12,
-                    color: isDarkMode
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
+                    color: AppColors.skMuted(d),
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   AppLocalizations.getString(dietLabelKey, language),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 16,
+                    color: AppColors.skInk(d),
                   ),
                 ),
               ],
@@ -396,61 +381,42 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-          width: 1,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  IconlyBold.chart,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   AppLocalizations.getString('target_calories_label', language),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 20,
+                    color: AppColors.skInk(d),
                   ),
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: 14,
+                  vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.skRule(d)),
+                  borderRadius: BorderRadius.circular(2),
                 ),
                 child: Text(
                   '${mealPlanProvider.calorieTarget.round()} ${AppLocalizations.getString('cal', language)}',
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 16,
+                    color: AppColors.skAccent(d),
                   ),
                 ),
               ),
@@ -459,16 +425,16 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
           const SizedBox(height: 16),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              trackHeight: 6,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+              trackHeight: 3,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
               overlayShape: SliderComponentShape.noOverlay,
             ),
             child: Slider(
               min: 1200,
               max: 3500,
               divisions: 23,
-              activeColor: AppColors.primary,
-              inactiveColor: isDarkMode ? AppColors.grey700 : AppColors.grey300,
+              activeColor: AppColors.skAccent(d),
+              inactiveColor: AppColors.skRule(d),
               value: mealPlanProvider.calorieTarget,
               onChanged: (value) => mealPlanProvider.setCalorieTarget(value),
             ),
@@ -476,11 +442,9 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
           const SizedBox(height: 8),
           Text(
             AppLocalizations.getString('target_calories_helper', language),
-            style: themeProvider.getFontForCurrentLanguage(
+            style: themeProvider.getBodyFont(
               fontSize: 12,
-              color: isDarkMode
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+              color: AppColors.skMuted(d),
             ),
           ),
         ],
@@ -494,46 +458,23 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  IconlyBold.category,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  AppLocalizations.getString('diet_style_label', language),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            AppLocalizations.getString('diet_style_label', language),
+            style: themeProvider.getSerifFont(
+              fontSize: 20,
+              color: AppColors.skInk(d),
+            ),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -545,53 +486,40 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
               return GestureDetector(
                 onTap: () => mealPlanProvider.setDietStyle(option['value']!),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 180),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: 14,
+                    vertical: 10,
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppColors.primary
-                        : (isDarkMode ? AppColors.grey800 : AppColors.grey100),
-                    borderRadius: BorderRadius.circular(18),
+                        ? AppColors.skInk(d)
+                        : AppColors.skPaper(d),
+                    borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: isSelected
-                          ? AppColors.primary
-                          : (isDarkMode
-                                ? AppColors.grey700
-                                : AppColors.grey300),
+                          ? AppColors.skInk(d)
+                          : AppColors.skRule(d),
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.25),
-                              blurRadius: 12,
-                              offset: const Offset(0, 6),
-                            ),
-                          ]
-                        : [],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         option['icon']!,
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         AppLocalizations.getString(labelKey, language),
-                        style: themeProvider.getFontForCurrentLanguage(
+                        style: themeProvider.getBodyFont(
                           fontSize: 14,
                           fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                           color: isSelected
-                              ? Colors.white
-                              : (isDarkMode
-                                    ? AppColors.textPrimaryDark
-                                    : AppColors.textPrimaryLight),
+                              ? AppColors.skPaper(d)
+                              : AppColors.skInk(d),
                         ),
                       ),
                     ],
@@ -611,47 +539,24 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     final options = [3, 4, 5, 6];
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  IconlyBold.time_circle,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  AppLocalizations.getString('meals_per_day_label', language),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            AppLocalizations.getString('meals_per_day_label', language),
+            style: themeProvider.getSerifFont(
+              fontSize: 20,
+              color: AppColors.skInk(d),
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -662,51 +567,42 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
                 child: GestureDetector(
                   onTap: () => mealPlanProvider.setMealsPerDay(count),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    duration: const Duration(milliseconds: 180),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
                     padding: const EdgeInsets.symmetric(
                       vertical: 12,
-                      horizontal: 12,
+                      horizontal: 8,
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primary
-                          : (isDarkMode
-                                ? AppColors.grey800
-                                : AppColors.grey100),
-                      borderRadius: BorderRadius.circular(16),
+                          ? AppColors.skInk(d)
+                          : AppColors.skPaper(d),
+                      borderRadius: BorderRadius.circular(4),
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.primary
-                            : (isDarkMode
-                                  ? AppColors.grey700
-                                  : AppColors.grey300),
+                            ? AppColors.skInk(d)
+                            : AppColors.skRule(d),
                       ),
                     ),
                     child: Column(
                       children: [
                         Text(
                           '$count×',
-                          style: themeProvider.getFontForCurrentLanguage(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                          style: themeProvider.getSerifFont(
+                            fontSize: 18,
                             color: isSelected
-                                ? Colors.white
-                                : (isDarkMode
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimaryLight),
+                                ? AppColors.skPaper(d)
+                                : AppColors.skInk(d),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           AppLocalizations.getString('meals', language),
-                          style: themeProvider.getFontForCurrentLanguage(
-                            fontSize: 12,
+                          style: themeProvider.getBodyFont(
+                            fontSize: 11,
                             color: isSelected
-                                ? Colors.white.withValues(alpha: 0.9)
-                                : (isDarkMode
-                                      ? AppColors.textSecondaryDark
-                                      : AppColors.textSecondaryLight),
+                                ? AppColors.skPaper(d).withValues(alpha: 0.8)
+                                : AppColors.skMuted(d),
                           ),
                         ),
                       ],
@@ -727,88 +623,55 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  IconlyBold.danger,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  AppLocalizations.getString('avoid_foods_label', language),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            AppLocalizations.getString('avoid_foods_label', language),
+            style: themeProvider.getSerifFont(
+              fontSize: 20,
+              color: AppColors.skInk(d),
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           TextField(
             controller: _restrictionController,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 14,
-              color: isDarkMode
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
+            style: themeProvider.getBodyFont(
+              fontSize: 15,
+              color: AppColors.skInk(d),
             ),
             maxLines: 2,
+            cursorColor: AppColors.skAccent(d),
             decoration: InputDecoration(
               filled: true,
-              fillColor: isDarkMode ? AppColors.grey800 : AppColors.grey100,
+              fillColor: AppColors.skPaper(d),
               hintText: AppLocalizations.getString(
                 'avoid_foods_hint',
                 language,
               ),
-              hintStyle: themeProvider.getFontForCurrentLanguage(
+              hintStyle: themeProvider.getBodyFont(
                 fontSize: 14,
-                color: isDarkMode
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
+                color: AppColors.skMuted(d),
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: isDarkMode ? AppColors.grey700 : AppColors.grey300,
-                ),
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: AppColors.skRule(d)),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: isDarkMode ? AppColors.grey700 : AppColors.grey300,
-                ),
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: AppColors.skRule(d)),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: 2,
-                ),
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: AppColors.skAccent(d), width: 1.5),
               ),
             ),
             onChanged: mealPlanProvider.setRestrictionsFromText,
@@ -816,11 +679,9 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
           const SizedBox(height: 8),
           Text(
             AppLocalizations.getString('avoid_foods_helper', language),
-            style: themeProvider.getFontForCurrentLanguage(
+            style: themeProvider.getBodyFont(
               fontSize: 12,
-              color: isDarkMode
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+              color: AppColors.skMuted(d),
             ),
           ),
         ],
@@ -834,85 +695,85 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     if (!widget.showPreferences) {
       return const SizedBox.shrink();
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: mealPlanProvider.isLoading
-            ? null
-            : () async {
-                await mealPlanProvider.generateMealPlan(languageCode: language);
-                if (!mounted) return;
-                final hasPlan = mealPlanProvider.currentPlan != null;
-                final noError = mealPlanProvider.errorMessage == null;
-                if (widget.onPlanGenerated != null && noError && hasPlan) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
-                    widget.onPlanGenerated!();
-                  });
-                } else if (!noError || !hasPlan) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${AppLocalizations.getString('meal_plan_error_title', language)}: ${mealPlanProvider.errorMessage ?? "Unknown error"}',
-                        ),
-                        backgroundColor: AppColors.error,
+    return GestureDetector(
+      onTap: mealPlanProvider.isLoading
+          ? null
+          : () async {
+              await mealPlanProvider.generateMealPlan(languageCode: language);
+              if (!mounted) return;
+              final hasPlan = mealPlanProvider.currentPlan != null;
+              final noError = mealPlanProvider.errorMessage == null;
+              if (widget.onPlanGenerated != null && noError && hasPlan) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  widget.onPlanGenerated!();
+                });
+              } else if (!noError || !hasPlan) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${AppLocalizations.getString('meal_plan_error_title', language)}: ${mealPlanProvider.errorMessage ?? "Unknown error"}',
                       ),
-                    );
-                  }
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
                 }
-              },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          elevation: 4,
-          shadowColor: AppColors.primary.withValues(alpha: 0.35),
+              }
+            },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        height: 56,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.skInk(d),
+          borderRadius: BorderRadius.circular(28),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (mealPlanProvider.isLoading) ...[
-              const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (mealPlanProvider.isLoading) ...[
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.skPaper(d)),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                AppLocalizations.getString(
-                  'meal_plan_generating_button',
-                  language,
+                const SizedBox(width: 12),
+                Text(
+                  AppLocalizations.getString(
+                    'meal_plan_generating_button',
+                    language,
+                  ),
+                  style: themeProvider.getBodyFont(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.skPaper(d),
+                  ),
                 ),
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
+              ] else ...[
+                Icon(Icons.auto_awesome, color: AppColors.skPaper(d), size: 20),
+                const SizedBox(width: 10),
+                Text(
+                  AppLocalizations.getString('generate_meal_plan', language),
+                  style: themeProvider.getBodyFont(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.skPaper(d),
+                  ),
                 ),
-              ),
-            ] else ...[
-              const Icon(Icons.auto_awesome, color: Colors.white),
-              const SizedBox(width: 10),
-              Text(
-                AppLocalizations.getString('generate_meal_plan', language),
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -1086,60 +947,38 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     final nutrient = mealPlan.nutrition;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      mealPlan.planTitle,
-                      style: themeProvider.getFontForCurrentLanguage(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: isDarkMode
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      mealPlan.goalSummary,
-                      style: themeProvider.getFontForCurrentLanguage(
-                        fontSize: 13,
-                        color: isDarkMode
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Text(
+            mealPlan.planTitle,
+            style: themeProvider.getSerifFont(
+              fontSize: 24,
+              color: AppColors.skInk(d),
+            ),
           ),
-          const SizedBox(height: 20),
+          if (mealPlan.goalSummary.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              mealPlan.goalSummary,
+              style: themeProvider.getBodyFont(
+                fontSize: 14,
+                color: AppColors.skBody(d),
+                height: 1.5,
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1147,33 +986,33 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
                 themeProvider,
                 language,
                 isDarkMode,
-                IconlyBold.activity,
+                IconlyLight.activity,
                 AppLocalizations.getString('total_calories', language),
-                '${nutrient.totalCalories.toStringAsFixed(0)} ${AppLocalizations.getString('cal', language)}',
+                '${nutrient.totalCalories.toStringAsFixed(0)} kcal',
               ),
               _buildSummaryStat(
                 themeProvider,
                 language,
                 isDarkMode,
-                IconlyBold.paper,
+                IconlyLight.paper,
                 AppLocalizations.getString('protein', language),
-                '${nutrient.protein.toStringAsFixed(0)} g',
+                '${nutrient.protein.toStringAsFixed(0)}g',
               ),
               _buildSummaryStat(
                 themeProvider,
                 language,
                 isDarkMode,
-                IconlyBold.chart,
+                IconlyLight.chart,
                 AppLocalizations.getString('carbs', language),
-                '${nutrient.carbs.toStringAsFixed(0)} g',
+                '${nutrient.carbs.toStringAsFixed(0)}g',
               ),
               _buildSummaryStat(
                 themeProvider,
                 language,
                 isDarkMode,
-                IconlyBold.time_circle,
+                IconlyLight.time_circle,
                 AppLocalizations.getString('fat', language),
-                '${nutrient.fat.toStringAsFixed(0)} g',
+                '${nutrient.fat.toStringAsFixed(0)}g',
               ),
             ],
           ),
@@ -1190,35 +1029,23 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String label,
     String value,
   ) {
+    final d = isDarkMode;
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(icon, color: AppColors.primary, size: 20),
-        ),
-        const SizedBox(height: 8),
         Text(
           value,
-          style: themeProvider.getFontForCurrentLanguage(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: isDarkMode
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
+          style: themeProvider.getSerifFont(
+            fontSize: 18,
+            color: AppColors.skInk(d),
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          label,
-          style: themeProvider.getFontForCurrentLanguage(
-            fontSize: 12,
-            color: isDarkMode
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
+          label.toUpperCase(),
+          style: themeProvider.getBodyFont(
+            fontSize: 10,
+            letterSpacing: 1.2,
+            color: AppColors.skMuted(d),
           ),
         ),
       ],
@@ -1231,42 +1058,31 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     bool isDarkMode,
     MealPlan mealPlan,
   ) {
+    final d = isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  IconlyBold.info_circle,
-                  color: Colors.blueAccent,
-                  size: 22,
-                ),
+              Icon(
+                IconlyLight.info_circle,
+                color: AppColors.skSage(d),
+                size: 20,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   AppLocalizations.getString('hydration_and_tips', language),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 20,
+                    color: AppColors.skInk(d),
                   ),
                 ),
               ),
@@ -1300,42 +1116,31 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     bool isDarkMode,
     List<String> groceryList,
   ) {
+    final d = isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  IconlyBold.bag_2,
-                  color: Colors.green[600],
-                  size: 22,
-                ),
+              Icon(
+                IconlyLight.bag_2,
+                color: AppColors.skSage(d),
+                size: 20,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   AppLocalizations.getString('grocery_list_label', language),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 20,
+                    color: AppColors.skInk(d),
                   ),
                 ),
               ),
@@ -1349,20 +1154,19 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
                 .map(
                   (item) => Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isDarkMode ? AppColors.grey800 : AppColors.grey100,
-                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.skPaper(d),
+                      border: Border.all(color: AppColors.skRule(d)),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
                       item,
-                      style: themeProvider.getFontForCurrentLanguage(
+                      style: themeProvider.getBodyFont(
                         fontSize: 13,
-                        color: isDarkMode
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
+                        color: AppColors.skInk(d),
                       ),
                     ),
                   ),
@@ -1380,6 +1184,7 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: items.map((item) {
@@ -1389,22 +1194,20 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 6,
-                height: 6,
-                margin: const EdgeInsets.only(top: 6, right: 10),
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                width: 5,
+                height: 5,
+                margin: const EdgeInsets.only(top: 7, right: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.skAccent(d),
                   shape: BoxShape.circle,
                 ),
               ),
               Expanded(
                 child: Text(
                   item,
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 13,
-                    color: isDarkMode
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
+                  style: themeProvider.getBodyFont(
+                    fontSize: 14,
+                    color: AppColors.skBody(d),
                     height: 1.4,
                   ),
                 ),
@@ -1421,44 +1224,38 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
     String language,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         children: [
           Icon(
             IconlyLight.calendar,
-            size: 56,
-            color: isDarkMode ? AppColors.grey600 : AppColors.grey400,
+            size: 48,
+            color: AppColors.skMuted(d),
           ),
           const SizedBox(height: 16),
           Text(
             AppLocalizations.getString('meal_plan_empty_title', language),
             textAlign: TextAlign.center,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: isDarkMode
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
+            style: themeProvider.getSerifFont(
+              fontSize: 20,
+              color: AppColors.skInk(d),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             AppLocalizations.getString('meal_plan_empty_subtitle', language),
             textAlign: TextAlign.center,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 13,
-              color: isDarkMode
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+            style: themeProvider.getBodyFont(
+              fontSize: 14,
+              color: AppColors.skMuted(d),
               height: 1.4,
             ),
           ),
@@ -1483,122 +1280,95 @@ class _MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = isDarkMode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDarkMode ? AppColors.grey700 : AppColors.grey200,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  _getMealIcon(meal.type),
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _getMealTitle(meal.type, language),
-                      style: themeProvider.getFontForCurrentLanguage(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                      _getMealTitle(meal.type, language).toUpperCase(),
+                      style: themeProvider.getBodyFont(
+                        fontSize: 11,
+                        letterSpacing: 1.2,
+                        color: AppColors.skMuted(d),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       meal.title,
-                      style: themeProvider.getFontForCurrentLanguage(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: isDarkMode
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
+                      style: themeProvider.getSerifFont(
+                        fontSize: 20,
+                        color: AppColors.skInk(d),
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+              Text(
+                meal.calories.toStringAsFixed(0),
+                style: themeProvider.getSerifFont(
+                  fontSize: 22,
+                  color: AppColors.skInk(d),
                 ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${meal.calories.toStringAsFixed(0)} ${AppLocalizations.getString('cal', language)}',
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'kcal',
+                style: themeProvider.getBodyFont(
+                  fontSize: 12,
+                  color: AppColors.skMuted(d),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            meal.description,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 13,
-              color: isDarkMode
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
-              height: 1.4,
+          if (meal.description.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              meal.description,
+              style: themeProvider.getBodyFont(
+                fontSize: 14,
+                color: AppColors.skBody(d),
+                height: 1.45,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+          ],
+          const SizedBox(height: 14),
           Wrap(
-            spacing: 8,
+            spacing: 12,
             runSpacing: 8,
             children: [
               _buildMacroChip(
                 themeProvider,
                 isDarkMode,
                 AppLocalizations.getString('protein', language),
-                '${meal.protein.toStringAsFixed(0)} g',
-                Icons.fitness_center,
+                '${meal.protein.toStringAsFixed(0)}g',
+                AppColors.skSage(d),
               ),
               _buildMacroChip(
                 themeProvider,
                 isDarkMode,
                 AppLocalizations.getString('carbs', language),
-                '${meal.carbs.toStringAsFixed(0)} g',
-                Icons.local_fire_department,
+                '${meal.carbs.toStringAsFixed(0)}g',
+                AppColors.skAccent(d),
               ),
               _buildMacroChip(
                 themeProvider,
                 isDarkMode,
                 AppLocalizations.getString('fat', language),
-                '${meal.fat.toStringAsFixed(0)} g',
-                Icons.oil_barrel,
+                '${meal.fat.toStringAsFixed(0)}g',
+                AppColors.skMuted(d),
               ),
             ],
           ),
@@ -1606,12 +1376,9 @@ class _MealCard extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               AppLocalizations.getString('ingredients_label', language),
-              style: themeProvider.getFontForCurrentLanguage(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isDarkMode
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
+              style: themeProvider.getSerifFont(
+                fontSize: 16,
+                color: AppColors.skInk(d),
               ),
             ),
             const SizedBox(height: 8),
@@ -1621,12 +1388,9 @@ class _MealCard extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               AppLocalizations.getString('instructions_label', language),
-              style: themeProvider.getFontForCurrentLanguage(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isDarkMode
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
+              style: themeProvider.getSerifFont(
+                fontSize: 16,
+                color: AppColors.skInk(d),
               ),
             ),
             const SizedBox(height: 8),
@@ -1637,37 +1401,6 @@ class _MealCard extends StatelessWidget {
     );
   }
 
-  IconData _getMealIcon(String type) {
-    final normalized = type.toLowerCase().trim();
-
-    if (normalized.contains('snack') ||
-        normalized.contains('tea') ||
-        normalized.contains('brunch') ||
-        normalized.contains('mini meal')) {
-      return Icons.cookie;
-    }
-
-    if (normalized.contains('breakfast') ||
-        normalized.contains('morning meal') ||
-        normalized.startsWith('morning ')) {
-      return Icons.free_breakfast;
-    }
-
-    if (normalized.contains('lunch') ||
-        normalized.contains('noon') ||
-        normalized.contains('midday')) {
-      return Icons.lunch_dining;
-    }
-
-    if (normalized.contains('dinner') ||
-        normalized.contains('supper') ||
-        normalized.contains('evening meal') ||
-        normalized.contains('night meal')) {
-      return Icons.restaurant;
-    }
-
-    return Icons.restaurant_menu;
-  }
 
   String _getMealTitle(String type, String language) {
     final normalized = type.toLowerCase().trim();
@@ -1709,36 +1442,40 @@ class _MealCard extends StatelessWidget {
     bool isDarkMode,
     String label,
     String value,
-    IconData icon,
+    Color color,
   ) {
+    final d = isDarkMode;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.grey800 : AppColors.grey100,
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.skPaper(d),
+        border: Border.all(color: AppColors.skRuleSoft(d)),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: AppColors.primary),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 12,
-              color: isDarkMode
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
+          Text(
+            '$label: ',
+            style: themeProvider.getBodyFont(
+              fontSize: 12,
+              color: AppColors.skMuted(d),
+            ),
+          ),
           Text(
             value,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: isDarkMode
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
+            style: themeProvider.getSerifFont(
+              fontSize: 13,
+              color: AppColors.skInk(d),
             ),
           ),
         ],

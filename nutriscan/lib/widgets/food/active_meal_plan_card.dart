@@ -37,7 +37,7 @@ class ActiveMealPlanCard extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: AppColors.skSurface(d),
           border: Border.all(color: AppColors.skRule(d)),
@@ -46,14 +46,14 @@ class ActiveMealPlanCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header row: label + dismiss ──
+            // ── Header row: badge + dismiss ──
             Row(
               children: [
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.skSage(d)),
+                    border: Border.all(color: AppColors.skSage(d), width: 1),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: Text(
@@ -62,6 +62,7 @@ class ActiveMealPlanCard extends StatelessWidget {
                     style: tp.getBodyFont(
                       fontSize: 10,
                       letterSpacing: 1.4,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.skSage(d),
                     ),
                   ),
@@ -71,7 +72,7 @@ class ActiveMealPlanCard extends StatelessWidget {
                   onTap: onDismiss,
                   child: Icon(
                     Icons.close,
-                    size: 16,
+                    size: 18,
                     color: AppColors.skMuted(d),
                   ),
                 ),
@@ -79,11 +80,12 @@ class ActiveMealPlanCard extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // ── Plan title (serif) ──
+            // ── Plan title (Instrument Serif) ──
             Text(
               plan.planTitle,
               style: tp.getSerifFont(
-                fontSize: 22,
+                fontSize: 26,
+                height: 1.15,
                 color: AppColors.skInk(d),
               ),
               maxLines: 2,
@@ -92,40 +94,37 @@ class ActiveMealPlanCard extends StatelessWidget {
 
             // ── Goal summary ──
             if (plan.goalSummary.isNotEmpty) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(
                 plan.goalSummary,
                 style: tp.getBodyFont(
-                  fontSize: 13,
-                  height: 1.5,
+                  fontSize: 14,
+                  height: 1.45,
                   color: AppColors.skBody(d),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
 
-            // ── Meal list (vertical, each meal is a row) ──
-            ...plan.meals.asMap().entries.map((entry) {
-              final i = entry.key;
-              final meal = entry.value;
+            // ── Divider ──
+            Divider(color: AppColors.skRule(d), height: 1),
+
+            // ── Meal list ──
+            ...plan.meals.map((meal) {
               return Container(
-                padding: const EdgeInsets.symmetric(vertical: 13),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   border: Border(
-                    top: BorderSide(
-                      color: i == 0
-                          ? AppColors.skRule(d)
-                          : AppColors.skRuleSoft(d),
-                    ),
+                    bottom: BorderSide(color: AppColors.skRuleSoft(d)),
                   ),
                 ),
                 child: Row(
                   children: [
-                    // Meal type label
+                    // Meal type label (MORNING / MIDDAY / SNACK / EVENING)
                     SizedBox(
-                      width: 72,
+                      width: 78,
                       child: Text(
                         _getMealTypeLabel(meal.type),
                         style: tp.getBodyFont(
@@ -135,23 +134,24 @@ class ActiveMealPlanCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Title
+                    // Title (Serif font as in image 1)
                     Expanded(
                       child: Text(
                         meal.title,
-                        style: tp.getBodyFont(
-                          fontSize: 15,
+                        style: tp.getSerifFont(
+                          fontSize: 17,
                           color: AppColors.skInk(d),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // Calories
+                    const SizedBox(width: 8),
+                    // Calories (Serif number + sans unit)
                     Text(
                       meal.calories.toStringAsFixed(0),
                       style: tp.getSerifFont(
-                        fontSize: 17,
+                        fontSize: 18,
                         color: AppColors.skInk(d),
                       ),
                     ),
@@ -159,7 +159,7 @@ class ActiveMealPlanCard extends StatelessWidget {
                     Text(
                       'kcal',
                       style: tp.getBodyFont(
-                        fontSize: 11,
+                        fontSize: 12,
                         color: AppColors.skMuted(d),
                       ),
                     ),
@@ -168,49 +168,48 @@ class ActiveMealPlanCard extends StatelessWidget {
               );
             }),
 
-            // ── Footer: total + view link ──
-            Container(
-              padding: const EdgeInsets.only(top: 14),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: AppColors.skRule(d)),
+            const SizedBox(height: 14),
+
+            // ── Footer row: Total + View Details ──
+            Row(
+              children: [
+                Text(
+                  '${AppLocalizations.getString('total', language)}: ',
+                  style: tp.getBodyFont(
+                    fontSize: 14,
+                    color: AppColors.skMuted(d),
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  // Total
-                  Text(
-                    '${AppLocalizations.getString('total', language)}: ',
-                    style: tp.getBodyFont(
-                      fontSize: 13,
-                      color: AppColors.skMuted(d),
-                    ),
+                Text(
+                  plan.nutrition.totalCalories.toStringAsFixed(0),
+                  style: tp.getSerifFont(
+                    fontSize: 20,
+                    color: AppColors.skInk(d),
                   ),
-                  Text(
-                    '${plan.nutrition.totalCalories.toStringAsFixed(0)} kcal',
-                    style: tp.getSerifFont(
-                      fontSize: 17,
-                      color: AppColors.skInk(d),
-                    ),
+                ),
+                Text(
+                  ' kcal',
+                  style: tp.getBodyFont(
+                    fontSize: 14,
+                    color: AppColors.skInk(d),
                   ),
-                  const Spacer(),
-                  // View details
-                  Text(
-                    AppLocalizations.getString('view_meal_plan', language),
-                    style: tp.getBodyFont(
-                      fontSize: 12,
-                      letterSpacing: 1.0,
-                      color: AppColors.skAccent(d),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 16,
+                ),
+                const Spacer(),
+                Text(
+                  AppLocalizations.getString('view_meal_plan', language),
+                  style: tp.getBodyFont(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.skAccent(d),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: AppColors.skAccent(d),
+                ),
+              ],
             ),
           ],
         ),
