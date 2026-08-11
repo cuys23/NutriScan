@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
+import 'package:nutriscan/providers/payment/subscription_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/services/auth/account_deletion_service.dart';
 import 'package:provider/provider.dart';
@@ -145,24 +146,50 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // ── Store-required note ──
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.skSurface(d),
-                    border: Border.all(color: AppColors.skRule(d)),
-                  ),
-                  child: Text(
-                    _t('delete_account_purchase_note'),
-                    style: tp.getBodyFont(
-                      fontSize: 12,
-                      color: AppColors.skMuted(d),
-                      height: 1.4,
-                    ),
-                  ),
+                // ── Subscription warning (only if active) ──
+                Consumer<SubscriptionProvider>(
+                  builder: (_, subProvider, __) {
+                    if (!subProvider.hasPremiumFeatures) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppColors.skSurface(d),
+                          border: Border.all(
+                            color: AppColors.skAccent(d),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              size: 18,
+                              color: AppColors.skAccent(d),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _t('delete_account_purchase_note'),
+                                style: tp.getBodyFont(
+                                  fontSize: 12,
+                                  color: AppColors.skInk(d),
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 20),
 
                 // ── Confirm input ──
                 Text(
