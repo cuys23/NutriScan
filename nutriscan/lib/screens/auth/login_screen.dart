@@ -58,71 +58,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       const LoginDescriptionText(),
                       const SizedBox(height: 60),
 
-                      // Sign In Button
+                      // Sign In with Google
                       Consumer<CloudBackupProvider>(
                         builder: (_, backupProvider, _) {
-                          return Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppColors.primary,
-                                  AppColors.primary.withValues(alpha: 0.8),
-                                ],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: backupProvider.isLoading
-                                  ? null
-                                  : () async {
-                                      final success = await backupProvider
-                                          .signInWithGoogle(
-                                            language: currentLanguage,
-                                          );
-
-                                      if (success && mounted) {
-                                        final prefs =
-                                            await SharedPreferences.getInstance();
-                                        await prefs.setBool(
-                                          'has_logged_in',
-                                          true,
+                          return GestureDetector(
+                            onTap: backupProvider.isLoading
+                                ? null
+                                : () async {
+                                    final success = await backupProvider
+                                        .signInWithGoogle(
+                                          language: currentLanguage,
                                         );
 
-                                        await Future.delayed(
-                                          const Duration(milliseconds: 500),
-                                        );
+                                    if (success && mounted) {
+                                      final prefs =
+                                          await SharedPreferences.getInstance();
+                                      await prefs.setBool(
+                                        'has_logged_in',
+                                        true,
+                                      );
 
-                                        if (!context.mounted) return;
-                                        final isStillSignedIn =
-                                            backupProvider.isSignedIn;
+                                      await Future.delayed(
+                                        const Duration(milliseconds: 500),
+                                      );
 
-                                        if (isStillSignedIn) {
-                                          Navigator.of(
-                                            context,
-                                          ).pushReplacementNamed('/main');
-                                        } else {
-                                          SkSnackBar.error(
-                                            context,
-                                            message: AppLocalizations.getString(
-                                              'login_failed',
-                                              currentLanguage,
-                                            ),
-                                          );
-                                        }
+                                      if (!context.mounted) return;
+                                      final isStillSignedIn =
+                                          backupProvider.isSignedIn;
+
+                                      if (isStillSignedIn) {
+                                        Navigator.of(
+                                          context,
+                                        ).pushReplacementNamed('/main');
                                       } else {
-                                        if (!context.mounted) return;
                                         SkSnackBar.error(
                                           context,
                                           message: AppLocalizations.getString(
@@ -131,56 +99,63 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                         );
                                       }
-                                    },
-                              icon: backupProvider.isGoogleLoading
-                                  ? const SizedBox(
+                                    } else {
+                                      if (!context.mounted) return;
+                                      SkSnackBar.error(
+                                        context,
+                                        message: AppLocalizations.getString(
+                                          'login_failed',
+                                          currentLanguage,
+                                        ),
+                                      );
+                                    }
+                                  },
+                            child: Container(
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: AppColors.skInk(d),
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (backupProvider.isGoogleLoading)
+                                    SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
+                                              AppColors.skPaper(d),
                                             ),
                                       ),
                                     )
-                                  : SvgPicture.asset(
+                                  else
+                                    SvgPicture.asset(
                                       'assets/images/svg/google_logo.svg',
-                                      width: 26,
-                                      height: 26,
+                                      width: 22,
+                                      height: 22,
                                     ),
-                              label: Text(
-                                backupProvider.isGoogleLoading
-                                    ? AppLocalizations.getString(
-                                        'signing_in',
-                                        currentLanguage,
-                                      )
-                                    : AppLocalizations.getString(
-                                        'sign_in_with_google',
-                                        currentLanguage,
-                                      ).replaceAll(
-                                        'Google',
-                                        AppLocalizations.getString(
-                                          'google',
-                                          currentLanguage,
-                                        ),
-                                      ),
-                                style: themeProvider.getFontForCurrentLanguage(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 0,
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    backupProvider.isGoogleLoading
+                                        ? AppLocalizations.getString(
+                                            'signing_in',
+                                            currentLanguage,
+                                          )
+                                        : AppLocalizations.getString(
+                                            'sign_in_with_google',
+                                            currentLanguage,
+                                          ),
+                                    style: themeProvider.getBodyFont(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.skPaper(d),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );
@@ -188,107 +163,101 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // Apple Sign In Button (Sleek Premium Black Button)
+                      // Sign In with Apple
                       Consumer2<CloudBackupProvider, ThemeProvider>(
                         builder: (context, backupProvider, themeProvider, child) {
                           final currentLanguage = context
                               .read<LanguageProvider>()
                               .currentLanguage;
 
-                          return Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.25),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: backupProvider.isLoading
-                                  ? null
-                                  : () async {
-                                      final success = await backupProvider
-                                          .signInWithApple(
-                                            language: currentLanguage,
-                                          );
-
-                                      if (success && mounted) {
-                                        final prefs =
-                                            await SharedPreferences.getInstance();
-                                        await prefs.setBool(
-                                          'has_logged_in',
-                                          true,
+                          return GestureDetector(
+                            onTap: backupProvider.isLoading
+                                ? null
+                                : () async {
+                                    final success = await backupProvider
+                                        .signInWithApple(
+                                          language: currentLanguage,
                                         );
 
-                                        await Future.delayed(
-                                          const Duration(milliseconds: 500),
-                                        );
+                                    if (success && mounted) {
+                                      final prefs =
+                                          await SharedPreferences.getInstance();
+                                      await prefs.setBool(
+                                        'has_logged_in',
+                                        true,
+                                      );
 
-                                        if (!context.mounted) return;
-                                        if (backupProvider.isSignedIn) {
-                                          Navigator.of(
-                                            context,
-                                          ).pushReplacementNamed('/main');
-                                        }
-                                      } else {
-                                        if (!context.mounted) return;
-                                        SkSnackBar.error(
+                                      await Future.delayed(
+                                        const Duration(milliseconds: 500),
+                                      );
+
+                                      if (!context.mounted) return;
+                                      if (backupProvider.isSignedIn) {
+                                        Navigator.of(
                                           context,
-                                          message: AppLocalizations.getString(
-                                            'login_failed',
-                                            currentLanguage,
-                                          ),
-                                        );
+                                        ).pushReplacementNamed('/main');
                                       }
-                                    },
-                              icon: backupProvider.isAppleLoading
-                                  ? const SizedBox(
+                                    } else {
+                                      if (!context.mounted) return;
+                                      SkSnackBar.error(
+                                        context,
+                                        message: AppLocalizations.getString(
+                                          'login_failed',
+                                          currentLanguage,
+                                        ),
+                                      );
+                                    }
+                                  },
+                            child: Container(
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                border: Border.all(
+                                  color: AppColors.skInk(d),
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (backupProvider.isAppleLoading)
+                                    SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
+                                              AppColors.skInk(d),
                                             ),
                                       ),
                                     )
-                                  : const Icon(
+                                  else
+                                    Icon(
                                       Icons.apple,
-                                      color: Colors.white,
-                                      size: 28,
+                                      color: AppColors.skInk(d),
+                                      size: 26,
                                     ),
-                              label: Text(
-                                backupProvider.isAppleLoading
-                                    ? AppLocalizations.getString(
-                                        'signing_in',
-                                        currentLanguage,
-                                      )
-                                    : AppLocalizations.getString(
-                                        'sign_in_with_apple',
-                                        currentLanguage,
-                                      ),
-                                style: themeProvider.getFontForCurrentLanguage(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 0,
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    backupProvider.isAppleLoading
+                                        ? AppLocalizations.getString(
+                                            'signing_in',
+                                            currentLanguage,
+                                          )
+                                        : AppLocalizations.getString(
+                                            'sign_in_with_apple',
+                                            currentLanguage,
+                                          ),
+                                    style: themeProvider.getBodyFont(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.skInk(d),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );

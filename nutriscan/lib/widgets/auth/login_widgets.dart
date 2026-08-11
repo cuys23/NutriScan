@@ -12,32 +12,22 @@ class LoginWelcomeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final tp = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
+    final d = tp.isDarkMode;
     final currentLanguage = languageProvider.currentLanguage;
 
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text:
-                AppLocalizations.getString(
-                  'welcome_to_nutriscan',
-                  currentLanguage,
-                ).replaceAll(
-                  'NutriSnap',
-                  AppLocalizations.getString('nutriscan', currentLanguage),
-                ),
-          ),
-        ],
+    return Text(
+      AppLocalizations.getString(
+        'welcome_to_nutriscan',
+        currentLanguage,
+      ).replaceAll(
+        'NutriSnap',
+        AppLocalizations.getString('nutriscan', currentLanguage),
       ),
-      style: themeProvider.getFontForCurrentLanguage(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: isDarkMode
-            ? AppColors.textPrimaryDark
-            : AppColors.textPrimaryLight,
+      style: tp.getSerifFont(
+        fontSize: 30,
+        color: AppColors.skInk(d),
       ),
       textAlign: TextAlign.center,
     );
@@ -50,32 +40,23 @@ class LoginDescriptionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final tp = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
+    final d = tp.isDarkMode;
     final currentLanguage = languageProvider.currentLanguage;
 
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text:
-                AppLocalizations.getString(
-                  'login_description',
-                  currentLanguage,
-                ).replaceAll(
-                  'Google',
-                  AppLocalizations.getString('google', currentLanguage),
-                ),
-          ),
-        ],
+    return Text(
+      AppLocalizations.getString(
+        'login_description',
+        currentLanguage,
+      ).replaceAll(
+        'Google',
+        AppLocalizations.getString('google', currentLanguage),
       ),
-      style: themeProvider.getFontForCurrentLanguage(
-        fontSize: 16,
+      style: tp.getBodyFont(
+        fontSize: 15,
         height: 1.5,
-        color: isDarkMode
-            ? AppColors.textSecondaryDark
-            : AppColors.textSecondaryLight,
+        color: AppColors.skMuted(d),
       ),
       textAlign: TextAlign.center,
     );
