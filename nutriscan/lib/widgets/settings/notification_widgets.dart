@@ -24,21 +24,19 @@ class NotificationCategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = isDarkMode;
     return Row(
       children: [
-        Icon(icon, color: AppColors.primary, size: 20),
+        Icon(icon, color: AppColors.skInk(d), size: 18),
         const SizedBox(width: 8),
         Text(
           AppLocalizations.getString(
             titleKey,
             languageProvider.currentLanguage,
-          ),
-          style: themeProvider.getFontForCurrentLanguage(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
+          ).toUpperCase(),
+          style: themeProvider.getSkLabel(
+            fontSize: 11,
+            color: AppColors.skMuted(d),
           ),
         ),
       ],
@@ -74,32 +72,26 @@ class NotificationToggleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = isDarkMode;
     final content = Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode
-                ? Colors.black.withValues(alpha: 0.2)
-                : Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.skPaper(d),
+              border: Border.all(color: AppColors.skRuleSoft(d)),
+              borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(icon, color: AppColors.skInk(d), size: 20),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,25 +101,20 @@ class NotificationToggleCard extends StatelessWidget {
                     titleKey,
                     languageProvider.currentLanguage,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
+                  style: themeProvider.getBodyFont(
+                    fontSize: 15,
+                    color: AppColors.skInk(d),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   AppLocalizations.getString(
                     subtitleKey,
                     languageProvider.currentLanguage,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 13,
-                    color: isDarkMode
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
+                  style: themeProvider.getBodyFont(
+                    fontSize: 12,
+                    color: AppColors.skMuted(d),
                   ),
                 ),
               ],
@@ -137,7 +124,8 @@ class NotificationToggleCard extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppColors.primary,
+            activeTrackColor: AppColors.skInk(d),
+            activeThumbColor: AppColors.skPaper(d),
           ),
         ],
       ),
@@ -146,7 +134,7 @@ class NotificationToggleCard extends StatelessWidget {
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(6),
         child: content,
       );
     }
@@ -183,33 +171,23 @@ class MealReminderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = isDarkMode;
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isEnabled
-              ? AppColors.primary.withValues(alpha: 0.3)
-              : isDarkMode
-              ? AppColors.grey600
-              : AppColors.grey300,
-          width: 1,
-        ),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         children: [
           Icon(
             icon,
-            color: isEnabled
-                ? AppColors.primary
-                : isDarkMode
-                ? AppColors.grey600
-                : AppColors.grey400,
-            size: 28,
+            color: isEnabled ? AppColors.skInk(d) : AppColors.skMuted(d),
+            size: 24,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,35 +197,31 @@ class MealReminderCard extends StatelessWidget {
                     mealNameKey,
                     languageProvider.currentLanguage,
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
+                  style: themeProvider.getSerifFont(
+                    fontSize: 18,
+                    color: AppColors.skInk(d),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   formattedTime,
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 14,
-                    color: isDarkMode
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
+                  style: themeProvider.getBodyFont(
+                    fontSize: 13,
+                    color: AppColors.skMuted(d),
                   ),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: Icon(IconlyLight.time_circle, color: AppColors.primary),
+            icon: Icon(IconlyLight.time_circle, color: AppColors.skAccent(d)),
             onPressed: onTimePressed,
           ),
           Switch(
             value: isEnabled,
             onChanged: onToggle,
-            activeThumbColor: AppColors.primary,
+            activeTrackColor: AppColors.skInk(d),
+            activeThumbColor: AppColors.skPaper(d),
           ),
         ],
       ),

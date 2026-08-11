@@ -183,46 +183,48 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     LanguageProvider languageProvider,
     bool isDarkMode,
   ) {
+    final d = isDarkMode;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: AppColors.skPaper(d),
+              border: Border.all(color: AppColors.skRuleSoft(d)),
               shape: BoxShape.circle,
             ),
-            child: Icon(IconlyBold.star, size: 48, color: Colors.white),
+            child: Icon(IconlyBold.star, size: 36, color: AppColors.skAccent(d)),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Text(
             AppLocalizations.getString(
               'upgrade_to_premium',
               languageProvider.currentLanguage,
             ),
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+            style: themeProvider.getSerifFont(
+              fontSize: 26,
+              color: AppColors.skInk(d),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             AppLocalizations.getString(
               'remove_ads_unlock_features',
               languageProvider.currentLanguage,
             ),
-            style: themeProvider.getFontForCurrentLanguage(
+            style: themeProvider.getBodyFont(
               fontSize: 14,
-              color: Colors.white70,
+              color: AppColors.skMuted(d),
             ),
             textAlign: TextAlign.center,
           ),
@@ -283,6 +285,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       },
     ];
 
+    final d = isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -291,61 +294,62 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             'premium_features',
             languageProvider.currentLanguage,
           ),
-          style: themeProvider.getFontForCurrentLanguage(
+          style: themeProvider.getSerifFont(
             fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
+            color: AppColors.skInk(d),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         ...features.map(
           (feature) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.skSurface(d),
+                border: Border.all(color: AppColors.skRule(d)),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.skPaper(d),
+                      border: Border.all(color: AppColors.skRuleSoft(d)),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(
+                      feature['icon'] as IconData,
+                      color: AppColors.skInk(d),
+                      size: 20,
+                    ),
                   ),
-                  child: Icon(
-                    feature['icon'] as IconData,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        feature['title'] as String,
-                        style: themeProvider.getFontForCurrentLanguage(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: isDarkMode
-                              ? AppColors.textPrimaryDark
-                              : AppColors.textPrimaryLight,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          feature['title'] as String,
+                          style: themeProvider.getSerifFont(
+                            fontSize: 18,
+                            color: AppColors.skInk(d),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        feature['description'] as String,
-                        style: themeProvider.getFontForCurrentLanguage(
-                          fontSize: 14,
-                          color: isDarkMode
-                              ? AppColors.textSecondaryDark
-                              : AppColors.textSecondaryLight,
+                        const SizedBox(height: 2),
+                        Text(
+                          feature['description'] as String,
+                          style: themeProvider.getBodyFont(
+                            fontSize: 13,
+                            color: AppColors.skMuted(d),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -440,36 +444,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     );
     final isSelected = _selectedPlan == planId;
 
+    final d = isDarkMode;
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan = planId),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.1)
-              : isDarkMode
-              ? AppColors.surfaceDark
-              : AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected ? AppColors.skSurface(d) : AppColors.skPaper(d),
+          borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : isDarkMode
-                ? AppColors.grey600
-                : AppColors.grey300,
+            color: isSelected ? AppColors.skInk(d) : AppColors.skRule(d),
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.2)
-                  : isDarkMode
-                  ? Colors.black.withValues(alpha: 0.1)
-                  : Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Row(
           children: [
@@ -710,19 +696,19 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     }
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.skInk(isDarkMode),
+              foregroundColor: AppColors.skPaper(isDarkMode),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(28),
               ),
               elevation: 0,
             ),
             child: subscriptionProvider.isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: AppColors.skPaper(isDarkMode),
                       strokeWidth: 2,
                     ),
                   )
@@ -731,9 +717,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       'subscribe_now',
                       languageProvider.currentLanguage,
                     ),
-                    style: themeProvider.getFontForCurrentLanguage(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    style: themeProvider.getBodyFont(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.skPaper(isDarkMode),
                     ),
                   ),
           ),

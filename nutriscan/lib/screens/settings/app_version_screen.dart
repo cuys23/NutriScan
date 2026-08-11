@@ -49,79 +49,42 @@ class AppVersionScreen extends StatelessWidget {
             // App Logo and Version
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                color: AppColors.skSurface(d),
+                border: Border.all(color: AppColors.skRule(d)),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
                 children: [
-                  // App Logo
-                  Container(
+                  // App Logo (Bowl custom painter)
+                  SizedBox(
                     width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(25.0),
-                      child: Image.asset(
-                        'assets/images/logo.jpg',
-                        fit: BoxFit.cover,
+                    height: 80,
+                    child: CustomPaint(
+                      painter: _SimpleBowlPainter(
+                        inkColor: AppColors.skInk(d),
+                        accentColor: AppColors.skAccent(d),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   // App Name
-                  Consumer2<ThemeProvider, LanguageProvider>(
-                    builder: (context, themeProvider, languageProvider, child) {
-                      return Text(
-                        AppConfig.appName,
-                        style: themeProvider.getFontForCurrentLanguage(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Version
-                  Consumer2<ThemeProvider, LanguageProvider>(
-                    builder: (context, themeProvider, languageProvider, child) {
-                      return Text(
-                        '${AppLocalizations.getString('version', languageProvider.currentLanguage)} ${AppConfig.appVersion}',
-                        style: themeProvider.getFontForCurrentLanguage(
-                          fontSize: 16,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                      );
-                    },
+                  Text(
+                    AppConfig.appName,
+                    style: themeProvider.getSerifFont(
+                      fontSize: 32,
+                      color: AppColors.skInk(d),
+                    ),
                   ),
                   const SizedBox(height: 4),
 
-                  // Build Number
-                  Consumer2<ThemeProvider, LanguageProvider>(
-                    builder: (context, themeProvider, languageProvider, child) {
+                  // Version
+                  Consumer<LanguageProvider>(
+                    builder: (context, languageProvider, child) {
                       return Text(
-                        '${AppLocalizations.getString('build_number', languageProvider.currentLanguage)} ${AppConfig.buildNumber}',
+                        '${AppLocalizations.getString('version', languageProvider.currentLanguage)} ${AppConfig.appVersion}',
                         style: themeProvider.getFontForCurrentLanguage(
                           fontSize: 14,
                           color: Colors.white.withValues(alpha: 0.7),
@@ -235,4 +198,66 @@ class AppVersionScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SimpleBowlPainter extends CustomPainter {
+  final Color inkColor;
+  final Color accentColor;
+
+  _SimpleBowlPainter({required this.inkColor, required this.accentColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final inkPaint = Paint()
+      ..color = inkColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round;
+
+    final accentPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round;
+
+    final bowlPath = Path()
+      ..moveTo(10, 35)
+      ..cubicTo(10, 65, 30, 75, 50, 75)
+      ..cubicTo(70, 75, 90, 65, 90, 35);
+    canvas.drawPath(bowlPath, inkPaint);
+
+    final rimPath = Path()
+      ..moveTo(2, 38)
+      ..lineTo(98, 38);
+    canvas.drawPath(rimPath, inkPaint);
+
+    final smilePath = Path()
+      ..moveTo(35, 75)
+      ..cubicTo(42, 80, 58, 80, 65, 75);
+    canvas.drawPath(smilePath, accentPaint);
+
+    final steamPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+
+    final steam1 = Path()
+      ..moveTo(32, 28)
+      ..cubicTo(30, 20, 34, 14, 32, 8);
+    canvas.drawPath(steam1, steamPaint);
+
+    final steam2 = Path()
+      ..moveTo(50, 26)
+      ..cubicTo(48, 17, 52, 11, 50, 4);
+    canvas.drawPath(steam2, steamPaint);
+
+    final steam3 = Path()
+      ..moveTo(68, 28)
+      ..cubicTo(66, 20, 70, 14, 68, 8);
+    canvas.drawPath(steam3, steamPaint);
+  }
+
+  @override
+  bool shouldRepaint(_SimpleBowlPainter oldDelegate) => false;
 }

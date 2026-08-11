@@ -80,72 +80,66 @@ class BackupActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final currentLanguage = languageProvider.currentLanguage;
+    final isDarkMode = themeProvider.isDarkMode;
+    final d = isDarkMode;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 48, color: color),
+          Icon(icon, size: 40, color: AppColors.skInk(d)),
           const SizedBox(height: 12),
           Text(
             title,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
+            style: themeProvider.getSerifFont(
+              fontSize: 22,
+              color: AppColors.skInk(d),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             subtitle,
-            style: themeProvider.getFontForCurrentLanguage(
-              fontSize: 14,
-              color: color.withValues(alpha: 0.8),
+            style: themeProvider.getBodyFont(
+              fontSize: 13,
+              color: AppColors.skMuted(d),
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: isEnabled && !isLoading ? onPressed : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                foregroundColor: Colors.white,
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          GestureDetector(
+            onTap: isEnabled && !isLoading ? onPressed : null,
+            child: Container(
+              height: 48,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: isEnabled ? AppColors.skInk(d) : AppColors.skRule(d),
+                borderRadius: BorderRadius.circular(24),
               ),
-              icon: isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              child: Center(
+                child: isLoading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.skPaper(d),
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        title,
+                        style: themeProvider.getBodyFont(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.skPaper(d),
+                        ),
                       ),
-                    )
-                  : Icon(icon, color: Colors.white),
-              label: Text(
-                isLoading
-                    ? AppLocalizations.getString('backing_up', currentLanguage)
-                    : title,
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
               ),
             ),
           ),
