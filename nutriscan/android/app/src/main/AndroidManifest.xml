@@ -63,12 +63,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        
-        <!-- AdMob App ID -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
-        
+
+        <!-- No AdMob App ID: ads are iOS-only, the SDK is never initialised
+             here (see AdsConfig.adsEnabled). -->
+
         <!-- Google Pay API -->
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"

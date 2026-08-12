@@ -129,35 +129,6 @@ class GoogleSignInButton extends StatelessWidget {
   }
 }
 
-/// Reusable widget for skip button
-class SkipButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-
-  const SkipButton({super.key, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
-    final currentLanguage = languageProvider.currentLanguage;
-
-    return TextButton(
-      onPressed: onPressed,
-      child: Text(
-        AppLocalizations.getString('skip_for_now', currentLanguage),
-        style: themeProvider.getFontForCurrentLanguage(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: isDarkMode
-              ? AppColors.textSecondaryDark
-              : AppColors.textSecondaryLight,
-        ),
-      ),
-    );
-  }
-}
-
 /// Reusable widget for login screen logo
 class LoginLogo extends StatelessWidget {
   const LoginLogo({super.key});

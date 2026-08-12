@@ -93,6 +93,19 @@ class CoinProvider extends ChangeNotifier {
     return true;
   }
 
+  // Undo a spendCoins() that didn't deliver (AI call failed, or a
+  // multi-food scan was cancelled with nothing kept). Restores balance
+  // without inflating totalCoinsEarned the way addCoins() would — this
+  // coin was never actually earned, just never really spent.
+  Future<void> refundCoins(int amount) async {
+    _coinBalance += amount;
+    _totalCoinsSpent = (_totalCoinsSpent - amount) < 0
+        ? 0
+        : _totalCoinsSpent - amount;
+    await _saveCoins();
+    notifyListeners();
+  }
+
   // Check if user has enough coins
   bool hasEnoughCoins(int amount) {
     return _coinBalance >= amount;

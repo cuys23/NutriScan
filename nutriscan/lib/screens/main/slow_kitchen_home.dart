@@ -17,6 +17,7 @@ import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/screens/analysis/sk_ledger_screen.dart';
 import 'package:nutriscan/screens/analysis/sk_weekly_review_screen.dart';
+import 'package:nutriscan/screens/auth/login_screen.dart';
 import 'package:nutriscan/screens/chat/health_coach_screen.dart';
 import 'package:nutriscan/screens/food/meal_plan_screen.dart';
 import 'package:nutriscan/screens/legal/privacy_policy_screen.dart';
@@ -30,7 +31,7 @@ import 'package:nutriscan/services/media/image_picker_service.dart';
 import 'package:nutriscan/utils/page_transition.dart';
 import 'package:nutriscan/widgets/ads/adaptive_banner_ad.dart';
 import 'package:nutriscan/widgets/analysis/sk_line_chart.dart';
-import 'package:nutriscan/widgets/common/language_dropdown.dart';
+// import 'package:nutriscan/widgets/common/language_dropdown.dart'; // language switching disabled
 import 'package:nutriscan/widgets/common/sk_torn_divider.dart';
 import 'package:nutriscan/widgets/dialogs/coin_ad_dialogs.dart';
 import 'package:nutriscan/widgets/common/sk_snackbar.dart';
@@ -74,6 +75,14 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
 
   late AnimationController _loadingController;
 
+  // The listeners actually registered on FoodProvider — addListener takes a
+  // closure, not the setup method itself, so these are what dispose() must
+  // pass to removeListener (removeListener(_setupErrorListener) was a no-op:
+  // that method was never the registered listener, only the closure created
+  // inside it was, and it leaked on every dispose/recreate of this State).
+  VoidCallback? _errorListener;
+  VoidCallback? _multiFoodListener;
+
   // ── lifecycle ──────────────────────────────────────────────
   @override
   void initState() {
@@ -96,7 +105,12 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     _searchController.dispose();
     try {
       final foodProvider = context.read<FoodProvider>();
-      foodProvider.removeListener(_setupErrorListener);
+      if (_errorListener != null) {
+        foodProvider.removeListener(_errorListener!);
+      }
+      if (_multiFoodListener != null) {
+        foodProvider.removeListener(_multiFoodListener!);
+      }
     } catch (_) {}
     super.dispose();
   }
@@ -118,8 +132,9 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
 
   void _setupErrorListener() {
     final foodProvider = context.read<FoodProvider>();
-    foodProvider.addListener(() {
-      if (mounted && foodProvider.error == 'NOT_FOOD_IMAGE') {
+    _errorListener = () {
+      if (!mounted) return;
+      if (foodProvider.error == 'NOT_FOOD_IMAGE') {
         foodProvider.clearError();
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -129,13 +144,51 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 language: currentLanguage);
           }
         });
+      } else if (foodProvider.error == 'PENDING_MULTI_FOOD_REVIEW') {
+        foodProvider.clearError();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final currentLanguage =
+                context.read<LanguageProvider>().currentLanguage;
+            SkSnackBar.show(
+              context,
+              message: AppLocalizations.getString(
+                'pending_multi_food_review_message',
+                currentLanguage,
+              ),
+            );
+          }
+        });
+      } else if (foodProvider.error == 'NOT_ENOUGH_COINS') {
+        // Belt-and-suspenders: _takePhotoFromCamera/_pickImageFromGallery
+        // already check canScan() before opening the picker, but
+        // FoodProvider.analyzeFoodImage now enforces this itself too (the
+        // real gate — see its coin pre-check), so any future/other call
+        // site that skips the UI check still gets the same dialog here.
+        foodProvider.clearError();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showNoCoinDialog();
+        });
+      } else if (foodProvider.error != null) {
+        // Every other failure (timeout, network, Groq/API error) used to be
+        // set on _error with nothing ever reading it here — the scan just
+        // silently went nowhere and the user was dropped back on the home
+        // screen with zero feedback, coin already refunded but no
+        // explanation why nothing showed up. Surface it instead of adding
+        // yet another silently-ignored branch.
+        final message = foodProvider.error!;
+        foodProvider.clearError();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) SkSnackBar.error(context, message: message);
+        });
       }
-    });
+    };
+    foodProvider.addListener(_errorListener!);
   }
 
   void _setupMultiFoodListener() {
     final foodProvider = context.read<FoodProvider>();
-    foodProvider.addListener(() {
+    _multiFoodListener = () {
       final pending = foodProvider.pendingMultiFoodCandidates;
       if (!mounted ||
           pending == null ||
@@ -163,7 +216,8 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
         );
         _multiFoodSheetOpen = false;
       });
-    });
+    };
+    foodProvider.addListener(_multiFoodListener!);
   }
 
   // ── scan logic (preserved from original) ───────────────────
@@ -621,7 +675,7 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                           Navigator.push(
                             context,
                             PageTransition(
-                              child: const MealPlanPreferencesScreen(),
+                              child: const MealPlanResultScreen(),
                             ),
                           );
                         },
@@ -1717,10 +1771,11 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
                 value: tp.isDarkMode, onTap: () {
               tp.toggleTheme();
             }),
-            _buildSettingRowWithTrailing(tp, d,
-                AppLocalizations.getString('language', lang),
-                hint: AppLocalizations.getString('language_subtitle', lang),
-                trailing: const LanguageDropdown()),
+            // Language switching is disabled — English is the app's only language.
+            // _buildSettingRowWithTrailing(tp, d,
+            //     AppLocalizations.getString('language', lang),
+            //     hint: AppLocalizations.getString('language_subtitle', lang),
+            //     trailing: const LanguageDropdown()),
           ]),
 
           // ── Data & privacy ──
@@ -1786,6 +1841,12 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     final deleted = await DeleteAccountDialog.show(context, currentLanguage);
     if (!deleted || !mounted) return;
 
+    // SubscriptionProvider/CoinProvider are app-lifetime singletons (created
+    // once in main.dart, not per-screen) and don't listen for auth-state
+    // changes the way CloudBackupProvider does — so without this they'd
+    // keep showing the just-deleted account's premium/coin state if the app
+    // stays open. Reload them before leaving so they're clean for whatever
+    // account signs in next.
     final foodProvider = context.read<FoodProvider>();
     await foodProvider.loadFoods();
 
@@ -1796,12 +1857,18 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     await context.read<CoinProvider>().reloadCoins();
 
     if (!mounted) return;
-    SkSnackBar.success(
-      context,
-      message: AppLocalizations.getString(
-        'delete_account_success',
-        currentLanguage,
+    // The account (and the Firebase Auth session with it) is gone at this
+    // point — AccountDeletionService already wiped local SQLite and cleared
+    // SharedPreferences. This used to stop here and just show a snackbar,
+    // leaving the user stranded on this authenticated-looking home screen;
+    // since login is mandatory in this app, the only correct place to land
+    // is the login screen, with the nav stack cleared so back can't return
+    // here. The screen shows its own confirmation toast on arrival instead.
+    Navigator.of(context).pushAndRemoveUntil(
+      PageTransition(
+        child: const LoginScreen(showAccountDeletedMessage: true),
       ),
+      (route) => false,
     );
   }
 
@@ -1894,36 +1961,37 @@ class _SlowKitchenHomeState extends State<SlowKitchenHome>
     );
   }
 
-  Widget _buildSettingRowWithTrailing(ThemeProvider tp, bool d, String label,
-      {String? hint, required Widget trailing}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: AppColors.skRule(d)),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: tp.getSerifFont(
-                        fontSize: 18, color: AppColors.skInk(d))),
-                if (hint != null)
-                  Text(hint,
-                      style: tp.getBodyFont(
-                          fontSize: 13, color: AppColors.skMuted(d))),
-              ],
-            ),
-          ),
-          trailing,
-        ],
-      ),
-    );
-  }
+  // Only caller was the language row (see above) — language switching disabled.
+  // Widget _buildSettingRowWithTrailing(ThemeProvider tp, bool d, String label,
+  //     {String? hint, required Widget trailing}) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(vertical: 15),
+  //     decoration: BoxDecoration(
+  //       border: Border(
+  //         top: BorderSide(color: AppColors.skRule(d)),
+  //       ),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Expanded(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(label,
+  //                   style: tp.getSerifFont(
+  //                       fontSize: 18, color: AppColors.skInk(d))),
+  //               if (hint != null)
+  //                 Text(hint,
+  //                     style: tp.getBodyFont(
+  //                         fontSize: 13, color: AppColors.skMuted(d))),
+  //             ],
+  //           ),
+  //         ),
+  //         trailing,
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildSettingToggleRow(ThemeProvider tp, bool d, String label,
       {String? hint, required bool value, required VoidCallback onTap}) {

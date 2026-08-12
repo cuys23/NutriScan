@@ -172,9 +172,55 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> insertFood(Food food, {bool isPremiumUser = false}) async {
+  /// Deletes every row, not just the active one. `foods` and `meal_plans`
+  /// are the only two local tables (see `_createMealPlansTable`) — this is
+  /// the meal-plan counterpart to [deleteAllFoods], for account deletion
+  /// (device-wide SQLite has no per-account scoping, so a leftover plan
+  /// would otherwise leak into whichever account signs in next on this
+  /// device).
+  Future<int> deleteAllMealPlans() async {
     final db = await database;
-    final result = await db.insert('foods', {
+    return await db.delete('meal_plans');
+  }
+
+  Future<int> insertFood(Food food, {bool isPremiumUser = false}) async {
+    final result = await _insertFoodRow(food);
+
+    // Auto backup to cloud ONLY for premium users
+    if (isPremiumUser && await _cloudBackupService.isAutoBackupEnabled()) {
+      final allFoods = await getAllFoods();
+      _cloudBackupService.autoBackup(allFoods, isPremiumUser: isPremiumUser);
+    }
+
+    return result;
+  }
+
+  /// Same as [insertFood] but for several rows at once (e.g. confirming a
+  /// multi-food scan): one transaction and, for premium users, exactly one
+  /// getAllFoods() + one cloud backup upload for the whole batch instead of
+  /// one per item.
+  Future<void> insertFoods(
+    List<Food> foods, {
+    bool isPremiumUser = false,
+  }) async {
+    if (foods.isEmpty) return;
+
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final food in foods) {
+        await _insertFoodRow(food, executor: txn);
+      }
+    });
+
+    if (isPremiumUser && await _cloudBackupService.isAutoBackupEnabled()) {
+      final allFoods = await getAllFoods();
+      _cloudBackupService.autoBackup(allFoods, isPremiumUser: isPremiumUser);
+    }
+  }
+
+  Future<int> _insertFoodRow(Food food, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await database;
+    return db.insert('foods', {
       'id': food.id,
       'name': food.name,
       'description': food.description,
@@ -196,14 +242,6 @@ class DatabaseHelper {
       'fkb_food_id': food.fkbFoodId,
       'match_score': food.matchScore,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
-
-    // Auto backup to cloud ONLY for premium users
-    if (isPremiumUser && await _cloudBackupService.isAutoBackupEnabled()) {
-      final allFoods = await getAllFoods();
-      _cloudBackupService.autoBackup(allFoods, isPremiumUser: isPremiumUser);
-    }
-
-    return result;
   }
 
   Future<List<Food>> getAllFoods() async {

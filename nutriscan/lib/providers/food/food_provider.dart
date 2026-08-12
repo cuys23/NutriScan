@@ -10,7 +10,7 @@ import 'package:nutriscan/providers/ads/admob_provider.dart';
 import 'package:nutriscan/providers/coins/coin_provider.dart';
 import 'package:nutriscan/providers/notifications/notification_provider.dart';
 import 'package:nutriscan/providers/payment/subscription_provider.dart';
-import 'package:nutriscan/services/ai/groq_service.dart';
+import 'package:nutriscan/services/ai/vision_ai_service.dart';
 import 'package:nutriscan/services/database/database_helper.dart';
 import 'package:nutriscan/services/fkb/match_service.dart';
 import 'package:nutriscan/services/storage/firebase_storage_service.dart';
@@ -30,7 +30,13 @@ class FoodProvider with ChangeNotifier {
   List<Food>? _pendingMultiFoodCandidates;
   String _pendingLanguage = 'en';
   bool _pendingIsPremiumUser = false;
-  final GroqService _groqService = GroqService();
+  // Tracked separately from _pendingIsPremiumUser (which reflects the
+  // caller-supplied isPremiumUser param, used for upload/insert decisions):
+  // this is the actual outcome of the coin-provider spend for this pending
+  // scan, so cancelMultiFoodSelection() refunds exactly when a coin was
+  // really taken — regardless of whether the two ever disagree.
+  bool _pendingCoinsSpent = false;
+  final VisionAiService _visionAiService = VisionAiService();
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final FirebaseStorageService _storageService = FirebaseStorageService();
   final MatchService _matchService = MatchService();
@@ -144,7 +150,7 @@ class FoodProvider with ChangeNotifier {
         'sodium_mg': food.sodium,
       },
       locale: language,
-      modelId: FeatureFlags().aiModelScan,
+      modelId: FeatureFlags().aiModelVision,
       promptVersion: ApiConfig.scanPromptVersion,
     );
 
@@ -202,6 +208,35 @@ class FoodProvider with ChangeNotifier {
     String language = 'en',
     bool isPremiumUser = false,
   }) async {
+    // A multi-food scan is still awaiting the user's keep/drop review (or the
+    // review sheet was dismissed without going through confirm/cancel — see
+    // MultiFoodReviewSheet's back-button guard). Starting a new scan here
+    // would silently overwrite _pendingMultiFoodCandidates and discard
+    // results the user already paid a coin/AI call for.
+    if (_pendingMultiFoodCandidates != null) {
+      _error = 'PENDING_MULTI_FOOD_REVIEW';
+      notifyListeners();
+      return;
+    }
+
+    // Coins are the real gate, not just a UI nicety: spend up front, before
+    // the AI call, so a free scan can never slip through (previously this
+    // only ran after a successful scan in _finalizeScan — a user with 0
+    // coins still got a full paid Groq call, and spendCoins() just failed
+    // silently afterward with nothing actually blocked). Refunded below on
+    // any outcome that isn't a real, useful scan.
+    final bool isPremium = _subscriptionProvider?.hasPremiumFeatures == true;
+    bool coinsSpent = false;
+    if (!isPremium) {
+      if (_coinProvider == null ||
+          !await _coinProvider!.spendCoins(CoinProvider.coinsPerScan)) {
+        _error = 'NOT_ENOUGH_COINS';
+        notifyListeners();
+        return;
+      }
+      coinsSpent = true;
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -220,7 +255,7 @@ class FoodProvider with ChangeNotifier {
 
       final bool multiFood = FeatureFlags().multiFoodScanEnabled;
 
-      Map<String, dynamic> analysisResult = await _groqService
+      Map<String, dynamic> analysisResult = await _visionAiService
           .analyzeFoodImage(imageFile, language: language, multiFood: multiFood)
           .timeout(const Duration(seconds: 30));
 
@@ -230,6 +265,9 @@ class FoodProvider with ChangeNotifier {
       );
 
       if (analysisResult['is_food'] == false || items.isEmpty) {
+        if (coinsSpent) {
+          await _coinProvider!.refundCoins(CoinProvider.coinsPerScan);
+        }
         _error = 'NOT_FOOD_IMAGE';
         _isLoading = false;
         notifyListeners();
@@ -257,6 +295,18 @@ class FoodProvider with ChangeNotifier {
       final String imagePath = (isPremiumUser && firebaseImageUrl != null)
           ? firebaseImageUrl
           : localImagePath;
+
+      // The local copy above exists only to survive the AI round-trip
+      // outliving the picker's temp file. Once the Firebase URL is the one
+      // actually saved, the local copy is dead weight — clean it up instead
+      // of leaking a full JPEG into food_images/ on every premium scan.
+      if (imagePath == firebaseImageUrl && localImagePath != imageFile.path) {
+        try {
+          await File(localImagePath).delete();
+        } catch (e) {
+          debugPrint('Error deleting orphaned local image copy: $e');
+        }
+      }
 
       // Match items in parallel, not sequentially — up to 8 sequential FKB
       // round-trips would blow the p95 scan latency budget (MASTER_PLAN.md
@@ -288,22 +338,27 @@ class FoodProvider with ChangeNotifier {
         _foods.insert(0, newFood);
         await _finalizeScan(language);
       } else {
-        // Multi-item: hold for user review (keep/drop) before anything is
-        // saved or charged — see confirmMultiFoodSelection.
+        // Multi-item: hold for user review (keep/drop). The coin (if any)
+        // was already spent above, before the AI call — see
+        // cancelMultiFoodSelection for the refund if the user keeps nothing.
         _pendingMultiFoodCandidates = candidates;
         _pendingLanguage = language;
         _pendingIsPremiumUser = isPremiumUser;
+        _pendingCoinsSpent = coinsSpent;
         notifyListeners();
       }
     } catch (e) {
       debugPrint('Error in analyzeFoodImage: $e');
+      if (coinsSpent) {
+        await _coinProvider!.refundCoins(CoinProvider.coinsPerScan);
+      }
       if (e is TimeoutException) {
-        _error = _groqService.getLocalizedErrorMessage(
+        _error = _visionAiService.getLocalizedErrorMessage(
           'connection_timeout',
           language,
         );
       } else {
-        _error = _groqService.getLocalizedErrorMessage(
+        _error = _visionAiService.getLocalizedErrorMessage(
           'network_error_generic',
           language,
           {'message': e.toString()},
@@ -318,9 +373,11 @@ class FoodProvider with ChangeNotifier {
 
   /// Saves the items the user kept from a multi-food review (docs/plan.md
   /// Phase 7A) and runs the same one-time-per-scan side effects
-  /// (notifications, coin spend) that a single-item scan already ran inline.
-  /// Passing an empty list behaves like [cancelMultiFoodSelection] — no
-  /// insert, no charge.
+  /// (notifications) that a single-item scan already ran inline. The coin
+  /// was already spent up front in analyzeFoodImage — this is a flat
+  /// per-scan cost, not per item, so keeping fewer items doesn't refund
+  /// part of it. Passing an empty list behaves like
+  /// [cancelMultiFoodSelection] — no insert, and a full refund.
   Future<void> confirmMultiFoodSelection(List<Food> selectedFoods) async {
     if (selectedFoods.isEmpty) {
       cancelMultiFoodSelection();
@@ -328,27 +385,38 @@ class FoodProvider with ChangeNotifier {
     }
 
     final language = _pendingLanguage;
+    await _databaseHelper.insertFoods(
+      selectedFoods,
+      isPremiumUser: _pendingIsPremiumUser,
+    );
     for (final food in selectedFoods) {
-      await _databaseHelper.insertFood(
-        food,
-        isPremiumUser: _pendingIsPremiumUser,
-      );
       _foods.insert(0, food);
     }
     _pendingMultiFoodCandidates = null;
     await _finalizeScan(language);
   }
 
-  /// Discards a pending multi-food review with nothing saved and no coin
-  /// spent (docs/plan.md Phase 7A edge case: user deselects everything).
-  void cancelMultiFoodSelection() {
+  /// Discards a pending multi-food review with nothing saved (docs/plan.md
+  /// Phase 7A edge case: user deselects everything, or backs out via
+  /// MultiFoodReviewSheet's Cancel/back-button path). The coin was already
+  /// spent up front in analyzeFoodImage — since nothing useful came of this
+  /// scan, refund it here rather than leaving the user charged for a scan
+  /// they explicitly threw away.
+  Future<void> cancelMultiFoodSelection() async {
+    if (_pendingCoinsSpent) {
+      await _coinProvider?.refundCoins(CoinProvider.coinsPerScan);
+      _pendingCoinsSpent = false;
+    }
     _pendingMultiFoodCandidates = null;
     notifyListeners();
   }
 
   /// Side effects that must run exactly once per scan action, regardless of
   /// how many food items that scan produced: progress notifications, the
-  /// nutrient-deficiency check, ad action tracking, and the coin spend.
+  /// nutrient-deficiency check, and ad action tracking. The coin spend now
+  /// happens up front in analyzeFoodImage instead of here — see there for
+  /// why (a post-success spend meant a zero-balance scan was never
+  /// actually blocked).
   /// Extracted from the tail of analyzeFoodImage so a multi-item scan
   /// (confirmMultiFoodSelection) can't accidentally run it once per item.
   Future<void> _finalizeScan(String language) async {
@@ -363,8 +431,9 @@ class FoodProvider with ChangeNotifier {
 
     final currentMonthSummary = await _databaseHelper.getCurrentMonthSummary();
     final monthNumber = currentMonthSummary['month_number'] as int;
-    final prefs = await SharedPreferences.getInstance();
-    final currentLanguage = prefs.getString('selected_language') ?? 'en';
+    // Language switching is disabled — the app is English-only (see
+    // LanguageProvider), so this no longer needs to read a stored preference.
+    const currentLanguage = 'en';
     final monthKeys = [
       'january',
       'february',
@@ -393,12 +462,6 @@ class FoodProvider with ChangeNotifier {
     await _checkAndNotifyNutrientDeficiency(language);
 
     _admobProvider?.incrementActionCount();
-
-    if (_subscriptionProvider != null &&
-        !_subscriptionProvider!.hasPremiumFeatures &&
-        _coinProvider != null) {
-      await _coinProvider!.spendCoins(CoinProvider.coinsPerScan);
-    }
 
     notifyListeners();
   }

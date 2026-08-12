@@ -122,8 +122,11 @@ Future<void> _bootstrap() async {
     // prompt simply means non-personalised ads.
     await _requestTrackingAuthorization();
 
-    // Initialize AdMob
-    await MobileAds.instance.initialize();
+    // Initialize AdMob. Skipped when ads are off (non-iOS, or a release build
+    // with unconfigured ad units) — there is no AdMob app to initialise against.
+    if (AdsConfig.adsEnabled) {
+      await MobileAds.instance.initialize();
+    }
 
     if (kDebugMode) {
       debugPrint(AdsConfig.configurationReport());
@@ -159,12 +162,13 @@ Future<void> _bootstrap() async {
   admobProvider.setSubscriptionProvider(subscriptionProvider);
   subscriptionProvider.setNotificationProvider(notificationProvider);
 
-  // Setup FCM topic subscription on language change
-  languageProvider.setLanguageChangeCallback((languageCode) {
-    notificationProvider.subscribeToLanguageTopic(languageCode);
-  });
+  // Language switching is disabled (English-only app), so there is no
+  // language-change event to subscribe to a new FCM topic for.
+  // languageProvider.setLanguageChangeCallback((languageCode) {
+  //   notificationProvider.subscribeToLanguageTopic(languageCode);
+  // });
 
-  // Subscribe to general topics and current language topic
+  // Subscribe to general topics and current (English) language topic
   notificationProvider.subscribeToGeneralTopics();
   notificationProvider.subscribeToLanguageTopic(
     languageProvider.currentLanguage,
