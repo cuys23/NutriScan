@@ -217,8 +217,9 @@ class CloudBackupService {
       if (!doc.exists) return null;
 
       final data = doc.data()!;
+      final rawDate = data['backupDate'];
       return {
-        'backupDate': data['backupDate'],
+        'backupDate': rawDate is Timestamp ? rawDate.toDate() : null,
         'totalItems': data['totalItems'] ?? 0,
         'deviceId': data['deviceId'],
       };
