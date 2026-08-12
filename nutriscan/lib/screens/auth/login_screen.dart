@@ -12,13 +12,37 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.showAccountDeletedMessage = false});
+
+  /// Shows a one-time confirmation toast on arrival — used when this screen
+  /// is reached right after a successful account deletion, since that flow
+  /// clears the nav stack and lands here with no other chance to confirm
+  /// the deletion actually happened.
+  final bool showAccountDeletedMessage;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showAccountDeletedMessage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final language = context.read<LanguageProvider>().currentLanguage;
+        SkSnackBar.success(
+          context,
+          message: AppLocalizations.getString(
+            'delete_account_success',
+            language,
+          ),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);

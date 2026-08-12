@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nutriscan/config/firebase_config.dart';
 import 'package:nutriscan/services/database/database_helper.dart';
@@ -63,6 +64,7 @@ class AccountDeletionService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   /// Keys that must survive deletion because they describe the device, not the
   /// user. Everything else in SharedPreferences is wiped.
@@ -217,6 +219,17 @@ class AccountDeletionService {
       debugPrint('AccountDeletionService: local DB wipe failed ($e)');
     }
 
+    // Local SQLite has no per-account scoping — without this, a plan left
+    // `is_active = 1` here survives on disk and gets picked up by
+    // MealPlanProvider.loadActiveMealPlan() for whichever account signs in
+    // next on this device, showing the deleted account's meal plan as if it
+    // belonged to the new one.
+    try {
+      await _databaseHelper.deleteAllMealPlans();
+    } catch (e) {
+      debugPrint('AccountDeletionService: meal plan wipe failed ($e)');
+    }
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final preserved = <String, String>{};
@@ -232,6 +245,19 @@ class AccountDeletionService {
       }
     } catch (e) {
       debugPrint('AccountDeletionService: prefs wipe failed ($e)');
+    }
+
+    // SubscriptionProvider caches `is_subscribed`/`subscription_type` here
+    // (not in SharedPreferences, so prefs.clear() above never touched them)
+    // as a local mirror of the server-verified Firestore record. iOS Keychain
+    // survives even an app reinstall, so without this a deleted premium
+    // account's entitlement would be silently inherited by the next account
+    // signed in on this device — SubscriptionProvider reads this cache back
+    // in on every launch and after reloadSubscriptionStatus().
+    try {
+      await _secureStorage.deleteAll();
+    } catch (e) {
+      debugPrint('AccountDeletionService: secure storage wipe failed ($e)');
     }
   }
 }
