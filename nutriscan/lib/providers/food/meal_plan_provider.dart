@@ -29,6 +29,14 @@ class MealPlanProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  // Nothing stopped a user from spam-tapping generate/refresh; each tap fires
+  // a real Groq request (plus an internal repair-prompt retry on bad JSON),
+  // which was enough on its own to trip Groq's rate limit. Ad flows in this
+  // app already use a cooldown for the same reason (see AdsConfig) — mirror
+  // that here rather than only fixing the retry path.
+  static const Duration generateCooldown = Duration(seconds: 15);
+  DateTime? _lastGenerateAttempt;
+
   double _calorieTarget = 2000;
   String _dietStyle = 'balanced';
   int _mealsPerDay = 4;
@@ -224,7 +232,33 @@ class MealPlanProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> generateMealPlan({required String languageCode}) async {
+  /// Time left before another [generateMealPlan] call is allowed, or null if
+  /// the cooldown has already elapsed.
+  Duration? get generateCooldownRemaining {
+    if (_lastGenerateAttempt == null) return null;
+    final elapsed = DateTime.now().difference(_lastGenerateAttempt!);
+    if (elapsed >= generateCooldown) return null;
+    return generateCooldown - elapsed;
+  }
+
+  /// Localized "please wait" message for a cooldown-blocked attempt — shown
+  /// as a transient snackbar by the caller rather than through
+  /// [errorMessage], so a plan already on screen doesn't get replaced by an
+  /// error state just because the user tapped refresh twice.
+  String cooldownMessage(String languageCode) =>
+      _groqService.getLocalizedErrorMessage('rate_limit', languageCode);
+
+  /// Generates a new plan. Returns false without touching any state
+  /// (loading, errorMessage, currentPlan) if still within
+  /// [generateCooldownRemaining] — callers should show [cooldownMessage]
+  /// themselves in that case. Returns true once a real attempt has run
+  /// (success or failure both surface through [errorMessage] as before).
+  Future<bool> generateMealPlan({required String languageCode}) async {
+    if (generateCooldownRemaining != null) {
+      return false;
+    }
+    _lastGenerateAttempt = DateTime.now();
+
     _setLoading(true);
     try {
       String? userContext;
@@ -264,6 +298,7 @@ class MealPlanProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+    return true;
   }
 
   void _setLoading(bool value) {

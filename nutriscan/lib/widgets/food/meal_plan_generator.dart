@@ -743,8 +743,17 @@ class _MealPlanGeneratorState extends State<MealPlanGenerator>
       onTap: mealPlanProvider.isLoading
           ? null
           : () async {
-              await mealPlanProvider.generateMealPlan(languageCode: language);
+              final attempted = await mealPlanProvider.generateMealPlan(
+                languageCode: language,
+              );
               if (!mounted) return;
+              if (!attempted) {
+                SkSnackBar.show(
+                  context,
+                  message: mealPlanProvider.cooldownMessage(language),
+                );
+                return;
+              }
               final hasPlan = mealPlanProvider.currentPlan != null;
               final noError = mealPlanProvider.errorMessage == null;
               if (widget.onPlanGenerated != null && noError && hasPlan) {

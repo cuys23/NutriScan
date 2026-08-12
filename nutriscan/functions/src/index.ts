@@ -5,7 +5,6 @@ import { defineSecret, defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import { z } from "zod";
 import { runUsdaSeedImport } from "./jobs/importUsdaSeed";
-import { searchFoods as searchUsdaFdc } from "./usda/client";
 import { runVnFctImport } from "./jobs/importVnFct";
 import { searchFkbFoods } from "./fkb/search";
 import { getFkbFood } from "./fkb/get";
@@ -70,6 +69,66 @@ function isValidGroqRequest(data: unknown): data is GroqChatCompletionRequest {
   return typeof d.model === "string" && Array.isArray(d.messages);
 }
 
+// Groq's TPM (tokens-per-minute) 429s regularly ask for 20-35s before the
+// client's own fixed 3s retry (groq_service.dart _callGroq) ever had a
+// chance of succeeding — confirmed in production logs: two consecutive
+// scan attempts both 429'd within ~4s of each other because our retry
+// fired well before Groq's actual cooldown, and the scan just failed
+// silently with nothing shown to the user. Parse Groq's own suggested
+// delay and wait that long server-side instead of guessing.
+const RETRY_AFTER_MESSAGE_RE = /try again in ([\d.]+)\s*s/i;
+const MAX_RETRY_AFTER_MS = 40_000;
+
+function retryAfterMsFromGroqError(
+  response: Response,
+  json: unknown,
+): number | null {
+  const headerValue = response.headers.get("retry-after");
+  if (headerValue) {
+    const seconds = Number(headerValue);
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.min(seconds * 1000, MAX_RETRY_AFTER_MS);
+    }
+  }
+  const message = (json as { error?: { message?: unknown } })?.error?.message;
+  if (typeof message === "string") {
+    const match = RETRY_AFTER_MESSAGE_RE.exec(message);
+    if (match) {
+      const seconds = Number(match[1]);
+      if (Number.isFinite(seconds) && seconds > 0) {
+        // A little padding — Groq's own countdown is to the millisecond and
+        // retrying at exactly t=0 still occasionally 429s again.
+        return Math.min((seconds + 1) * 1000, MAX_RETRY_AFTER_MS);
+      }
+    }
+  }
+  return null;
+}
+
+async function fetchGroq(
+  groqBody: Record<string, unknown>,
+  apiKey: string,
+  receiveTimeoutMs: number,
+): Promise<{ response: Response; json: Record<string, unknown> }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), receiveTimeoutMs);
+  try {
+    const response = await fetch(GROQ_BASE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(groqBody),
+      signal: controller.signal,
+    });
+    const json = (await response.json()) as Record<string, unknown>;
+    return { response, json };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 /**
  * Callable proxy for all Groq chat-completion calls made by the app
  * (food analysis, meal plans, insights, health coach chat).
@@ -92,26 +151,28 @@ export const groqChatCompletion = onCall(
     await enforceDailyRateLimit(request.auth.uid);
 
     const { receiveTimeoutMs, ...groqBody } = request.data;
-    const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      receiveTimeoutMs ?? 30_000,
-    );
+    const timeoutMs = receiveTimeoutMs ?? 30_000;
+    const apiKey = GROQ_API_KEY.value();
 
     const startTime = Date.now();
     try {
-      const response = await fetch(GROQ_BASE_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${GROQ_API_KEY.value()}`,
-        },
-        body: JSON.stringify(groqBody),
-        signal: controller.signal,
-      });
+      let { response, json } = await fetchGroq(groqBody, apiKey, timeoutMs);
+
+      if (!response.ok && response.status === 429) {
+        const retryAfterMs = retryAfterMsFromGroqError(response, json);
+        logger.warn("Groq API 429, retrying once", {
+          uid: request.auth.uid,
+          model: groqBody.model,
+          retryAfterMs,
+          json,
+        });
+        if (retryAfterMs != null) {
+          await new Promise((resolve) => setTimeout(resolve, retryAfterMs));
+          ({ response, json } = await fetchGroq(groqBody, apiKey, timeoutMs));
+        }
+      }
 
       const latencyMs = Date.now() - startTime;
-      const json = (await response.json()) as { usage?: unknown; [key: string]: unknown };
 
       if (!response.ok) {
         logger.warn("Groq API error", {
@@ -162,8 +223,6 @@ export const groqChatCompletion = onCall(
         error: String(err),
       });
       throw new HttpsError("internal", "Failed to reach the AI service.");
-    } finally {
-      clearTimeout(timeout);
     }
   },
 );
@@ -389,44 +448,6 @@ export const importUsdaSeed = onCall(
     } catch (err) {
       logger.error("importUsdaSeed failed", err);
       throw new HttpsError("internal", `Import failed: ${err}`);
-    }
-  },
-);
-
-const UsdaFdcSearchDebugRequestSchema = z.object({
-  query: z.string().min(1),
-});
-
-/**
- * TEMPORARY — re-verifying SEED_FOODS fdcIds after discovering most of the
- * Phase 1A USDA import points at the wrong food (see CLAUDE.md known debt).
- * Thin passthrough to USDA FDC search using the existing Secret Manager key,
- * so this never needs the raw key outside Functions. Remove once SEED_FOODS
- * is corrected and re-imported.
- */
-export const usdaFdcSearchDebug = onCall(
-  { secrets: [USDA_FDC_API_KEY], timeoutSeconds: 30, memory: "256MiB" },
-  async (request) => {
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "Sign-in required.");
-    }
-
-    const parsed = UsdaFdcSearchDebugRequestSchema.safeParse(request.data);
-    if (!parsed.success) {
-      throw new HttpsError("invalid-argument", "Malformed usdaFdcSearchDebug request.");
-    }
-
-    try {
-      const result = await searchUsdaFdc(parsed.data.query, USDA_FDC_API_KEY.value());
-      const foods = result.foods.map((f) => ({
-        fdcId: f.fdcId,
-        description: f.description,
-        dataType: f.dataType,
-      }));
-      return { ok: true, data: { foods } };
-    } catch (err) {
-      logger.error("usdaFdcSearchDebug failed", err);
-      throw new HttpsError("internal", `USDA search failed: ${err}`);
     }
   },
 );

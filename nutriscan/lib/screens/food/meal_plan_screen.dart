@@ -4,6 +4,7 @@ import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/config/exports/providers.dart';
 import 'package:nutriscan/config/exports/widgets.dart';
 import 'package:nutriscan/utils/page_transition.dart';
+import 'package:nutriscan/widgets/common/sk_snackbar.dart';
 import 'package:provider/provider.dart';
 
 
@@ -97,9 +98,16 @@ class MealPlanResultScreen extends StatelessWidget {
                 onPressed: mealPlanProvider.isLoading
                     ? null
                     : () async {
-                        await mealPlanProvider.generateMealPlan(
-                          languageCode: currentLanguage,
-                        );
+                        final attempted = await mealPlanProvider
+                            .generateMealPlan(languageCode: currentLanguage);
+                        if (!attempted && context.mounted) {
+                          SkSnackBar.show(
+                            context,
+                            message: mealPlanProvider.cooldownMessage(
+                              currentLanguage,
+                            ),
+                          );
+                        }
                       },
                 tooltip: AppLocalizations.getString(
                   'refresh',
