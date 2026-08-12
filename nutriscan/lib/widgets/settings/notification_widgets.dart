@@ -5,6 +5,7 @@ import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
+import 'package:nutriscan/widgets/common/sk_switch.dart';
 
 class NotificationCategoryHeader extends StatelessWidget {
   final String titleKey;
@@ -121,12 +122,7 @@ class NotificationToggleCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeTrackColor: AppColors.skInk(d),
-            activeThumbColor: AppColors.skPaper(d),
-          ),
+          SkSwitch(value: value, isDarkMode: d, onChanged: onChanged),
         ],
       ),
     );
@@ -217,12 +213,7 @@ class MealReminderCard extends StatelessWidget {
             icon: Icon(IconlyLight.time_circle, color: AppColors.skAccent(d)),
             onPressed: onTimePressed,
           ),
-          Switch(
-            value: isEnabled,
-            onChanged: onToggle,
-            activeTrackColor: AppColors.skInk(d),
-            activeThumbColor: AppColors.skPaper(d),
-          ),
+          SkSwitch(value: isEnabled, isDarkMode: d, onChanged: onToggle),
         ],
       ),
     );
@@ -247,6 +238,7 @@ class NotificationPauseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = isDarkMode;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
@@ -256,12 +248,13 @@ class NotificationPauseCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.skSurface(d),
+                border: Border.all(color: AppColors.skRule(d)),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 IconlyBold.time_circle,
-                color: AppColors.primary,
+                color: AppColors.skAccent(d),
                 size: 72,
               ),
             ),
@@ -271,12 +264,9 @@ class NotificationPauseCard extends StatelessWidget {
                 'pause_active',
                 languageProvider.currentLanguage,
               ),
-              style: themeProvider.getFontForCurrentLanguage(
+              style: themeProvider.getSerifFont(
                 fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
+                color: AppColors.skInk(d),
               ),
               textAlign: TextAlign.center,
             ),
@@ -284,14 +274,18 @@ class NotificationPauseCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(IconlyBold.calendar, color: AppColors.primary, size: 28),
+                Icon(
+                  IconlyBold.calendar,
+                  color: AppColors.skAccent(d),
+                  size: 28,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   '$remainingDays ${AppLocalizations.getString('days', languageProvider.currentLanguage)} ${AppLocalizations.getString('remaining', languageProvider.currentLanguage)}',
-                  style: themeProvider.getFontForCurrentLanguage(
+                  style: themeProvider.getBodyFont(
                     fontSize: 24,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: AppColors.skAccent(d),
                   ),
                 ),
               ],
@@ -304,42 +298,46 @@ class NotificationPauseCard extends StatelessWidget {
                   'pause_info_message',
                   languageProvider.currentLanguage,
                 ),
-                style: themeProvider.getFontForCurrentLanguage(
+                style: themeProvider.getBodyFont(
                   fontSize: 16,
-                  color: isDarkMode
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight,
+                  color: AppColors.skMuted(d),
                   height: 1.7,
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 48),
-            SizedBox(
-              width: 280,
-              height: 60,
-              child: ElevatedButton.icon(
-                onPressed: onResume,
-                icon: const Icon(IconlyBold.play, size: 24),
-                label: Text(
-                  AppLocalizations.getString(
-                    'resume_now',
-                    languageProvider.currentLanguage,
-                  ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+            GestureDetector(
+              onTap: onResume,
+              child: Container(
+                width: 280,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.skInk(d),
+                  borderRadius: BorderRadius.circular(28),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 4,
-                  shadowColor: AppColors.primary.withValues(alpha: 0.4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      IconlyBold.play,
+                      size: 22,
+                      color: AppColors.skPaper(d),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      AppLocalizations.getString(
+                        'resume_now',
+                        languageProvider.currentLanguage,
+                      ),
+                      style: themeProvider.getBodyFont(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.skPaper(d),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -350,91 +348,6 @@ class NotificationPauseCard extends StatelessWidget {
   }
 }
 
-class NotificationMainToggle extends StatelessWidget {
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final ThemeProvider themeProvider;
-  final LanguageProvider languageProvider;
-  final bool isDarkMode;
-
-  const NotificationMainToggle({
-    super.key,
-    required this.value,
-    required this.onChanged,
-    required this.themeProvider,
-    required this.languageProvider,
-    required this.isDarkMode,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode
-                ? Colors.black.withValues(alpha: 0.2)
-                : Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(IconlyBold.buy, color: AppColors.primary, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.getString(
-                    'enable_notifications',
-                    languageProvider.currentLanguage,
-                  ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  AppLocalizations.getString(
-                    'notification_description',
-                    languageProvider.currentLanguage,
-                  ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 14,
-                    color: isDarkMode
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: AppColors.primary,
-          ),
-        ],
-      ),
-    );
-  }
-}
+// The master "enable notifications" toggle used NotificationToggleCard's
+// look-alike but with off-brand blue styling; the call site now uses
+// NotificationToggleCard directly (same title/subtitle/value/onChanged shape).
