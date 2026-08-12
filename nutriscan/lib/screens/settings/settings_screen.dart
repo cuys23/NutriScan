@@ -111,18 +111,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onTap: null,
         ),
         const SizedBox(height: 12),
-        SettingsCard(
-          icon: Icons.language,
-          title: AppLocalizations.getString('language', currentLanguage),
-          subtitle: AppLocalizations.getString(
-            'language_subtitle',
-            currentLanguage,
-          ),
-          color: Colors.blue,
-          trailing: const LanguageDropdown(),
-          onTap: null,
-        ),
-        const SizedBox(height: 12),
+        // Language switching is disabled — English is the app's only language.
+        // SettingsCard(
+        //   icon: Icons.language,
+        //   title: AppLocalizations.getString('language', currentLanguage),
+        //   subtitle: AppLocalizations.getString(
+        //     'language_subtitle',
+        //     currentLanguage,
+        //   ),
+        //   color: Colors.blue,
+        //   trailing: const LanguageDropdown(),
+        //   onTap: null,
+        // ),
+        // const SizedBox(height: 12),
         SettingsCard(
           icon: Icons.notifications,
           title: AppLocalizations.getString(
