@@ -31,6 +31,7 @@ NutriScan/
 | `docs/plan.md` | Implementing a feature phase — read **your assigned phase end to end** |
 | `docs/15_IOS_RELEASE_PLAN.md` | Anything about shipping, compliance, signing, store |
 | `docs/PHASE0_INVENTORY.md` | Locating existing scan-path code |
+| `docs/16_FEATURE_ROADMAP.md` | Post-launch feature work — Phase 7+, follows `plan.md` Phase 6 |
 
 Precedence when documents disagree:
 

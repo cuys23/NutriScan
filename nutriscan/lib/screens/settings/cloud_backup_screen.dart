@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iconly/iconly.dart';
+import 'package:intl/intl.dart';
 import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
@@ -8,6 +8,8 @@ import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/widgets/ads/adaptive_banner_ad.dart';
 import 'package:nutriscan/widgets/cloud_backup/cloud_backup_widgets.dart';
+import 'package:nutriscan/widgets/common/sk_switch.dart';
+import 'package:nutriscan/widgets/dialogs/sk_confirm_dialog.dart';
 import 'package:provider/provider.dart';
 
 
@@ -45,26 +47,24 @@ class _CloudBackupScreenState extends State<CloudBackupScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
+    final d = isDarkMode;
     final currentLanguage = languageProvider.currentLanguage;
 
     return Scaffold(
-      backgroundColor: isDarkMode
-          ? AppColors.backgroundDark
-          : AppColors.backgroundLight,
+      backgroundColor: AppColors.skPaper(d),
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(IconlyLight.arrow_left, color: Colors.white, size: 24),
+          icon: Icon(Icons.arrow_back, color: AppColors.skInk(d), size: 24),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           AppLocalizations.getString('cloud_backup', currentLanguage),
-          style: themeProvider.getFontForCurrentLanguage(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: Colors.white,
+          style: themeProvider.getSerifFont(
+            fontSize: 22,
+            color: AppColors.skInk(d),
           ),
         ),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.skPaper(d),
         elevation: 0,
         actions: [
           Consumer<CloudBackupProvider>(
@@ -148,21 +148,14 @@ class _CloudBackupScreenState extends State<CloudBackupScreen> {
       listen: false,
     );
     final isPremium = subscriptionProvider.hasPremiumFeatures;
+    final d = isDarkMode;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,175 +164,189 @@ class _CloudBackupScreenState extends State<CloudBackupScreen> {
             children: [
               Text(
                 AppLocalizations.getString('backup_actions', currentLanguage),
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
+                style: themeProvider.getSerifFont(
+                  fontSize: 18,
+                  color: AppColors.skInk(d),
                 ),
               ),
               if (!isPremium) ...[
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    AppLocalizations.getString(
-                      'premium_badge',
-                      currentLanguage,
-                    ),
-                    style: themeProvider.getFontForCurrentLanguage(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                const PremiumBadge(),
               ],
             ],
+          ),
+          const SizedBox(height: 8),
+          // The provider was already loading this (initializeSilently,
+          // refreshBackupInfo, and after every successful backupData call)
+          // but nothing ever rendered it — the screen showed buttons with
+          // no indication of whether a backup exists or when it last ran.
+          Text(
+            _backupStatusLabel(backupProvider, currentLanguage),
+            style: themeProvider.getBodyFont(
+              fontSize: 13,
+              color: AppColors.skMuted(d),
+            ),
           ),
           const SizedBox(height: 15),
 
           // Backup Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed:
-                  (!isPremium ||
-                      backupProvider.isLoading ||
-                      backupProvider.isBackingUp)
-                  ? null
-                  : () async {
-                      final subscriptionProvider =
-                          Provider.of<SubscriptionProvider>(
-                            context,
-                            listen: false,
-                          );
-                      final languageProvider = Provider.of<LanguageProvider>(
-                        context,
-                        listen: false,
-                      );
-                      await backupProvider.backupData(
-                        isPremiumUser: subscriptionProvider.hasPremiumFeatures,
-                        language: languageProvider.currentLanguage,
-                      );
-                      // Backup completed - UI will update automatically
-                    },
-              icon: backupProvider.isBackingUp
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : Icon(
-                      isPremium ? Icons.cloud_upload : Icons.lock,
-                      color: Colors.white,
-                    ),
-              label: Text(
-                backupProvider.isBackingUp
-                    ? AppLocalizations.getString('backing_up', currentLanguage)
-                    : isPremium
-                    ? AppLocalizations.getString(
-                        'backup_to_cloud',
-                        currentLanguage,
-                      )
-                    : AppLocalizations.getString(
-                        'backup_to_cloud_premium',
-                        currentLanguage,
-                      ),
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+          GestureDetector(
+            onTap:
+                (!isPremium ||
+                    backupProvider.isLoading ||
+                    backupProvider.isBackingUp)
+                ? null
+                : () async {
+                    final subscriptionProvider =
+                        Provider.of<SubscriptionProvider>(
+                          context,
+                          listen: false,
+                        );
+                    final languageProvider = Provider.of<LanguageProvider>(
+                      context,
+                      listen: false,
+                    );
+                    await backupProvider.backupData(
+                      isPremiumUser: subscriptionProvider.hasPremiumFeatures,
+                      language: languageProvider.currentLanguage,
+                    );
+                    // Backup completed - UI will update automatically
+                  },
+            child: Container(
+              width: double.infinity,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: isPremium ? AppColors.skInk(d) : AppColors.skRule(d),
+                borderRadius: BorderRadius.circular(24),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isPremium ? AppColors.primary : Colors.grey,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: 0,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
-          // Restore Button
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed:
-                  (!isPremium ||
-                      backupProvider.isLoading ||
-                      backupProvider.isRestoring)
-                  ? null
-                  : () async {
-                      _showRestoreDialog(
-                        backupProvider,
-                        themeProvider,
-                        isDarkMode,
-                        currentLanguage,
-                      );
-                    },
-              icon: backupProvider.isRestoring
+              child: backupProvider.isBackingUp
                   ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
+                          AppColors.skPaper(d),
                         ),
                       ),
                     )
-                  : Icon(
-                      isPremium ? Icons.cloud_download : Icons.lock,
-                      color: isPremium ? AppColors.primary : Colors.grey,
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isPremium ? Icons.cloud_upload : Icons.lock,
+                          size: 18,
+                          color: AppColors.skPaper(d),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isPremium
+                              ? AppLocalizations.getString(
+                                  'backup_to_cloud',
+                                  currentLanguage,
+                                )
+                              : AppLocalizations.getString(
+                                  'backup_to_cloud_premium',
+                                  currentLanguage,
+                                ),
+                          style: themeProvider.getBodyFont(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.skPaper(d),
+                          ),
+                        ),
+                      ],
                     ),
-              label: Text(
-                backupProvider.isRestoring
-                    ? AppLocalizations.getString('restoring', currentLanguage)
-                    : isPremium
-                    ? AppLocalizations.getString(
-                        'restore_from_cloud',
-                        currentLanguage,
-                      )
-                    : AppLocalizations.getString(
-                        'restore_from_cloud_premium',
-                        currentLanguage,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Restore Button
+          GestureDetector(
+            onTap:
+                (!isPremium ||
+                    backupProvider.isLoading ||
+                    backupProvider.isRestoring)
+                ? null
+                : () => _showRestoreDialog(backupProvider, currentLanguage),
+            child: Container(
+              width: double.infinity,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                border: Border.all(
+                  color: isPremium ? AppColors.skInk(d) : AppColors.skRule(d),
+                ),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: backupProvider.isRestoring
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.skInk(d),
+                        ),
                       ),
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: isPremium ? AppColors.primary : Colors.grey,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                side: BorderSide(
-                  color: isPremium ? AppColors.primary : Colors.grey,
-                ),
-              ),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isPremium ? Icons.cloud_download : Icons.lock,
+                          size: 18,
+                          color: isPremium
+                              ? AppColors.skInk(d)
+                              : AppColors.skMuted(d),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isPremium
+                              ? AppLocalizations.getString(
+                                  'restore_from_cloud',
+                                  currentLanguage,
+                                )
+                              : AppLocalizations.getString(
+                                  'restore_from_cloud_premium',
+                                  currentLanguage,
+                                ),
+                          style: themeProvider.getBodyFont(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isPremium
+                                ? AppColors.skInk(d)
+                                : AppColors.skMuted(d),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _backupStatusLabel(
+    CloudBackupProvider backupProvider,
+    String currentLanguage,
+  ) {
+    if (!backupProvider.isSignedIn) {
+      return AppLocalizations.getString('not_signed_in', currentLanguage);
+    }
+    final info = backupProvider.backupInfo;
+    final backupDate = info?['backupDate'];
+    if (info == null || backupDate is! DateTime) {
+      return AppLocalizations.getString('no_backup_yet', currentLanguage);
+    }
+    final formattedDate = DateFormat('d MMMM yyyy, HH:mm').format(backupDate);
+    return AppLocalizations.getString('last_backup_items', currentLanguage)
+        .replaceAll('{date}', formattedDate)
+        .replaceAll('{count}', '${info['totalItems'] ?? 0}');
   }
 
   Widget _buildAutoBackupSection(
@@ -354,21 +361,14 @@ class _CloudBackupScreenState extends State<CloudBackupScreen> {
       listen: false,
     );
     final isPremium = subscriptionProvider.hasPremiumFeatures;
+    final d = isDarkMode;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,82 +377,63 @@ class _CloudBackupScreenState extends State<CloudBackupScreen> {
             children: [
               Text(
                 AppLocalizations.getString('auto_backup', currentLanguage),
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
+                style: themeProvider.getSerifFont(
+                  fontSize: 18,
+                  color: AppColors.skInk(d),
                 ),
               ),
               if (!isPremium) ...[
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    AppLocalizations.getString(
-                      'premium_badge',
-                      currentLanguage,
-                    ),
-                    style: themeProvider.getFontForCurrentLanguage(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                const PremiumBadge(),
               ],
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             AppLocalizations.getString(
               'auto_backup_description',
               currentLanguage,
             ),
-            style: themeProvider.getFontForCurrentLanguage(
+            style: themeProvider.getBodyFont(
               fontSize: 14,
-              color: isDarkMode
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+              color: AppColors.skMuted(d),
+              height: 1.4,
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 16),
+          Container(height: 1, color: AppColors.skRuleSoft(d)),
+          const SizedBox(height: 16),
           FutureBuilder<bool>(
             future: backupProvider.isAutoBackupEnabled(),
             builder: (context, snapshot) {
               final isEnabled = snapshot.data ?? true;
-              return SwitchListTile(
-                title: Text(
-                  AppLocalizations.getString(
-                    'enable_auto_backup',
-                    currentLanguage,
+              return Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.getString(
+                        'enable_auto_backup',
+                        currentLanguage,
+                      ),
+                      style: themeProvider.getBodyFont(
+                        fontSize: 15,
+                        color: AppColors.skInk(d),
+                      ),
+                    ),
                   ),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 14,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
+                  SkSwitch(
+                    value: isPremium ? isEnabled : false,
+                    isDarkMode: d,
+                    onChanged: isPremium
+                        ? (value) async {
+                            await backupProvider.setAutoBackupEnabled(value);
+                            if (mounted) {
+                              setState(() {});
+                            }
+                          }
+                        : null,
                   ),
-                ),
-                value: isPremium ? isEnabled : false,
-                onChanged: isPremium
-                    ? (value) async {
-                        await backupProvider.setAutoBackupEnabled(value);
-                        if (mounted) {
-                          setState(() {});
-                        }
-                      }
-                    : null,
-                activeThumbColor: AppColors.primary,
-                contentPadding: EdgeInsets.zero,
+                ],
               );
             },
           ),
@@ -463,198 +444,32 @@ class _CloudBackupScreenState extends State<CloudBackupScreen> {
 
   void _showRestoreDialog(
     CloudBackupProvider backupProvider,
-    ThemeProvider themeProvider,
-    bool isDarkMode,
     String currentLanguage,
   ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDarkMode
-                  ? AppColors.surfaceDark
-                  : AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: isDarkMode
-                      ? Colors.black.withValues(alpha: 0.5)
-                      : Colors.black.withValues(alpha: 0.1),
-                  spreadRadius: 1,
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Warning Icon
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[50],
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Icon(
-                    Icons.cloud_download,
-                    size: 48,
-                    color: Colors.orange[600],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Title
-                Text(
-                  AppLocalizations.getString('restore_data', currentLanguage),
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Description
-                Text(
-                  AppLocalizations.getString(
-                    'restore_data_warning',
-                    currentLanguage,
-                  ),
-                  textAlign: TextAlign.center,
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 14,
-                    color: isDarkMode
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          side: BorderSide(
-                            color: isDarkMode
-                                ? AppColors.textSecondaryDark
-                                : AppColors.textSecondaryLight,
-                          ),
-                        ),
-                        child: Text(
-                          AppLocalizations.getString(
-                            'cancel_btn',
-                            currentLanguage,
-                          ),
-                          style: themeProvider.getFontForCurrentLanguage(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: isDarkMode
-                                ? AppColors.textSecondaryDark
-                                : AppColors.textSecondaryLight,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed:
-                            (backupProvider.isLoading ||
-                                backupProvider.isRestoring)
-                            ? null
-                            : () async {
-                                Navigator.pop(context);
-                                final subscriptionProvider =
-                                    Provider.of<SubscriptionProvider>(
-                                      context,
-                                      listen: false,
-                                    );
-                                final languageProvider =
-                                    Provider.of<LanguageProvider>(
-                                      context,
-                                      listen: false,
-                                    );
-                                await backupProvider.restoreData(
-                                  isPremiumUser:
-                                      subscriptionProvider.hasPremiumFeatures,
-                                  language: languageProvider.currentLanguage,
-                                );
-                                // Restore completed - UI will update automatically
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: backupProvider.isRestoring
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    AppLocalizations.getString(
-                                      'restoring',
-                                      currentLanguage,
-                                    ),
-                                    style: themeProvider
-                                        .getFontForCurrentLanguage(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                  ),
-                                ],
-                              )
-                            : Text(
-                                AppLocalizations.getString(
-                                  'restore',
-                                  currentLanguage,
-                                ),
-                                style: themeProvider.getFontForCurrentLanguage(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+    SkConfirmDialog.show(
+      context,
+      icon: Icons.cloud_download,
+      title: AppLocalizations.getString('restore_data', currentLanguage),
+      message: AppLocalizations.getString(
+        'restore_data_warning',
+        currentLanguage,
+      ),
+      cancelLabel: AppLocalizations.getString('cancel_btn', currentLanguage),
+      confirmLabel: AppLocalizations.getString('restore', currentLanguage),
+      onConfirm: () async {
+        final subscriptionProvider = Provider.of<SubscriptionProvider>(
+          context,
+          listen: false,
         );
+        final languageProvider = Provider.of<LanguageProvider>(
+          context,
+          listen: false,
+        );
+        await backupProvider.restoreData(
+          isPremiumUser: subscriptionProvider.hasPremiumFeatures,
+          language: languageProvider.currentLanguage,
+        );
+        // Restore completed - UI will update automatically
       },
     );
   }

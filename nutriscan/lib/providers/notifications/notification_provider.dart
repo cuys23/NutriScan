@@ -256,7 +256,7 @@ class NotificationProvider with ChangeNotifier {
 
       await _notificationService.scheduleMealReminder(
         id: reminder.id,
-        title: 'NutriScan 🍽️',
+        title: 'NutriSnap 🍽️',
         body: message,
         hour: reminder.time.hour,
         minute: reminder.time.minute,
@@ -267,9 +267,8 @@ class NotificationProvider with ChangeNotifier {
   }
 
   Future<String> _getMealReminderMessage(String mealName) async {
-    // Get current language from SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final currentLanguage = prefs.getString('selected_language') ?? 'en';
+    // Language switching is disabled — the app is English-only.
+    const currentLanguage = 'en';
 
     // Generate localized key
     String key = '${mealName}_notification';
@@ -431,9 +430,8 @@ class NotificationProvider with ChangeNotifier {
         return;
       }
 
-      // Get current language from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final currentLanguage = prefs.getString('selected_language') ?? 'en';
+      // Language switching is disabled — the app is English-only.
+      const currentLanguage = 'en';
 
       // Get localized strings
       String title = AppLocalizations.getString(
@@ -565,8 +563,8 @@ class NotificationProvider with ChangeNotifier {
 
         // Only send if inactive for 24+ hours and time is around 10:00
         if (hoursSinceLastScan >= 24 && now.hour >= 10 && now.hour < 11) {
-          // Get localized message
-          final currentLanguage = prefs.getString('selected_language') ?? 'en';
+          // Language switching is disabled — the app is English-only.
+          const currentLanguage = 'en';
           String title = AppLocalizations.getString(
             'inactivity_reminder',
             currentLanguage,
@@ -596,8 +594,8 @@ class NotificationProvider with ChangeNotifier {
           final hoursSinceFirstUse = now.difference(firstUsed).inHours;
 
           if (hoursSinceFirstUse >= 24 && now.hour >= 10 && now.hour < 11) {
-            final currentLanguage =
-                prefs.getString('selected_language') ?? 'en';
+            // Language switching is disabled — the app is English-only.
+            const currentLanguage = 'en';
             String title = AppLocalizations.getString(
               'inactivity_reminder',
               currentLanguage,
@@ -671,9 +669,8 @@ class NotificationProvider with ChangeNotifier {
         return;
       }
 
-      // Get current language from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final currentLanguage = prefs.getString('selected_language') ?? 'en';
+      // Language switching is disabled — the app is English-only.
+      const currentLanguage = 'en';
 
       // Get localized strings
       String title = AppLocalizations.getString(
@@ -753,9 +750,8 @@ class NotificationProvider with ChangeNotifier {
         return;
       }
 
-      // Get current language from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final currentLanguage = prefs.getString('selected_language') ?? 'en';
+      // Language switching is disabled — the app is English-only.
+      const currentLanguage = 'en';
 
       // Get localized strings
       String title = AppLocalizations.getString(
@@ -845,8 +841,8 @@ class NotificationProvider with ChangeNotifier {
 
       // Only schedule if user is NOT premium
       if (!hasPremium) {
-        final prefs = await SharedPreferences.getInstance();
-        final currentLanguage = prefs.getString('selected_language') ?? 'en';
+        // Language switching is disabled — the app is English-only.
+        const currentLanguage = 'en';
 
         // Get localized strings
         String title = AppLocalizations.getString(

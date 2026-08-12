@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E8E6E1;font-family:"DM Sans",system-ui,sans-serif;
+--sk-paper:#F4EFE7;--sk-surface:#FBF8F2;--sk-ink:#1C1A17;--sk-muted:#8A8578;
+--sk-rule:#DFD8CB;--sk-rule-soft:#E3DDD2;--sk-image:#EAE4D9;--sk-accent:#C4552F;
+--sk-sage:#6B7F5C;--sk-body:#57534C;--sk-faint:#C9C1B2;--sk-tab-off:#A8A296}
+body *{transition:background-color .4s ease,border-color .4s ease,color .4s ease,fill .4s ease,stroke .4s ease}
+a{color:var(--sk-accent);text-decoration:none}
+a:hover{color:#9E4224}
+input,textarea{font-family:"DM Sans",system-ui,sans-serif}
+@keyframes sk-fade{from{opacity:0}to{opacity:1}}
+@keyframes sk-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes sk-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes sk-draw{from{stroke-dashoffset:var(--len,600)}to{stroke-dashoffset:0}}
+@keyframes sk-steam{0%{opacity:0;transform:translateY(6px) scaleY(.8)}35%{opacity:.75}100%{opacity:0;transform:translateY(-26px) scaleY(1.25)}}
+@keyframes sk-out{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.06)}}
+@keyframes sk-bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes sk-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes sk-sheet{from{transform:translateY(110%)}to{transform:none}}
+@keyframes sk-blink{0%,80%,100%{opacity:.28}40%{opacity:1}}
+@keyframes sk-spin{to{transform:rotate(360deg)}}
+@keyframes sk-sweep{0%{top:6%;opacity:0}12%{opacity:1}88%{opacity:1}100%{top:94%;opacity:0}}
+@keyframes sk-pop{0%{opacity:0;transform:scale(.7)}60%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes sk-slide{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@keyframes sk-page{from{transform:translateX(100%)}to{transform:none}}
+@keyframes sk-write{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 -8% 0 0)}}
+@keyframes sk-fromright{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes sk-fromleft{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@keyframes sk-stamp{0%{opacity:0;transform:scale(1.7) rotate(-16deg)}58%{opacity:1;transform:scale(.93) rotate(-5deg)}100%{opacity:1;transform:scale(1) rotate(-7deg)}}
+@keyframes sk-drop{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="height:100%;position:relative;overflow:hidden;background:var(--sk-paper);font-family:'DM Sans',system-ui,sans-serif;color:var(--sk-ink)">
+
+  <sc-if value="{{ onSplash }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;inset:0;z-index:90;background:var(--sk-paper);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:sk-out .5s ease 2.5s both">
+      <div style="position:relative;width:180px;height:150px">
+        <div style="position:absolute;left:52px;top:-6px;width:3px;height:34px;border-radius:2px;background:var(--sk-accent);opacity:0;animation:sk-steam 2.4s ease-out 1s infinite"></div>
+        <div style="position:absolute;left:88px;top:-16px;width:3px;height:40px;border-radius:2px;background:var(--sk-accent);opacity:0;animation:sk-steam 2.4s ease-out 1.35s infinite"></div>
+        <div style="position:absolute;left:124px;top:-6px;width:3px;height:34px;border-radius:2px;background:var(--sk-accent);opacity:0;animation:sk-steam 2.4s ease-out 1.65s infinite"></div>
+        <svg width="180" height="150" viewBox="0 0 180 150" fill="none" stroke="var(--sk-ink)" stroke-width="4" stroke-linecap="round">
+          <path d="M20 62h140c0 42-31 68-70 68S20 104 20 62Z" style="--len:420;stroke-dasharray:420;animation:sk-draw 1.15s cubic-bezier(.5,0,.2,1) .1s both"></path>
+          <path d="M8 66h164" style="--len:170;stroke-dasharray:170;animation:sk-draw .5s ease .95s both"></path>
+          <path d="M62 130c12 9 44 9 56 0" stroke="var(--sk-accent)" style="--len:80;stroke-dasharray:80;animation:sk-draw .45s ease 1.25s both"></path>
+        </svg>
+      </div>
+      <div style="height:28px"></div>
+      <div style="font-family:'Instrument Serif',serif;font-size:46px;animation:sk-up .6s cubic-bezier(.2,.85,.25,1) 1.35s both">NutriScan</div>
+      <div style="height:10px"></div>
+      <div style="font-size:15px;color:var(--sk-muted);animation:sk-up .6s cubic-bezier(.2,.85,.25,1) 1.6s both">Eat well, one photo at a time</div>
+      <div style="position:absolute;left:0;right:0;bottom:64px;display:flex;justify-content:center;gap:6px">
+        <div style="width:6px;height:6px;border-radius:3px;background:var(--sk-accent);animation:sk-blink 1.2s ease-in-out infinite"></div>
+        <div style="width:6px;height:6px;border-radius:3px;background:var(--sk-accent);animation:sk-blink 1.2s ease-in-out .16s infinite"></div>
+        <div style="width:6px;height:6px;border-radius:3px;background:var(--sk-accent);animation:sk-blink 1.2s ease-in-out .32s infinite"></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="height:100%;display:flex;flex-direction:column">
+
+    <div onScroll="{{ onScroll }}" style="flex:1;overflow:auto">
+
+      <sc-if value="{{ isToday }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:{{ tabAnim }}">
+          <div style="padding:62px 28px 0;animation:sk-up .5s cubic-bezier(.2,.85,.25,1) both">
+            <div style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Monday, 10 August</div>
+            <div style="height:6px"></div>
+            <div style="font-family:'Instrument Serif',serif;font-size:34px">Good evening, Minh</div>
+          </div>
+          <div style="padding:26px 28px 0;animation:sk-up .5s cubic-bezier(.2,.85,.25,1) .1s both">
+            <div style="display:flex;align-items:flex-end;gap:10px">
+              <div style="font-family:'Instrument Serif',serif;font-size:82px;line-height:.86;animation:sk-write 1.1s cubic-bezier(.35,0,.2,1) .15s both">{{ calNum }}</div>
+              <div style="padding-bottom:10px;font-size:15px;color:var(--sk-muted)">of {{ targetLabel }} kcal</div>
+            </div>
+            <div style="height:20px"></div>
+            <div style="height:2px;background:var(--sk-rule);position:relative">
+              <div style="position:absolute;left:0;top:0;height:2px;background:var(--sk-accent);transform-origin:left;animation:sk-bar 1s cubic-bezier(.3,.9,.3,1) .25s both;width:{{ calPct }}"></div>
+              <div style="position:absolute;top:-4px;width:1px;height:10px;background:var(--sk-faint);left:{{ projectionLeft }}"></div>
+            </div>
+            <div style="height:10px"></div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <div style="font-size:13px;color:var(--sk-muted)">{{ remainingLabel }}</div>
+              <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sk-faint)">Projected {{ projectedLabel }}</div>
+            </div>
+            <div style="height:26px"></div>
+            <div style="display:flex;gap:24px">
+              <sc-for list="{{ macros }}" as="macro" hint-placeholder-count="3">
+                <div style="flex:1">
+                  <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sk-muted)">{{ macro.label }}</div>
+                  <div style="height:8px"></div>
+                  <div style="font-family:'Instrument Serif',serif;font-size:26px">{{ macro.value }}</div>
+                  <div style="height:8px"></div>
+                  <div style="height:3px;background:var(--sk-rule-soft)">
+                    <div style="height:3px;transform-origin:left;animation:sk-bar .8s cubic-bezier(.3,.9,.3,1) .45s both;width:{{ macro.pct }};background:{{ macro.color }}"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:30px 28px 0;animation:sk-up .5s ease .38s both">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">The day so far</div>
+              <div style="font-size:12px;color:var(--sk-faint)">{{ gapLabel }}</div>
+            </div>
+            <div style="height:16px"></div>
+            <div style="position:relative;height:44px">
+              <div style="position:absolute;left:0;right:0;top:9px;height:1px;background:var(--sk-rule)"></div>
+              <div style="position:absolute;top:4px;width:1px;height:11px;background:var(--sk-accent);left:{{ nowLeft }}"></div>
+              <sc-for list="{{ dayMarks }}" as="mark" hint-placeholder-count="3">
+                <div style="position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;animation:sk-pop .45s cubic-bezier(.2,.9,.25,1) both;left:{{ mark.left }};animation-delay:{{ mark.delay }}">
+                  <div style="border-radius:50%;background:var(--sk-ink);width:{{ mark.size }};height:{{ mark.size }};margin-top:{{ mark.offset }}"></div>
+                  <div style="height:8px"></div>
+                  <div style="font-size:11px;color:var(--sk-muted);white-space:nowrap">{{ mark.time }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sk-faint)">
+              <div>06:00</div>
+              <div>22:00</div>
+            </div>
+          </div>
+          <div style="height:34px"></div>
+          <div style="padding:0 28px 24px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;animation:sk-up .5s ease .5s both">
+              <div style="font-family:'Instrument Serif',serif;font-size:24px">Today's meals</div>
+              <div style="font-size:13px;color:var(--sk-muted)">{{ mealCount }} logged</div>
+            </div>
+            <div style="height:14px"></div>
+            <sc-if value="{{ hasMeals }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ meals }}" as="meal" hint-placeholder-count="3">
+                  <div onClick="{{ meal.onOpen }}" style="padding:16px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px;animation:{{ meal.anim }}" style-active="opacity:.55">
+                    <div style="width:44px;height:44px;border-radius:22px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center;flex:none;font-family:'Instrument Serif',serif;font-size:18px">{{ meal.score }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:16px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ meal.name }}</div>
+                      <div style="height:3px"></div>
+                      <div style="font-size:13px;color:var(--sk-muted)">{{ meal.time }} · {{ meal.source }}</div>
+                    </div>
+                    <div style="font-family:'Instrument Serif',serif;font-size:22px">{{ meal.kcal }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noMeals }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:44px 0;border-top:1px solid var(--sk-rule);text-align:center">
+                <div style="font-family:'Instrument Serif',serif;font-size:26px">Nothing logged yet</div>
+                <div style="height:8px"></div>
+                <div style="font-size:14px;color:var(--sk-muted)">Photograph your first plate of the day.</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:{{ tabAnim }}">
+          <div style="padding:62px 28px 0;animation:sk-up .5s cubic-bezier(.2,.85,.25,1) both">
+            <div style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Kitchen diary</div>
+            <div style="height:6px"></div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <div style="font-family:'Instrument Serif',serif;font-size:34px">History</div>
+              <div onClick="{{ openLedger }}" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sk-accent)">Ledger</div>
+            </div>
+            <div style="height:22px"></div>
+            <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--sk-rule)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sk-muted)" stroke-width="1.6"><circle cx="11" cy="11" r="7.5"/><path d="M20 20l-3.2-3.2" stroke-linecap="round"/></svg>
+              <input type="text" placeholder="Search your meals" value="{{ query }}" onChange="{{ onQuery }}" style="flex:1;min-width:0;border:none;background:transparent;outline:none;font-size:15px;color:var(--sk-ink)" />
+              <div onClick="{{ cycleSort }}" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sk-accent);white-space:nowrap">{{ sortLabel }}</div>
+            </div>
+          </div>
+          <div style="padding:0 28px 24px">
+            <sc-for list="{{ historyGroups }}" as="group" hint-placeholder-count="2">
+              <div style="padding-top:26px;animation:sk-slide .4s ease both;animation-delay:{{ group.delay }}">
+                <div style="height:7px;margin-bottom:18px;background:linear-gradient(-45deg,var(--sk-paper) 5px,transparent 0) 0 50%/9px 14px repeat-x,linear-gradient(45deg,var(--sk-paper) 5px,var(--sk-rule) 0) 0 50%/9px 14px repeat-x"></div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between">
+                  <div style="font-family:'Instrument Serif',serif;font-size:22px">{{ group.label }}</div>
+                  <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sk-muted)">{{ group.total }} kcal</div>
+                </div>
+                <div style="height:10px"></div>
+                <sc-for list="{{ group.items }}" as="row" hint-placeholder-count="3">
+                  <div onClick="{{ row.onOpen }}" style="padding:15px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px" style-active="opacity:.55">
+                    <div style="width:40px;height:40px;border-radius:20px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center;flex:none;font-family:'Instrument Serif',serif;font-size:16px">{{ row.score }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div>
+                      <div style="height:3px"></div>
+                      <div style="font-size:13px;color:var(--sk-muted)">{{ row.time }} · {{ row.source }}</div>
+                    </div>
+                    <div style="font-family:'Instrument Serif',serif;font-size:20px">{{ row.kcal }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:60px 0;text-align:center">
+                <div style="font-family:'Instrument Serif',serif;font-size:24px">No meals match</div>
+                <div style="height:8px"></div>
+                <div style="font-size:14px;color:var(--sk-muted)">Try a different word.</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTrends }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:{{ tabAnim }}">
+          <div style="padding:62px 28px 0;animation:sk-up .5s cubic-bezier(.2,.85,.25,1) both">
+            <div style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Seven days</div>
+            <div style="height:6px"></div>
+            <div style="font-family:'Instrument Serif',serif;font-size:34px">Trends</div>
+          </div>
+          <div style="padding:22px 28px 0;display:flex;gap:26px;border-bottom:1px solid var(--sk-rule)">
+            <sc-for list="{{ metricTabs }}" as="tab" hint-placeholder-count="4">
+              <div onClick="{{ tab.onTap }}" style="padding-bottom:12px;font-size:14px;transition:color .2s ease,border-color .2s ease;color:{{ tab.color }};font-weight:{{ tab.weight }};border-bottom:2px solid {{ tab.border }}">{{ tab.label }}</div>
+            </sc-for>
+          </div>
+
+          <div style="padding:28px 28px 0">
+            <div style="display:flex;align-items:flex-end;gap:10px;animation:sk-up .5s ease .1s both">
+              <div style="font-family:'Instrument Serif',serif;font-size:64px;line-height:.9">{{ avgValue }}</div>
+              <div style="padding-bottom:8px;font-size:14px;color:var(--sk-muted)">daily average</div>
+            </div>
+            <div style="height:6px"></div>
+            <div style="font-size:14px;color:{{ deltaColor }}">{{ deltaLabel }}</div>
+            <div style="height:6px"></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sk-faint)">
+              <div style="width:18px;height:1px;background:var(--sk-faint)"></div>
+              <div>Last week, {{ prevAvgLabel }} average</div>
+            </div>
+            <div style="height:24px"></div>
+            <svg width="100%" height="200" viewBox="0 0 322 200" style="overflow:visible">
+              <sc-for list="{{ gridRows }}" as="grid" hint-placeholder-count="4">
+                <line x1="0" x2="322" stroke="var(--sk-rule-soft)" stroke-width="1" y1="{{ grid.y }}" y2="{{ grid.y }}"></line>
+              </sc-for>
+              <path fill="none" stroke="var(--sk-ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="900" style="animation:sk-draw 1.3s cubic-bezier(.4,0,.25,1) .2s both;--len:900" d="{{ linePath }}"></path>
+              <path fill="none" stroke="var(--sk-faint)" stroke-width="1.5" stroke-dasharray="4 5" stroke-linecap="round" style="animation:sk-fade .7s ease .55s both" d="{{ prevPath }}"></path>
+              <sc-for list="{{ marks }}" as="note" hint-placeholder-count="2">
+                <text text-anchor="middle" font-size="11" font-family="DM Sans" fill="var(--sk-accent)" style="animation:sk-fade .5s ease 1.1s both" x="{{ note.x }}" y="{{ note.y }}">{{ note.label }}</text>
+              </sc-for>
+              <sc-for list="{{ points }}" as="dot" hint-placeholder-count="7">
+                <circle r="4.5" fill="var(--sk-accent)" style="animation:sk-pop .4s cubic-bezier(.2,.9,.25,1) both;animation-delay:{{ dot.delay }}" cx="{{ dot.x }}" cy="{{ dot.y }}"></circle>
+              </sc-for>
+              <sc-for list="{{ points }}" as="lbl" hint-placeholder-count="7">
+                <text text-anchor="middle" y="192" font-size="12" fill="var(--sk-muted)" font-family="DM Sans" x="{{ lbl.x }}">{{ lbl.label }}</text>
+              </sc-for>
+            </svg>
+          </div>
+
+          <div style="padding:34px 28px 0">
+            <div style="font-family:'Instrument Serif',serif;font-size:24px">Where the calories come from</div>
+            <div style="height:18px"></div>
+            <div style="display:flex;height:14px;overflow:hidden">
+              <sc-for list="{{ splitBars }}" as="seg" hint-placeholder-count="3">
+                <div style="transform-origin:left;animation:sk-bar .9s cubic-bezier(.3,.9,.3,1) both;animation-delay:{{ seg.delay }};width:{{ seg.pct }};background:{{ seg.color }}"></div>
+              </sc-for>
+            </div>
+            <div style="height:16px"></div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ splitBars }}" as="leg" hint-placeholder-count="3">
+                <div style="padding:12px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:12px">
+                  <div style="width:10px;height:10px;border-radius:2px;background:{{ leg.color }}"></div>
+                  <div style="flex:1;font-size:15px">{{ leg.label }}</div>
+                  <div style="font-size:13px;color:var(--sk-muted)">{{ leg.pct }}</div>
+                  <div style="font-family:'Instrument Serif',serif;font-size:20px;min-width:64px;text-align:right">{{ leg.grams }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:34px 28px 0">
+            <div style="font-family:'Instrument Serif',serif;font-size:24px">Health scores</div>
+            <div style="height:6px"></div>
+            <div style="font-size:14px;color:var(--sk-muted)">Average {{ avgScore }} out of 10 across {{ totalLogs }} meals</div>
+            <div style="height:20px"></div>
+            <div style="height:120px;display:flex;align-items:flex-end;gap:5px">
+              <sc-for list="{{ scoreBars }}" as="bar" hint-placeholder-count="10">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end">
+                  <div style="width:100%;transform-origin:bottom;animation:sk-grow .55s cubic-bezier(.2,.9,.25,1) both;height:{{ bar.h }};background:{{ bar.color }};animation-delay:{{ bar.delay }}"></div>
+                  <div style="font-size:11px;color:var(--sk-muted)">{{ bar.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:34px 28px 20px">
+            <div style="padding:22px;border:1px solid var(--sk-rule);background:var(--sk-surface);animation:sk-up .5s ease .3s both">
+              <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-accent)">Note from the coach</div>
+              <div style="height:10px"></div>
+              <div style="font-size:15px;line-height:1.55;color:var(--sk-body);text-wrap:pretty">{{ trendNote }}</div>
+            </div>
+          </div>
+          <div style="padding:0 28px 28px">
+            <div onClick="{{ openWeekly }}" style="height:56px;border-radius:28px;border:1px solid var(--sk-ink);display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:500" style-active="background:var(--sk-image)">
+              Open weekly review
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sk-ink)" stroke-width="1.8" stroke-linecap="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCoach }}" hint-placeholder-val="{{ false }}">
+        <div style="height:100%;display:flex;flex-direction:column;animation:{{ tabAnim }}">
+          <div style="padding:62px 28px 18px;border-bottom:1px solid var(--sk-rule);display:flex;align-items:flex-end;justify-content:space-between">
+            <div>
+              <div style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Always in the kitchen</div>
+              <div style="height:6px"></div>
+              <div style="font-family:'Instrument Serif',serif;font-size:34px">Coach</div>
+            </div>
+            <div onClick="{{ clearChat }}" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sk-accent);padding-bottom:6px">Clear</div>
+          </div>
+          <div data-chat-scroll="1" style="flex:1;overflow:auto;padding:0 28px">
+            <sc-if value="{{ chatEmpty }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:52px 0;animation:sk-fade .4s ease">
+                <div style="font-family:'Instrument Serif',serif;font-size:28px;line-height:1.25;text-wrap:pretty">Ask me anything about what you ate today.</div>
+                <div style="height:12px"></div>
+                <div style="font-size:15px;color:var(--sk-muted);line-height:1.5">I can see your logged meals, portions and health scores.</div>
+                <div style="height:28px"></div>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ prompts }}" as="prompt" hint-placeholder-count="3">
+                    <div onClick="{{ prompt.onTap }}" style="padding:16px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:12px;animation:sk-up .45s ease both;animation-delay:{{ prompt.delay }}" style-active="opacity:.55">
+                      <div style="flex:1;font-size:15px">{{ prompt.text }}</div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sk-accent)" stroke-width="1.8" stroke-linecap="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ chatHasMessages }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:22px 0 8px;display:flex;flex-direction:column;gap:18px">
+                <sc-for list="{{ messages }}" as="msg" hint-placeholder-count="2">
+                  <div style="display:flex;flex-direction:column;align-items:{{ msg.cross }};animation:sk-in .35s cubic-bezier(.2,.9,.25,1) both">
+                    <div style="max-width:82%;padding:14px 16px;font-size:15px;line-height:1.5;white-space:pre-line;text-wrap:pretty;border-radius:14px;background:{{ msg.bg }};color:{{ msg.color }};border:{{ msg.border }}">{{ msg.content }}</div>
+                    <div style="height:6px"></div>
+                    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--sk-muted)">{{ msg.meta }}</div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ chatTyping }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:8px;animation:sk-fade .25s ease">
+                    <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sk-muted)">Coach is writing</div>
+                    <div style="display:flex;gap:4px">
+                      <div style="width:5px;height:5px;border-radius:3px;background:var(--sk-accent);animation:sk-blink 1.1s ease-in-out infinite"></div>
+                      <div style="width:5px;height:5px;border-radius:3px;background:var(--sk-accent);animation:sk-blink 1.1s ease-in-out .15s infinite"></div>
+                      <div style="width:5px;height:5px;border-radius:3px;background:var(--sk-accent);animation:sk-blink 1.1s ease-in-out .3s infinite"></div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+          <div style="padding:14px 28px 18px;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+            <input type="text" placeholder="Write to your coach" value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKey }}" style="flex:1;min-width:0;border:none;background:transparent;outline:none;font-size:15px;color:var(--sk-ink)" />
+            <div onClick="{{ sendChat }}" style="width:44px;height:44px;border-radius:22px;flex:none;background:var(--sk-ink);display:flex;align-items:center;justify-content:center;transition:transform .16s ease" style-active="transform:scale(.92)">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="var(--sk-paper)"><path d="M20.4 3.9 3.6 9.2c-1.1.3-1.2 1.9-.1 2.4l6.1 2.6c.4.2.7.5.9.9l2.6 6.1c.5 1.1 2.1 1 2.4-.1L20.4 3.9Z"/></svg>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isYou }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:{{ tabAnim }};padding-bottom:28px">
+          <div style="padding:62px 28px 0;animation:sk-up .5s cubic-bezier(.2,.85,.25,1) both">
+            <div style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Your kitchen</div>
+            <div style="height:6px"></div>
+            <div style="font-family:'Instrument Serif',serif;font-size:34px">{{ profileName }}</div>
+            <div style="height:22px"></div>
+            <div style="display:flex;gap:20px;padding-top:16px;border-top:1px solid var(--sk-ink)">
+              <sc-for list="{{ profileStats }}" as="stat" hint-placeholder-count="3">
+                <div style="flex:1">
+                  <div style="font-family:'Instrument Serif',serif;font-size:28px;line-height:1">{{ stat.value }}</div>
+                  <div style="height:6px"></div>
+                  <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sk-muted)">{{ stat.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:24px 28px 0;animation:sk-up .45s ease .1s both">
+            <div style="padding:20px 22px;border:1px solid var(--sk-ink);background:var(--sk-surface)">
+              <div style="display:flex;align-items:center;gap:18px">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Coins</div>
+                  <div style="height:6px"></div>
+                  <div style="font-family:'Instrument Serif',serif;font-size:44px;line-height:.9">{{ coins }}</div>
+                </div>
+                <div onClick="{{ earnCoins }}" style="flex:none;padding:11px 16px;border-radius:22px;border:1px solid var(--sk-ink);font-size:13px;font-weight:500;white-space:nowrap;transition:background .16s ease" style-active="background:var(--sk-image)">Watch an ad</div>
+              </div>
+              <div style="height:16px"></div>
+              <div style="font-size:13px;color:var(--sk-muted)">One coin per scan · earned {{ coinsEarned }}, spent 33</div>
+            </div>
+          </div>
+
+          <sc-for list="{{ settingSections }}" as="section" hint-placeholder-count="3">
+            <div style="padding:32px 28px 0;animation:sk-up .45s ease both;animation-delay:{{ section.delay }}">
+              <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">{{ section.title }}</div>
+              <div style="height:12px"></div>
+              <sc-for list="{{ section.rows }}" as="row" hint-placeholder-count="4">
+                <div onClick="{{ row.onTap }}" style="padding:16px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px" style-active="opacity:.55">
+                  <div style="flex:1">
+                    <div style="font-size:16px;color:{{ row.tone }}">{{ row.label }}</div>
+                    <sc-if value="{{ row.hasHint }}" hint-placeholder-val="{{ true }}">
+                      <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">{{ row.hint }}</div>
+                    </sc-if>
+                  </div>
+                  <div style="font-size:14px;color:var(--sk-muted)">{{ row.value }}</div>
+                  <sc-if value="{{ row.isToggle }}" hint-placeholder-val="{{ false }}">
+                    <div style="width:46px;height:26px;border-radius:14px;padding:2px;box-sizing:border-box;display:flex;align-items:center;transition:background .2s ease;background:{{ row.trackBg }};justify-content:{{ row.knobSide }}">
+                      <div style="width:22px;height:22px;border-radius:11px;background:var(--sk-surface);box-shadow:0 1px 3px rgba(28,26,23,.28)"></div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ row.isLink }}" hint-placeholder-val="{{ true }}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sk-muted)" stroke-width="1.7" stroke-linecap="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+
+          <div style="padding:32px 28px 0;font-size:12px;line-height:1.6;color:var(--sk-muted);text-wrap:pretty">Nutrition values are estimates for informational purposes only, not medical advice.</div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <sc-if value="{{ showScanBar }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:none;padding:0 28px 14px">
+        <div onClick="{{ openSheet }}" style="height:56px;border-radius:28px;background:var(--sk-ink);display:flex;align-items:center;justify-content:center;gap:10px;color:var(--sk-paper);font-size:16px;font-weight:500;transition:transform .18s ease" style-active="transform:scale(.97)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sk-paper)" stroke-width="1.7" stroke-linecap="round"><path d="M3 8.4V6.2A3.2 3.2 0 0 1 6.2 3h2.2M15.6 3h2.2A3.2 3.2 0 0 1 21 6.2v2.2M21 15.6v2.2A3.2 3.2 0 0 1 17.8 21h-2.2M8.4 21H6.2A3.2 3.2 0 0 1 3 17.8v-2.2"/><path d="M3.4 12h17.2"/></svg>
+          Scan a meal
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="flex:none;padding:0 28px 30px;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase">
+      <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="5">
+        <div onClick="{{ tab.onTap }}" style="padding:10px 0;transition:color .2s ease;color:{{ tab.color }};font-weight:{{ tab.weight }}">{{ tab.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:70">
+      <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(28,26,23,.42);animation:sk-fade .22s ease"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:28px 28px 44px;background:var(--sk-paper);border-radius:24px 24px 0 0;animation:sk-sheet .34s cubic-bezier(.2,.9,.25,1)">
+        <div style="font-family:'Instrument Serif',serif;font-size:28px">How shall we look?</div>
+        <div style="height:8px"></div>
+        <div style="font-size:14px;color:var(--sk-muted)">One coin per scan. You have {{ coins }}.</div>
+        <div style="height:22px"></div>
+        <div onClick="{{ startCamera }}" style="padding:18px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:16px" style-active="opacity:.55">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--sk-ink)"><path d="M20 7.8h-1.6l-.9-2c-.35-.8-1.15-1.3-2-1.3H8.5c-.85 0-1.65.5-2 1.3l-.9 2H4a2.4 2.4 0 0 0-2.4 2.4v7A2.4 2.4 0 0 0 4 19.6h16a2.4 2.4 0 0 0 2.4-2.4v-7A2.4 2.4 0 0 0 20 7.8Z"/><circle cx="12" cy="13.6" r="3.4" fill="var(--sk-paper)"/></svg>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:500">Take a photo</div>
+            <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">Best light is by a window</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sk-muted)" stroke-width="1.7" stroke-linecap="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+        </div>
+        <div onClick="{{ startCamera }}" style="padding:18px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:16px" style-active="opacity:.55">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--sk-ink)"><path d="M16.4 2.6H7.6c-3 0-5 2.1-5 5.1v8.6c0 3 2 5.1 5 5.1h8.8c3 0 5-2.1 5-5.1V7.7c0-3-2-5.1-5-5.1Z"/><circle cx="9.2" cy="9" r="1.7" fill="var(--sk-paper)"/><path d="M4 17.8l3.9-3.5c.7-.6 1.7-.6 2.4 0l2.5 2.3 1.2-1.1c.7-.6 1.7-.6 2.4 0l3.2 2.9-.4 1.4H4.4L4 17.8Z" fill="var(--sk-paper)"/></svg>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:500">Choose from gallery</div>
+            <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">Something you shot earlier</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sk-muted)" stroke-width="1.7" stroke-linecap="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ cameraOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:80;background:#1C1A17;display:flex;flex-direction:column;animation:sk-fade .22s ease">
+      <div style="padding:58px 24px 0;display:flex;align-items:center;justify-content:space-between">
+        <div onClick="{{ closeCamera }}" style="width:38px;height:38px;border-radius:19px;border:1px solid rgba(244,239,231,.3);display:flex;align-items:center;justify-content:center;color:#F4EFE7;font-size:17px">✕</div>
+        <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,239,231,.6)">Fill the frame</div>
+        <div style="width:38px"></div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div style="width:100%;aspect-ratio:1;position:relative;background:#141311;display:flex;align-items:center;justify-content:center">
+          <svg width="76" height="76" viewBox="0 0 24 24" fill="none" stroke="#3A362F" stroke-width="1.3"><rect x="2.8" y="4" width="18.4" height="16" rx="3"/><circle cx="9" cy="9.6" r="1.9"/><path d="M3.2 17.4l4.6-4.2c.8-.7 2-.7 2.8 0l3 2.7 1.4-1.3c.8-.7 2-.7 2.8 0l3 2.8"/></svg>
+          <div style="position:absolute;top:22px;left:22px;width:30px;height:30px;border-top:2px solid #C4552F;border-left:2px solid #C4552F"></div>
+          <div style="position:absolute;top:22px;right:22px;width:30px;height:30px;border-top:2px solid #C4552F;border-right:2px solid #C4552F"></div>
+          <div style="position:absolute;bottom:22px;left:22px;width:30px;height:30px;border-bottom:2px solid #C4552F;border-left:2px solid #C4552F"></div>
+          <div style="position:absolute;bottom:22px;right:22px;width:30px;height:30px;border-bottom:2px solid #C4552F;border-right:2px solid #C4552F"></div>
+        </div>
+      </div>
+      <div style="padding:0 24px 58px;display:flex;align-items:center;justify-content:center">
+        <div onClick="{{ capture }}" style="width:74px;height:74px;border-radius:37px;border:2px solid rgba(244,239,231,.5);display:flex;align-items:center;justify-content:center;transition:transform .16s ease" style-active="transform:scale(.9)">
+          <div style="width:58px;height:58px;border-radius:29px;background:#F4EFE7"></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ scanning }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:85;background:var(--sk-paper);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:sk-fade .25s ease">
+      <div style="width:230px;height:230px;position:relative;background:var(--sk-image);overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="var(--sk-faint)" stroke-width="1.3"><rect x="2.8" y="4" width="18.4" height="16" rx="3"/><circle cx="9" cy="9.6" r="1.9"/><path d="M3.2 17.4l4.6-4.2c.8-.7 2-.7 2.8 0l3 2.7 1.4-1.3c.8-.7 2-.7 2.8 0l3 2.8"/></svg>
+        <div style="position:absolute;left:0;right:0;height:1.5px;background:var(--sk-accent);box-shadow:0 0 14px 3px rgba(196,85,47,.4);animation:sk-sweep 1.3s cubic-bezier(.45,0,.55,1) infinite"></div>
+      </div>
+      <div style="height:34px"></div>
+      <div style="font-family:'Instrument Serif',serif;font-size:30px">Reading your plate</div>
+      <div style="height:10px"></div>
+      <div style="font-size:14px;color:var(--sk-muted)">Matching against the food database…</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:88;background:var(--sk-paper);display:flex;flex-direction:column;animation:sk-up .38s cubic-bezier(.2,.85,.25,1)">
+      <div style="flex:1;overflow:auto">
+        <div style="height:240px;background:var(--sk-image);display:flex;align-items:center;justify-content:center;position:relative">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--sk-faint)" stroke-width="1.3"><rect x="2.8" y="4" width="18.4" height="16" rx="3"/><circle cx="9" cy="9.6" r="1.9"/><path d="M3.2 17.4l4.6-4.2c.8-.7 2-.7 2.8 0l3 2.7 1.4-1.3c.8-.7 2-.7 2.8 0l3 2.8"/></svg>
+          <div onClick="{{ closeDetail }}" style="position:absolute;top:56px;left:24px;width:38px;height:38px;border-radius:19px;background:var(--sk-paper);display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sk-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>
+          </div>
+        </div>
+        <div style="padding:26px 28px 0">
+          <div style="display:flex;align-items:center;gap:10px;animation:sk-up .45s ease .05s both">
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:{{ detail.sourceColor }}">{{ detail.source }}</div>
+            <div style="width:4px;height:4px;border-radius:2px;background:var(--sk-faint)"></div>
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">{{ detail.time }}</div>
+          </div>
+          <div style="height:10px"></div>
+          <div style="font-family:'Instrument Serif',serif;font-size:38px;line-height:1.1;animation:sk-up .45s ease .1s both">{{ detail.name }}</div>
+          <div style="height:12px"></div>
+          <div style="font-size:15px;line-height:1.55;color:var(--sk-body);text-wrap:pretty;animation:sk-up .45s ease .16s both">{{ detail.description }}</div>
+          <div style="height:26px"></div>
+          <div style="display:flex;align-items:flex-end;gap:10px;animation:sk-up .45s ease .22s both">
+            <div style="font-family:'Instrument Serif',serif;font-size:62px;line-height:.9">{{ detailCal }}</div>
+            <div style="padding-bottom:8px;font-size:14px;color:var(--sk-muted)">kcal · {{ detail.servingSize }}</div>
+          </div>
+          <div style="height:24px"></div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ detail.nutrients }}" as="nut" hint-placeholder-count="5">
+              <div style="padding:14px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px;animation:sk-slide .4s ease both;animation-delay:{{ nut.delay }}">
+                <div style="flex:1;font-size:15px">{{ nut.label }}</div>
+                <div style="width:110px;height:3px;background:var(--sk-rule-soft)">
+                  <div style="height:3px;transform-origin:left;animation:sk-bar .7s cubic-bezier(.3,.9,.3,1) both;animation-delay:{{ nut.delay }};width:{{ nut.pct }};background:{{ nut.color }}"></div>
+                </div>
+                <div style="font-family:'Instrument Serif',serif;font-size:20px;min-width:66px;text-align:right">{{ nut.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="height:28px"></div>
+          <div style="padding:20px;border:1px solid var(--sk-rule);background:var(--sk-surface)">
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-accent)">Health score {{ detail.score }} of 10</div>
+            <div style="height:14px"></div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ detail.tags }}" as="tag" hint-placeholder-count="3">
+                <div style="padding:6px 12px;border-radius:16px;border:1px solid var(--sk-rule);font-size:12px;animation:sk-pop .35s cubic-bezier(.2,.9,.25,1) both;color:{{ tag.color }};animation-delay:{{ tag.delay }}">{{ tag.label }}</div>
+              </sc-for>
+            </div>
+            <div style="height:14px"></div>
+            <div style="font-size:15px;line-height:1.55;color:var(--sk-body);white-space:pre-line;text-wrap:pretty">{{ detail.benefits }}</div>
+          </div>
+          <div style="height:24px"></div>
+        </div>
+      </div>
+      <div style="flex:none;padding:14px 28px 30px;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+        <div onClick="{{ closeDetail }}" style="flex:1;height:52px;border-radius:26px;border:1px solid var(--sk-ink);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500" style-active="background:var(--sk-image)">Done</div>
+        <div onClick="{{ deleteDetail }}" style="width:52px;height:52px;border-radius:26px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center" style-active="background:var(--sk-image)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="var(--sk-accent)"><path d="M20 6.6h-3.4l-.5-1.5c-.3-.9-1.1-1.5-2-1.5H9.9c-.9 0-1.7.6-2 1.5l-.5 1.5H4c-.5 0-.9.4-.9.9s.4.9.9.9h16c.5 0 .9-.4.9-.9s-.4-.9-.9-.9Z"/><path d="M18.4 10.2H5.6l.7 8.3c.1 1.2 1.1 2.1 2.3 2.1h6.8c1.2 0 2.2-.9 2.3-2.1l.7-8.3Z"/></svg>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ youScreenOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:86;background:var(--sk-paper);display:flex;flex-direction:column;animation:sk-page .34s cubic-bezier(.2,.85,.25,1)">
+      <div style="flex:none;padding:56px 28px 16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--sk-rule)">
+        <div onClick="{{ closeYouScreen }}" style="width:38px;height:38px;margin-left:-8px;border-radius:19px;display:flex;align-items:center;justify-content:center;flex:none" style-active="background:var(--sk-image)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--sk-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-size:28px">{{ youTitle }}</div>
+      </div>
+
+      <div style="flex:1;overflow:auto">
+
+        <sc-if value="{{ scrLanguage }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:8px 28px 28px">
+            <sc-for list="{{ languages }}" as="lang" hint-placeholder-count="7">
+              <div onClick="{{ lang.onTap }}" style="padding:17px 0;border-bottom:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px;animation:sk-slide .35s ease both;animation-delay:{{ lang.delay }}" style-active="opacity:.55">
+                <div style="flex:1">
+                  <div style="font-size:16px">{{ lang.native }}</div>
+                  <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">{{ lang.english }}</div>
+                </div>
+                <sc-if value="{{ lang.active }}" hint-placeholder-val="{{ false }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sk-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrTarget }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:32px 28px 28px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:20px">
+              <div onClick="{{ targetDown }}" style="width:52px;height:52px;border-radius:26px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center;flex:none;font-size:24px;color:var(--sk-ink)" style-active="background:var(--sk-image)">−</div>
+              <div style="text-align:center">
+                <div style="font-family:'Instrument Serif',serif;font-size:64px;line-height:.9">{{ targetValue }}</div>
+                <div style="padding-top:8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">kcal a day</div>
+              </div>
+              <div onClick="{{ targetUp }}" style="width:52px;height:52px;border-radius:26px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center;flex:none;font-size:24px;color:var(--sk-ink)" style-active="background:var(--sk-image)">+</div>
+            </div>
+            <div style="height:32px"></div>
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Macro split</div>
+            <div style="height:12px"></div>
+            <sc-for list="{{ targetSplit }}" as="split" hint-placeholder-count="3">
+              <div style="padding:15px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+                <div style="width:10px;height:10px;border-radius:2px;background:{{ split.color }}"></div>
+                <div style="flex:1;font-size:15px">{{ split.label }}</div>
+                <div style="font-size:13px;color:var(--sk-muted)">{{ split.pct }}</div>
+                <div style="font-family:'Instrument Serif',serif;font-size:20px;min-width:72px;text-align:right">{{ split.grams }}</div>
+              </div>
+            </sc-for>
+            <div style="height:28px"></div>
+            <div style="padding:20px;border:1px solid var(--sk-rule);background:var(--sk-surface);font-size:14px;line-height:1.55;color:var(--sk-body);text-wrap:pretty">Based on your last seven days you average {{ weekAvg }} kcal. A target within 200 kcal of that is usually the one people keep.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrReminders }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:8px 28px 28px">
+            <sc-for list="{{ reminderRows }}" as="rem" hint-placeholder-count="4">
+              <div onClick="{{ rem.onTap }}" style="padding:17px 0;border-bottom:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px;animation:sk-slide .35s ease both;animation-delay:{{ rem.delay }}">
+                <div style="flex:1">
+                  <div style="font-size:16px">{{ rem.label }}</div>
+                  <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">{{ rem.hint }}</div>
+                </div>
+                <div style="width:46px;height:26px;border-radius:14px;padding:2px;box-sizing:border-box;display:flex;align-items:center;flex:none;background:{{ rem.trackBg }};justify-content:{{ rem.knobSide }}">
+                  <div style="width:22px;height:22px;border-radius:11px;background:var(--sk-surface);box-shadow:0 1px 3px rgba(0,0,0,.28)"></div>
+                </div>
+              </div>
+            </sc-for>
+            <div style="height:26px"></div>
+            <div style="padding:20px;border:1px solid var(--sk-rule);background:var(--sk-surface);font-size:14px;line-height:1.55;color:var(--sk-body);text-wrap:pretty">Reminders are quiet by default — a single line on the lock screen, no sound.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrPremium }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:28px">
+            <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.2;text-wrap:pretty">Everything unlocked, no banner at the bottom.</div>
+            <div style="height:22px"></div>
+            <sc-for list="{{ plans }}" as="plan" hint-placeholder-count="2">
+              <div onClick="{{ plan.onTap }}" style="margin-bottom:12px;padding:20px;display:flex;align-items:center;gap:16px;background:{{ plan.bg }};border:1px solid {{ plan.border }}">
+                <div style="width:20px;height:20px;border-radius:10px;flex:none;border:1px solid {{ plan.dotBorder }};background:{{ plan.dotFill }}"></div>
+                <div style="flex:1">
+                  <div style="font-size:16px;font-weight:500;color:{{ plan.text }}">{{ plan.name }}</div>
+                  <div style="padding-top:3px;font-size:13px;color:{{ plan.sub }}">{{ plan.note }}</div>
+                </div>
+                <div style="font-family:'Instrument Serif',serif;font-size:22px;color:{{ plan.text }}">{{ plan.price }}</div>
+              </div>
+            </sc-for>
+            <div style="height:14px"></div>
+            <sc-for list="{{ premiumPerks }}" as="perk" hint-placeholder-count="4">
+              <div style="padding:14px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:12px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sk-sage)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>
+                <div style="flex:1;font-size:15px">{{ perk.text }}</div>
+              </div>
+            </sc-for>
+            <div style="height:24px"></div>
+            <div style="height:56px;border-radius:28px;background:var(--sk-ink);display:flex;align-items:center;justify-content:center;color:var(--sk-paper);font-size:16px;font-weight:500" style-active="transform:scale(.97)">Start 7 days free</div>
+            <div style="height:12px"></div>
+            <div style="text-align:center;font-size:13px;color:var(--sk-muted)">Cancel any time. Renews at {{ selectedPlanPrice }}.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrMealPlans }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:28px">
+            <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.2;text-wrap:pretty">A week of menus, written around what you already eat.</div>
+            <div style="height:18px"></div>
+            <div style="font-size:15px;line-height:1.55;color:var(--sk-body);text-wrap:pretty">The plan is built from your logged meals, your daily target and the dishes you score highest. Nothing exotic — mostly things you have cooked before.</div>
+            <div style="height:26px"></div>
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">It reads</div>
+            <div style="height:10px"></div>
+            <sc-for list="{{ planInputs }}" as="input" hint-placeholder-count="4">
+              <div style="padding:14px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+                <div style="flex:1;font-size:15px">{{ input.label }}</div>
+                <div style="font-size:14px;color:var(--sk-muted)">{{ input.value }}</div>
+              </div>
+            </sc-for>
+            <div style="height:26px"></div>
+            <div style="height:56px;border-radius:28px;border:1px solid var(--sk-ink);display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:500" style-active="background:var(--sk-image)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--sk-accent)"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2Z"/></svg>
+              Generate this week
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrBackup }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:8px 28px 28px">
+            <div style="padding:17px 0;border-bottom:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+              <div style="flex:1">
+                <div style="font-size:16px">Last backup</div>
+                <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">10 August, 18:24 · {{ totalLogs }} meals</div>
+              </div>
+            </div>
+            <div onClick="{{ toggleAutoBackup }}" style="padding:17px 0;border-bottom:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+              <div style="flex:1">
+                <div style="font-size:16px">Automatic backup</div>
+                <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">Once a day over wi-fi</div>
+              </div>
+              <div style="width:46px;height:26px;border-radius:14px;padding:2px;box-sizing:border-box;display:flex;align-items:center;flex:none;background:{{ autoBackupTrack }};justify-content:{{ autoBackupSide }}">
+                <div style="width:22px;height:22px;border-radius:11px;background:var(--sk-surface);box-shadow:0 1px 3px rgba(0,0,0,.28)"></div>
+              </div>
+            </div>
+            <div style="padding:17px 0;border-bottom:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px" style-active="opacity:.55">
+              <div style="flex:1;font-size:16px">Restore from backup</div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sk-muted)" stroke-width="1.7" stroke-linecap="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+            </div>
+            <div style="height:26px"></div>
+            <div style="height:56px;border-radius:28px;background:var(--sk-ink);display:flex;align-items:center;justify-content:center;color:var(--sk-paper);font-size:16px;font-weight:500" style-active="transform:scale(.97)">Back up now</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrExport }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:24px 28px 28px">
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Format</div>
+            <div style="height:10px"></div>
+            <sc-for list="{{ exportFormats }}" as="fmt" hint-placeholder-count="2">
+              <div onClick="{{ fmt.onTap }}" style="padding:16px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px" style-active="opacity:.55">
+                <div style="flex:1">
+                  <div style="font-size:16px">{{ fmt.label }}</div>
+                  <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">{{ fmt.hint }}</div>
+                </div>
+                <sc-if value="{{ fmt.active }}" hint-placeholder-val="{{ false }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sk-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div style="height:28px"></div>
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Range</div>
+            <div style="height:10px"></div>
+            <sc-for list="{{ exportRanges }}" as="rng" hint-placeholder-count="3">
+              <div onClick="{{ rng.onTap }}" style="padding:16px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px" style-active="opacity:.55">
+                <div style="flex:1;font-size:16px">{{ rng.label }}</div>
+                <div style="font-size:13px;color:var(--sk-muted)">{{ rng.count }}</div>
+                <sc-if value="{{ rng.active }}" hint-placeholder-val="{{ false }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sk-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div style="height:28px"></div>
+            <div style="height:56px;border-radius:28px;background:var(--sk-ink);display:flex;align-items:center;justify-content:center;color:var(--sk-paper);font-size:16px;font-weight:500" style-active="transform:scale(.97)">Export {{ exportSummary }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrClear }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:32px 28px 28px">
+            <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1.2;color:var(--sk-accent);text-wrap:pretty">This cannot be undone.</div>
+            <div style="height:18px"></div>
+            <div style="font-size:15px;line-height:1.55;color:var(--sk-body);text-wrap:pretty">Deleting your data removes everything held on this phone. Your subscription and coins stay with your account.</div>
+            <div style="height:24px"></div>
+            <sc-for list="{{ clearItems }}" as="item" hint-placeholder-count="4">
+              <div style="padding:14px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+                <div style="flex:1;font-size:15px">{{ item.label }}</div>
+                <div style="font-size:14px;color:var(--sk-muted)">{{ item.value }}</div>
+              </div>
+            </sc-for>
+            <div style="height:28px"></div>
+            <div onClick="{{ confirmClear }}" style="height:56px;border-radius:28px;background:var(--sk-accent);display:flex;align-items:center;justify-content:center;color:#FFF8F2;font-size:16px;font-weight:500" style-active="transform:scale(.97)">Delete everything</div>
+            <div style="height:12px"></div>
+            <div onClick="{{ closeYouScreen }}" style="height:56px;border-radius:28px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500" style-active="background:var(--sk-image)">Keep my diary</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scrLegal }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:28px">
+            <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Updated 1 July 2026</div>
+            <div style="height:18px"></div>
+            <sc-for list="{{ legalSections }}" as="para" hint-placeholder-count="4">
+              <div style="padding-bottom:24px;animation:sk-slide .35s ease both;animation-delay:{{ para.delay }}">
+                <div style="font-family:'Instrument Serif',serif;font-size:22px">{{ para.title }}</div>
+                <div style="height:8px"></div>
+                <div style="font-size:15px;line-height:1.6;color:var(--sk-body);text-wrap:pretty">{{ para.body }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ condensed }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;top:0;left:0;right:0;z-index:60;padding:54px 28px 12px;background:var(--sk-paper);border-bottom:1px solid var(--sk-rule);display:flex;align-items:baseline;gap:10px;animation:sk-drop .3s cubic-bezier(.2,.85,.25,1)">
+      <div style="font-family:'Instrument Serif',serif;font-size:26px">{{ calNum }}</div>
+      <div style="font-size:13px;color:var(--sk-muted)">of {{ targetLabel }} kcal</div>
+      <div style="flex:1"></div>
+      <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sk-accent)">{{ calPctLabel }}</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ celebrateOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeCelebrate }}" style="position:absolute;inset:0;z-index:92;background:var(--sk-paper);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 40px;text-align:center;animation:sk-fade .3s ease">
+      <div style="position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center">
+        <div style="position:absolute;inset:0;border:2px solid var(--sk-accent);border-radius:75px;animation:sk-stamp .6s cubic-bezier(.2,.9,.25,1) both"></div>
+        <div style="animation:sk-stamp .6s cubic-bezier(.2,.9,.25,1) both;display:flex;flex-direction:column;align-items:center">
+          <div style="font-family:'Instrument Serif',serif;font-size:52px;line-height:1;color:var(--sk-accent)">{{ celebrate.score }}</div>
+          <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sk-accent)">out of ten</div>
+        </div>
+      </div>
+      <div style="height:32px"></div>
+      <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--sk-muted);animation:sk-up .5s ease .35s both">Added to today</div>
+      <div style="height:12px"></div>
+      <div style="font-family:'Instrument Serif',serif;font-size:38px;line-height:1.15;animation:sk-up .5s ease .45s both">{{ celebrate.name }}</div>
+      <div style="height:14px"></div>
+      <div style="font-size:15px;color:var(--sk-muted);animation:sk-up .5s ease .55s both">{{ celebrate.kcal }} kcal · {{ celebrate.servingSize }}</div>
+      <div style="height:36px"></div>
+      <div style="font-size:13px;color:var(--sk-faint);animation:sk-fade .5s ease 1.1s both">Tap to see your day</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ weeklyOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:87;background:var(--sk-image);display:flex;flex-direction:column;animation:sk-page .34s cubic-bezier(.2,.85,.25,1)">
+      <div style="flex:none;padding:52px 20px 12px;display:flex;align-items:center;gap:12px">
+        <div onClick="{{ closeWeekly }}" style="width:38px;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center" style-active="background:var(--sk-rule)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--sk-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>
+        </div>
+        <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Weekly review</div>
+      </div>
+      <div style="flex:1;overflow:auto;padding:0 20px 24px">
+        <div style="padding:32px 26px 30px;background:var(--sk-paper);border:1px solid var(--sk-rule);box-shadow:0 12px 30px rgba(0,0,0,.08)">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--sk-muted)">4 — 10 August</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:15px;color:var(--sk-faint)">No. 32</div>
+          </div>
+          <div style="height:14px"></div>
+          <div style="font-family:'Instrument Serif',serif;font-size:36px;line-height:1.1">A steady week, lighter at the weekend.</div>
+          <div style="height:24px"></div>
+          <div style="display:flex;gap:24px;padding-bottom:20px;border-bottom:1px solid var(--sk-ink)">
+            <div style="flex:1">
+              <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Total</div>
+              <div style="padding-top:6px;font-family:'Instrument Serif',serif;font-size:30px">{{ weekTotal }}</div>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Daily</div>
+              <div style="padding-top:6px;font-family:'Instrument Serif',serif;font-size:30px">{{ weekAvg }}</div>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Score</div>
+              <div style="padding-top:6px;font-family:'Instrument Serif',serif;font-size:30px">{{ avgScore }}</div>
+            </div>
+          </div>
+          <sc-for list="{{ weeklyRows }}" as="wrow" hint-placeholder-count="7">
+            <div style="padding:13px 0;border-bottom:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px;animation:sk-slide .35s ease both;animation-delay:{{ wrow.delay }}">
+              <div style="width:38px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sk-muted)">{{ wrow.day }}</div>
+              <div style="flex:1;height:6px;background:var(--sk-rule-soft)">
+                <div style="height:6px;background:var(--sk-ink);transform-origin:left;animation:sk-bar .7s cubic-bezier(.3,.9,.3,1) both;width:{{ wrow.pct }};animation-delay:{{ wrow.delay }}"></div>
+              </div>
+              <div style="font-family:'Instrument Serif',serif;font-size:19px;min-width:56px;text-align:right">{{ wrow.kcal }}</div>
+            </div>
+          </sc-for>
+          <div style="height:24px"></div>
+          <div style="display:flex;gap:24px">
+            <div style="flex:1">
+              <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Best dish</div>
+              <div style="padding-top:6px;font-size:16px">Gỏi cuốn tôm thịt</div>
+              <div style="padding-top:2px;font-size:13px;color:var(--sk-muted)">9 of 10</div>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Heaviest</div>
+              <div style="padding-top:6px;font-size:16px">Cơm tấm sườn</div>
+              <div style="padding-top:2px;font-size:13px;color:var(--sk-muted)">720 kcal</div>
+            </div>
+          </div>
+          <div style="height:26px"></div>
+          <div style="padding:18px;border:1px solid var(--sk-rule);background:var(--sk-surface);font-size:15px;line-height:1.6;color:var(--sk-body);text-wrap:pretty">{{ trendNote }}</div>
+          <div style="height:22px"></div>
+          <div style="text-align:center;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--sk-faint)">NutriScan · printed 10 August</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ledgerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:87;background:var(--sk-paper);display:flex;flex-direction:column;animation:sk-page .34s cubic-bezier(.2,.85,.25,1)">
+      <div style="flex:none;padding:56px 28px 16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--sk-rule)">
+        <div onClick="{{ closeLedger }}" style="width:38px;height:38px;margin-left:-8px;border-radius:19px;display:flex;align-items:center;justify-content:center;flex:none" style-active="background:var(--sk-image)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--sk-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-size:28px">August</div>
+        <div style="flex:1"></div>
+        <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sk-muted)">{{ ledgerTotal }} kcal</div>
+      </div>
+      <div style="flex:1;overflow:auto;padding:20px 24px 28px">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0 4px;padding-bottom:10px">
+          <sc-for list="{{ weekdayNames }}" as="wd" hint-placeholder-count="7">
+            <div style="text-align:center;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sk-faint)">{{ wd.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0 4px">
+          <sc-for list="{{ ledgerDays }}" as="day" hint-placeholder-count="35">
+            <div style="height:58px;padding-top:6px;box-sizing:border-box;border-top:1px solid var(--sk-rule);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;animation:sk-fade .3s ease both;animation-delay:{{ day.delay }}">
+              <div style="font-size:11px;color:{{ day.numColor }};font-weight:{{ day.weight }}">{{ day.num }}</div>
+              <div style="height:4px"></div>
+              <div style="font-family:'Instrument Serif',serif;font-size:15px;color:{{ day.valColor }}">{{ day.value }}</div>
+              <sc-if value="{{ day.isToday }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:4px;width:16px;height:2px;background:var(--sk-accent)"></div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="height:26px"></div>
+        <div style="display:flex;gap:24px;padding-top:18px;border-top:1px solid var(--sk-ink)">
+          <div style="flex:1">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Days logged</div>
+            <div style="padding-top:6px;font-family:'Instrument Serif',serif;font-size:26px">{{ ledgerDaysLogged }}</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Daily average</div>
+            <div style="padding-top:6px;font-family:'Instrument Serif',serif;font-size:26px">{{ ledgerAvg }}</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">Streak</div>
+            <div style="padding-top:6px;font-family:'Instrument Serif',serif;font-size:26px">12</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ onboardingOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:91;background:var(--sk-paper);display:flex;flex-direction:column;animation:sk-fade .4s ease">
+      <div style="flex:none;padding:56px 28px 0;display:flex;align-items:center;gap:8px">
+        <sc-for list="{{ obProgress }}" as="step" hint-placeholder-count="3">
+          <div style="flex:1;height:2px;transition:background .3s ease;background:{{ step.bg }}"></div>
+        </sc-for>
+        <div onClick="{{ obSkip }}" style="padding-left:14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sk-muted)">Skip</div>
+      </div>
+
+      <div style="flex:1;overflow:auto;padding:0 28px">
+        <sc-if value="{{ obStep1 }}" hint-placeholder-val="{{ true }}">
+          <div style="padding-top:56px;animation:sk-up .5s cubic-bezier(.2,.85,.25,1) both">
+            <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--sk-muted)">First things first</div>
+            <div style="height:14px"></div>
+            <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.1">What shall I call you?</div>
+            <div style="height:16px"></div>
+            <div style="font-size:15px;line-height:1.55;color:var(--sk-body)">It only appears at the top of your diary. Nothing leaves the phone.</div>
+            <div style="height:36px"></div>
+            <input type="text" placeholder="Your name" value="{{ obName }}" onChange="{{ onObName }}" style="width:100%;box-sizing:border-box;padding:0 0 14px;border:none;border-bottom:1px solid var(--sk-ink);background:transparent;outline:none;font-family:'Instrument Serif',serif;font-size:32px;color:var(--sk-ink)" />
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ obStep2 }}" hint-placeholder-val="{{ false }}">
+          <div style="padding-top:56px;animation:sk-fromright .45s cubic-bezier(.2,.85,.25,1) both">
+            <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--sk-muted)">Step two</div>
+            <div style="height:14px"></div>
+            <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.1">How much, on an ordinary day?</div>
+            <div style="height:36px"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:20px">
+              <div onClick="{{ targetDown }}" style="width:52px;height:52px;border-radius:26px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center;flex:none;font-size:24px" style-active="background:var(--sk-image)">−</div>
+              <div style="text-align:center">
+                <div style="font-family:'Instrument Serif',serif;font-size:60px;line-height:.9">{{ targetValue }}</div>
+                <div style="padding-top:8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sk-muted)">kcal a day</div>
+              </div>
+              <div onClick="{{ targetUp }}" style="width:52px;height:52px;border-radius:26px;border:1px solid var(--sk-rule);display:flex;align-items:center;justify-content:center;flex:none;font-size:24px" style-active="background:var(--sk-image)">+</div>
+            </div>
+            <div style="height:32px"></div>
+            <sc-for list="{{ targetSplit }}" as="split" hint-placeholder-count="3">
+              <div style="padding:14px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+                <div style="width:10px;height:10px;border-radius:2px;background:{{ split.color }}"></div>
+                <div style="flex:1;font-size:15px">{{ split.label }}</div>
+                <div style="font-family:'Instrument Serif',serif;font-size:19px">{{ split.grams }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ obStep3 }}" hint-placeholder-val="{{ false }}">
+          <div style="padding-top:56px;animation:sk-fromright .45s cubic-bezier(.2,.85,.25,1) both">
+            <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--sk-muted)">Last one</div>
+            <div style="height:14px"></div>
+            <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.1">When shall I remind you?</div>
+            <div style="height:16px"></div>
+            <div style="font-size:15px;line-height:1.55;color:var(--sk-body)">A single quiet line on the lock screen. No sound.</div>
+            <div style="height:28px"></div>
+            <sc-for list="{{ reminderRows }}" as="rem" hint-placeholder-count="4">
+              <div onClick="{{ rem.onTap }}" style="padding:17px 0;border-top:1px solid var(--sk-rule);display:flex;align-items:center;gap:14px">
+                <div style="flex:1">
+                  <div style="font-size:16px">{{ rem.label }}</div>
+                  <div style="padding-top:3px;font-size:13px;color:var(--sk-muted)">{{ rem.hint }}</div>
+                </div>
+                <div style="width:46px;height:26px;border-radius:14px;padding:2px;box-sizing:border-box;display:flex;align-items:center;flex:none;background:{{ rem.trackBg }};justify-content:{{ rem.knobSide }}">
+                  <div style="width:22px;height:22px;border-radius:11px;background:var(--sk-surface);box-shadow:0 1px 3px rgba(0,0,0,.28)"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="flex:none;padding:16px 28px 34px">
+        <div onClick="{{ obNext }}" style="height:56px;border-radius:28px;background:var(--sk-ink);display:flex;align-items:center;justify-content:center;color:var(--sk-paper);font-size:16px;font-weight:500;transition:transform .18s ease" style-active="transform:scale(.97)">{{ obCta }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="position:absolute;inset:0;z-index:96;pointer-events:none;opacity:.07;mix-blend-mode:multiply;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22/%3E%3C/filter%3E%3Crect width=%22180%22 height=%22180%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');background-size:180px 180px"></div>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:930},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;showSplash&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;showOnboarding&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;scanDurationMs&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2400,&quot;min&quot;:600,&quot;max&quot;:4000,&quot;step&quot;:100,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+const TODAY = [
+  { id: 't1', name: 'Phở bò', kcal: 480, score: 8, time: '07:40', source: 'Verified', day: 'Today',
+    description: 'Beef noodle soup with rice noodles, brisket, spring onion and a plate of herbs.',
+    protein: 28.5, carbs: 62, fat: 12, fiber: 3.2, sugar: 4.1, servingSize: '1 bowl, 450 g',
+    benefits: 'High in protein and rich in B vitamins.\nBroth-based dishes keep the calorie load moderate for the volume.' },
+  { id: 't2', name: 'Cơm tấm sườn nướng', kcal: 720, score: 6, time: '12:15', source: 'AI estimate', day: 'Today',
+    description: 'Broken rice with grilled pork chop, pickled vegetables and scallion oil.',
+    protein: 34, carbs: 88, fat: 24, fiber: 2.4, sugar: 9, servingSize: '1 plate, 520 g',
+    benefits: 'Good source of protein and sustained energy.\nThe portion of rice is the main driver of the calorie count.' },
+  { id: 't3', name: 'Gỏi cuốn tôm thịt', kcal: 210, score: 9, time: '19:05', source: 'Verified', day: 'Today',
+    description: 'Fresh rice-paper rolls with shrimp, pork, vermicelli and herbs.',
+    protein: 14.2, carbs: 26.4, fat: 4.1, fiber: 2, sugar: 3.6, servingSize: '3 rolls, 240 g',
+    benefits: 'Low in fat with lean protein.\nFresh herbs add fibre without adding calories.' }
+];
+
+const EARLIER = [
+  { id: 'e1', name: 'Bánh mì thịt nướng', kcal: 560, score: 6, time: '08:10', source: 'AI estimate', day: 'Sunday, 9 August',
+    description: 'Baguette with grilled pork, pâté, pickled carrot and coriander.',
+    protein: 26, carbs: 68, fat: 20, fiber: 3.1, sugar: 6.4, servingSize: '1 roll, 230 g',
+    benefits: 'Balanced protein and carbohydrate.\nWatch the pâté and mayonnaise for added fat.' },
+  { id: 'e2', name: 'Bún chả cá', kcal: 430, score: 7, time: '12:40', source: 'Verified', day: 'Sunday, 9 August',
+    description: 'Fish cake noodle soup with dill, tomato and rice vermicelli.',
+    protein: 24.5, carbs: 54, fat: 11.2, fiber: 2.8, sugar: 5.2, servingSize: '1 bowl, 400 g',
+    benefits: 'Lean protein from fish.\nDill and tomato contribute vitamin C.' },
+  { id: 'e3', name: 'Chè đậu xanh', kcal: 260, score: 4, time: '20:20', source: 'AI estimate', day: 'Sunday, 9 August',
+    description: 'Mung bean sweet soup with coconut milk.',
+    protein: 6.4, carbs: 46, fat: 7.8, fiber: 3.4, sugar: 32, servingSize: '1 cup, 220 g',
+    benefits: 'Mung beans bring fibre.\nSugar is high for the portion — treat it as dessert.' },
+  { id: 'e4', name: 'Cháo gà', kcal: 320, score: 8, time: '07:55', source: 'Verified', day: 'Saturday, 8 August',
+    description: 'Chicken rice porridge with ginger and spring onion.',
+    protein: 22, carbs: 44, fat: 6.2, fiber: 1.6, sugar: 2.1, servingSize: '1 bowl, 400 g',
+    benefits: 'Gentle on digestion.\nGinger and lean chicken keep the fat low.' }
+];
+
+const WEEK = [
+  { label: 'Mon', calories: 1720, protein: 82, carbs: 198, fat: 52 },
+  { label: 'Tue', calories: 1480, protein: 70, carbs: 172, fat: 44 },
+  { label: 'Wed', calories: 1910, protein: 91, carbs: 236, fat: 61 },
+  { label: 'Thu', calories: 1240, protein: 58, carbs: 148, fat: 34 },
+  { label: 'Fri', calories: 1830, protein: 88, carbs: 214, fat: 58 },
+  { label: 'Sat', calories: 1010, protein: 52, carbs: 128, fat: 26 },
+  { label: 'Sun', calories: 1250, protein: 57, carbs: 168, fat: 39 }
+];
+
+const REPLIES = [
+  null,
+  'Two of your three logs today are matched against the food database, so those numbers are scaled from per-100 g values.\n\nThe cơm tấm is an AI estimate. The amount of rice and the cut of pork can move that figure by 150 kcal either way — worth correcting the portion if you weighed it.',
+  'Across the last seven days you average 1,491 kcal with a health score of 7.2 out of 10.\n\nThe pattern is clear: broth-based bowls and fresh rolls score highest, fried and rice-heavy plates pull the average down. Keeping those to twice a week would lift the score without changing what you like to eat.'
+];
+
+const THEMES = {
+  light: {
+    '--sk-paper': '#F4EFE7', '--sk-surface': '#FBF8F2', '--sk-ink': '#1C1A17',
+    '--sk-muted': '#8A8578', '--sk-rule': '#DFD8CB', '--sk-rule-soft': '#E3DDD2',
+    '--sk-image': '#EAE4D9', '--sk-accent': '#C4552F', '--sk-sage': '#6B7F5C',
+    '--sk-body': '#57534C', '--sk-faint': '#C9C1B2', '--sk-tab-off': '#A8A296'
+  },
+  dark: {
+    '--sk-paper': '#17150F', '--sk-surface': '#201C15', '--sk-ink': '#F0EAE0',
+    '--sk-muted': '#9C9484', '--sk-rule': '#342E24', '--sk-rule-soft': '#2B261D',
+    '--sk-image': '#262117', '--sk-accent': '#E2814F', '--sk-sage': '#9DB487',
+    '--sk-body': '#C2BAA9', '--sk-faint': '#4A4335', '--sk-tab-off': '#6E675A'
+  }
+};
+
+class Component extends DCLogic {
+  state = {
+    splash: true, tab: 'today', meals: TODAY.slice(), earlier: EARLIER.slice(),
+    cal: 0, sheet: false, camera: false, scanning: false, revealId: null,
+    detailId: null, query: '', sort: 'time', metric: 'calories',
+    messages: [], chatInput: '', typing: false, coins: 12, coinsEarned: 45,
+    darkMode: false, reminders: true,
+    condensed: false, tabDir: 'right', celebrate: null, weekly: false, ledger: false,
+    obStep: 0, name: 'Minh',
+    youScreen: null, language: 'English', target: 2000,
+    mealReminders: { breakfast: true, lunch: true, dinner: true, weekly: false },
+    plan: 'yearly', autoBackup: true, exportFormat: 'csv', exportRange: '30'
+  };
+
+  applyTheme(mode) {
+    const vars = THEMES[mode] || THEMES.light;
+    Object.keys(vars).forEach(k => document.body.style.setProperty(k, vars[k]));
+  }
+
+  componentDidMount() {
+    const dark = this.props.theme === 'dark';
+    this._lastTheme = this.props.theme;
+    this._lastDark = dark;
+    this._lastMsgs = this.state.messages;
+    this._lastTyping = this.state.typing;
+    this.applyTheme(dark ? 'dark' : 'light');
+    if (dark) this.setState({ darkMode: true });
+    if (this.props.showSplash === false) {
+      this.setState({ splash: false });
+      this.tween(this.totalCal(this.state.meals), 1100);
+      return;
+    }
+    this._t = setTimeout(() => {
+      this.setState({ splash: false });
+      this.tween(this.totalCal(this.state.meals), 1100);
+    }, 3000);
+  }
+
+  componentDidUpdate(prevProps) {
+    const prevTheme = this._lastTheme;
+    this._lastTheme = this.props.theme;
+    if (prevTheme !== undefined && prevTheme !== this.props.theme) {
+      this.setState({ darkMode: this.props.theme === 'dark' });
+    }
+    if (this._lastDark !== this.state.darkMode) {
+      this._lastDark = this.state.darkMode;
+      this.applyTheme(this.state.darkMode ? 'dark' : 'light');
+    }
+    const chatChanged = this._lastMsgs !== this.state.messages || this._lastTyping !== this.state.typing;
+    this._lastMsgs = this.state.messages;
+    this._lastTyping = this.state.typing;
+    if (this.state.tab === 'coach' && chatChanged) {
+      requestAnimationFrame(() => {
+        const el = document.querySelector('[data-chat-scroll]');
+        if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._t);
+    clearTimeout(this._scan);
+    clearTimeout(this._reply);
+    cancelAnimationFrame(this._raf);
+  }
+
+  totalCal(list) { return list.reduce((a, f) => a + f.kcal, 0); }
+
+  tween(to, ms) {
+    cancelAnimationFrame(this._raf);
+    const from = this.state.cal;
+    const t0 = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / ms);
+      const e = 1 - Math.pow(1 - p, 3);
+      if (p < 1) this._raf = requestAnimationFrame(step);
+      this.setState({ cal: from + (to - from) * e });
+    };
+    this._raf = requestAnimationFrame(step);
+  }
+
+  capture = () => {
+    const dur = Math.max(600, Number(this.props.scanDurationMs) || 2400);
+    this.setState({ camera: false, scanning: true });
+    this._scan = setTimeout(() => {
+      const fresh = {
+        id: 'n' + Date.now(), name: 'Canh chua cá lóc', kcal: 240, score: 9, time: '20:30',
+        source: 'Verified', day: 'Today',
+        description: 'Sour tamarind soup with snakehead fish, pineapple, okra and bean sprouts.',
+        protein: 21.4, carbs: 18.6, fat: 6.2, fiber: 3.8, sugar: 8.4, servingSize: '1 bowl, 380 g',
+        benefits: 'Lean fish protein with a high water content.\nTamarind and pineapple add vitamin C for very few calories.'
+      };
+      const meals = this.state.meals.concat([fresh]);
+      this.setState(s => ({
+        scanning: false, meals, revealId: fresh.id, tab: 'today',
+        coins: Math.max(0, s.coins - 1), celebrate: fresh, condensed: false
+      }));
+      this.tween(this.totalCal(meals), 1200);
+      clearTimeout(this._celebrate);
+      this._celebrate = setTimeout(() => this.setState({ celebrate: null }), 2800);
+    }, dur);
+  };
+
+  send = (text) => {
+    const body = (text || this.state.chatInput).trim();
+    if (!body || this.state.typing) return;
+    const msg = { id: 'u' + Date.now(), role: 'user', content: body, ts: new Date() };
+    this.setState(s => ({ messages: s.messages.concat([msg]), chatInput: '', typing: true }));
+    clearTimeout(this._reply);
+    this._reply = setTimeout(() => {
+      const i = this.state.messages.filter(m => m.role === 'assistant').length % REPLIES.length;
+      this.setState(s => ({
+        typing: false,
+        messages: s.messages.concat([{ id: 'a' + Date.now(), role: 'assistant', content: REPLIES[i] || this.todayReply(), ts: new Date() }])
+      }));
+    }, 1500);
+  };
+
+  todayReply() {
+    const list = this.state.meals;
+    const cal = this.totalCal(list);
+    const pro = list.reduce((a, f) => a + f.protein, 0);
+    const carb = list.reduce((a, f) => a + f.carbs, 0);
+    const gap = 2000 - cal;
+    return 'You are at ' + cal.toLocaleString('en-US') + ' kcal across ' + list.length + (list.length === 1 ? ' meal' : ' meals')
+      + ', about ' + Math.abs(Math.round(gap)) + ' kcal ' + (gap >= 0 ? 'under' : 'over') + ' your 2,000 target.\n\n'
+      + 'Protein sits at ' + pro.toFixed(1) + ' g and carbohydrate at ' + carb.toFixed(1) + ' g.\n\n'
+      + (gap > 250
+        ? 'If you are still hungry, something protein-forward would close the gap without adding much starch.'
+        : 'That is close enough to target. Keep the rest of the evening light.');
+  }
+
+  renderVals() {
+    const s = this.state;
+    const all = s.meals.concat(s.earlier);
+    const fmt = (n) => Math.round(n).toLocaleString('en-US');
+    const target = 2000;
+
+    const protein = s.meals.reduce((a, f) => a + f.protein, 0);
+    const carbs = s.meals.reduce((a, f) => a + f.carbs, 0);
+    const fat = s.meals.reduce((a, f) => a + f.fat, 0);
+
+    const decorate = (f, i, base) => ({
+      ...f,
+      kcal: f.kcal,
+      score: f.score + '/10',
+      anim: f.id === s.revealId
+        ? 'sk-up .55s cubic-bezier(.2,.9,.25,1) both'
+        : 'sk-up .5s cubic-bezier(.2,.85,.25,1) ' + (base + i * 90) + 'ms both',
+      onOpen: () => this.setState({ detailId: f.id })
+    });
+
+    const q = s.query.trim().toLowerCase();
+    const filtered = all.filter(f => !q || f.name.toLowerCase().includes(q));
+    const sorted = filtered.slice().sort((a, b) =>
+      s.sort === 'name' ? a.name.localeCompare(b.name)
+        : s.sort === 'calories' ? b.kcal - a.kcal : 0
+    );
+    const groupOrder = [];
+    const groupMap = {};
+    sorted.forEach(f => {
+      if (!groupMap[f.day]) { groupMap[f.day] = []; groupOrder.push(f.day); }
+      groupMap[f.day].push(f);
+    });
+
+    const metricLabel = { calories: 'Calories', protein: 'Protein', carbs: 'Carbs', fat: 'Fat' }[s.metric];
+    const unit = s.metric === 'calories' ? 'kcal' : 'g';
+    const vals = WEEK.map(d => d[s.metric]);
+    const avg = vals.reduce((a, v) => a + v, 0) / vals.length;
+    const lo = Math.min(...vals) * 0.88, hi = Math.max(...vals) * 1.06;
+    const span = (hi - lo) || 1;
+    const px = (i) => 6 + (i * 310) / (WEEK.length - 1);
+    const py = (v) => 168 - ((v - lo) / span) * 152;
+    const points = WEEK.map((d, i) => ({
+      x: px(i).toFixed(1), y: py(d[s.metric]).toFixed(1), label: d.label, delay: (700 + i * 70) + 'ms'
+    }));
+    const firstHalf = vals.slice(0, 3).reduce((a, v) => a + v, 0) / 3;
+    const lastHalf = vals.slice(4).reduce((a, v) => a + v, 0) / 3;
+    const delta = lastHalf - firstHalf;
+
+    const macroCal = { protein: protein * 4, carbs: carbs * 4, fat: fat * 9 };
+    const macroTotal = macroCal.protein + macroCal.carbs + macroCal.fat || 1;
+
+    const scoreCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    all.forEach(f => { scoreCounts[f.score - 1] += 1; });
+    const scoreMax = Math.max(1, ...scoreCounts);
+    const avgScore = all.reduce((a, f) => a + f.score, 0) / (all.length || 1);
+
+    const detail = all.find(f => f.id === s.detailId) || all[0];
+    const nutrients = [
+      { label: 'Protein', value: detail.protein.toFixed(1) + 'g', pct: Math.min(100, (detail.protein / 40) * 100) + '%', color: 'var(--sk-sage)' },
+      { label: 'Carbohydrate', value: detail.carbs.toFixed(1) + 'g', pct: Math.min(100, (detail.carbs / 90) * 100) + '%', color: 'var(--sk-accent)' },
+      { label: 'Fat', value: detail.fat.toFixed(1) + 'g', pct: Math.min(100, (detail.fat / 30) * 100) + '%', color: 'var(--sk-muted)' },
+      { label: 'Fibre', value: detail.fiber.toFixed(1) + 'g', pct: Math.min(100, (detail.fiber / 8) * 100) + '%', color: 'var(--sk-sage)' },
+      { label: 'Sugar', value: detail.sugar.toFixed(1) + 'g', pct: Math.min(100, (detail.sugar / 35) * 100) + '%', color: 'var(--sk-accent)' }
+    ].map((n, i) => ({ ...n, delay: (120 + i * 70) + 'ms' }));
+
+    const TAB_ORDER = ['today', 'history', 'trends', 'coach', 'you'];
+    const tab = (key, label) => ({
+      label,
+      onTap: () => this.setState({
+        tab: key, revealId: null, condensed: false,
+        tabDir: TAB_ORDER.indexOf(key) >= TAB_ORDER.indexOf(s.tab) ? 'right' : 'left'
+      }),
+      color: s.tab === key ? 'var(--sk-ink)' : 'var(--sk-tab-off)',
+      weight: s.tab === key ? 700 : 400
+    });
+
+    // ── the day so far ───────────────────────────────────────────
+    const DAY_START = 6, DAY_END = 22, NOW = 20 + 10 / 60;
+    const toHours = (t) => Number(t.slice(0, 2)) + Number(t.slice(3)) / 60;
+    const leftOf = (h) => (((h - DAY_START) / (DAY_END - DAY_START)) * 100).toFixed(1) + '%';
+    const timed = s.meals.slice().sort((a, b) => toHours(a.time) - toHours(b.time));
+    const dayMarks = timed.map((f, i) => {
+      const d = Math.round(6 + Math.min(1, f.kcal / 800) * 7);
+      return {
+        left: leftOf(toHours(f.time)), time: f.time, size: d + 'px',
+        offset: (9 - d / 2) + 'px', delay: (500 + i * 90) + 'ms'
+      };
+    });
+    let gapLabel = 'No meals yet';
+    if (timed.length) {
+      let biggest = { from: DAY_START, to: toHours(timed[0].time), after: 'waking' };
+      for (let i = 1; i < timed.length; i++) {
+        const g = toHours(timed[i].time) - toHours(timed[i - 1].time);
+        if (g > biggest.to - biggest.from) biggest = { from: toHours(timed[i - 1].time), to: toHours(timed[i].time), after: timed[i - 1].time };
+      }
+      const g = biggest.to - biggest.from;
+      gapLabel = Math.floor(g) + 'h ' + Math.round((g % 1) * 60) + 'm gap after ' + biggest.after;
+    }
+    const elapsed = Math.min(1, Math.max(0.15, (NOW - DAY_START) / (DAY_END - DAY_START)));
+    const projected = s.cal / elapsed;
+    const left = s.target - s.cal;
+
+    // ── trends: previous week + annotations ──────────────────────
+    const prevVals = vals.map((v, i) => Math.round(v * (0.82 + ((i * 7) % 5) * 0.045)));
+    const prevPath = prevVals.map((v, i) => (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + py(v).toFixed(1)).join(' ');
+    const prevAvg = prevVals.reduce((a, v) => a + v, 0) / prevVals.length;
+    const maxI = vals.indexOf(Math.max(...vals));
+    const minI = vals.indexOf(Math.min(...vals));
+    const marks = [
+      { x: px(maxI).toFixed(1), y: (py(vals[maxI]) - 14).toFixed(1), label: 'highest' },
+      { x: px(minI).toFixed(1), y: (py(vals[minI]) + 22).toFixed(1), label: 'lightest' }
+    ];
+
+    // ── month ledger ─────────────────────────────────────────────
+    const LEDGER = { 1: 1180, 2: 1420, 3: 1720, 4: 1480, 5: 1910, 6: 1240, 7: 1830, 8: 1010, 9: 1250 };
+    LEDGER[10] = Math.round(this.totalCal(s.meals));
+    const ledgerCells = [];
+    for (let i = 0; i < 5; i++) ledgerCells.push({ num: '', value: '', blank: true });
+    for (let d = 1; d <= 31; d++) ledgerCells.push({ num: d, value: LEDGER[d] || '', blank: false, isToday: d === 10 });
+    const loggedDays = Object.keys(LEDGER).length;
+    const ledgerSum = Object.values(LEDGER).reduce((a, v) => a + v, 0);
+
+    const tagsFor = (f) => {
+      const out = [];
+      if (f.source === 'Verified') out.push({ label: 'verified match', color: 'var(--sk-sage)' });
+      if (f.protein >= 20) out.push({ label: 'protein-rich', color: 'var(--sk-sage)' });
+      if (f.fiber >= 3) out.push({ label: 'good fibre', color: 'var(--sk-sage)' });
+      if (f.kcal <= 300) out.push({ label: 'light', color: 'var(--sk-sage)' });
+      if (f.carbs >= 60) out.push({ label: 'carb-heavy', color: 'var(--sk-accent)' });
+      if (f.fat >= 20) out.push({ label: 'rich in fat', color: 'var(--sk-accent)' });
+      if (f.sugar >= 20) out.push({ label: 'high sugar', color: 'var(--sk-accent)' });
+      return out.slice(0, 4).map((t, i) => ({ ...t, delay: (i * 70) + 'ms' }));
+    };
+
+    const row = (label, opts) => ({
+      label, hint: (opts && opts.hint) || '', hasHint: !!(opts && opts.hint),
+      value: (opts && opts.value) || '', tone: (opts && opts.tone) || 'var(--sk-ink)',
+      isToggle: !!(opts && opts.toggle), isLink: !(opts && (opts.toggle || opts.plain)),
+      trackBg: opts && opts.on ? 'var(--sk-sage)' : 'var(--sk-rule)',
+      knobSide: opts && opts.on ? 'flex-end' : 'flex-start',
+      onTap: (opts && opts.onTap) || (opts && opts.screen ? () => this.setState({ youScreen: opts.screen }) : () => {})
+    });
+
+    const LANGS = [
+      ['English', 'English'], ['Tiếng Việt', 'Vietnamese'], ['中文', 'Chinese'],
+      ['日本語', 'Japanese'], ['한국어', 'Korean'], ['Español', 'Spanish'], ['Français', 'French']
+    ];
+    const weekAvgCal = WEEK.reduce((a, d) => a + d.calories, 0) / WEEK.length;
+    const targetSplit = [
+      { label: 'Protein', color: 'var(--sk-sage)', share: 0.25, kcalPerG: 4 },
+      { label: 'Carbohydrate', color: 'var(--sk-accent)', share: 0.5, kcalPerG: 4 },
+      { label: 'Fat', color: 'var(--sk-muted)', share: 0.25, kcalPerG: 9 }
+    ].map(m => ({
+      label: m.label, color: m.color, pct: (m.share * 100).toFixed(0) + '%',
+      grams: Math.round((s.target * m.share) / m.kcalPerG) + 'g'
+    }));
+
+    const remRow = (key, label, hint) => ({
+      label, hint, delay: '0ms',
+      trackBg: s.mealReminders[key] ? 'var(--sk-sage)' : 'var(--sk-rule)',
+      knobSide: s.mealReminders[key] ? 'flex-end' : 'flex-start',
+      onTap: () => this.setState(st => ({ mealReminders: { ...st.mealReminders, [key]: !st.mealReminders[key] } }))
+    });
+
+    const PLANS = [
+      { key: 'monthly', name: 'Monthly', note: 'Billed every month', price: '49.000₫' },
+      { key: 'yearly', name: 'Yearly', note: 'Two months free', price: '390.000₫' }
+    ];
+
+    const LEGAL = {
+      privacy: [
+        ['What we store', 'Your meals, photos and nutrition figures are held on your phone. If cloud backup is on, an encrypted copy is kept against your account.'],
+        ['Photos', 'A photo is sent for recognition and deleted from the server once the result comes back. It is never used to train a model without your consent.'],
+        ['What we never sell', 'Your diary, your weight, your health scores. No advertiser receives them, in any form.'],
+        ['Your control', 'You can export everything as a file, or delete all of it from Data in this menu. Deletion is immediate and permanent.']
+      ],
+      terms: [
+        ['Using the app', 'NutriScan is a food diary. It gives estimates to help you notice patterns, not a diagnosis or a treatment plan.'],
+        ['Nutrition figures', 'Verified entries come from a public food database. AI estimates are calculated from a photo and may be wrong, particularly for portion size.'],
+        ['Subscription', 'Premium renews at the end of each period unless cancelled at least 24 hours before. Manage it in your App Store account.'],
+        ['Medical advice', 'If you are managing a condition, pregnant, or under the care of a dietitian, follow their guidance over anything shown here.']
+      ]
+    };
+    const legalKey = s.youScreen === 'terms' ? 'terms' : 'privacy';
+
+    const YOU_TITLES = {
+      language: 'Language', target: 'Daily target', reminders: 'Notifications',
+      premium: 'Premium', mealplans: 'AI meal plans', backup: 'Cloud backup',
+      export: 'Export diary', clear: 'Clear all data', privacy: 'Privacy policy', terms: 'Terms of service'
+    };
+
+    const rangeCounts = { '7': all.length, '30': all.length, all: all.length };
+    const onCount = ['breakfast', 'lunch', 'dinner', 'weekly'].filter(k => s.mealReminders[k]).length;
+    const remindersOn = onCount === 0 ? 'Off' : onCount + ' on';
+
+    return {
+      onSplash: s.splash,
+      isToday: s.tab === 'today', isHistory: s.tab === 'history', isTrends: s.tab === 'trends',
+      isCoach: s.tab === 'coach', isYou: s.tab === 'you',
+      showScanBar: s.tab === 'today' || s.tab === 'history',
+      tabs: [tab('today', 'Today'), tab('history', 'History'), tab('trends', 'Trends'), tab('coach', 'Coach'), tab('you', 'You')],
+
+      calNum: fmt(s.cal),
+      calPct: Math.min(100, (s.cal / s.target) * 100).toFixed(1) + '%',
+      calPctLabel: Math.round((s.cal / s.target) * 100) + '%',
+      targetLabel: fmt(s.target),
+      remainingLabel: left >= 0 ? fmt(left) + ' kcal left today' : fmt(-left) + ' kcal over target',
+      projectedLabel: fmt(projected),
+      projectionLeft: Math.min(100, (projected / s.target) * 100).toFixed(1) + '%',
+      dayMarks, gapLabel, nowLeft: leftOf(NOW),
+      condensed: s.condensed && s.tab === 'today' && !s.splash,
+      tabAnim: (s.tabDir === 'left' ? 'sk-fromleft' : 'sk-fromright') + ' .42s cubic-bezier(.2,.85,.25,1)',
+      onScroll: (e) => {
+        const c = e.target.scrollTop > 170;
+        if (c !== this.state.condensed) this.setState({ condensed: c });
+      },
+      macros: [
+        { label: 'Protein', value: protein.toFixed(1) + 'g', pct: Math.min(100, (protein / 95) * 100).toFixed(0) + '%', color: 'var(--sk-sage)' },
+        { label: 'Carbs', value: carbs.toFixed(0) + 'g', pct: Math.min(100, (carbs / 210) * 100).toFixed(0) + '%', color: 'var(--sk-accent)' },
+        { label: 'Fat', value: fat.toFixed(1) + 'g', pct: Math.min(100, (fat / 65) * 100).toFixed(0) + '%', color: 'var(--sk-muted)' }
+      ],
+      meals: s.meals.map((f, i) => decorate(f, i, 560)),
+      mealCount: s.meals.length,
+      hasMeals: s.meals.length > 0,
+      noMeals: s.meals.length === 0,
+
+      query: s.query,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      cycleSort: () => this.setState({ sort: s.sort === 'time' ? 'name' : s.sort === 'name' ? 'calories' : 'time' }),
+      sortLabel: { time: 'By time', name: 'By name', calories: 'By calories' }[s.sort],
+      historyGroups: groupOrder.map((day, gi) => ({
+        label: day,
+        total: fmt(groupMap[day].reduce((a, f) => a + f.kcal, 0)),
+        delay: (gi * 90) + 'ms',
+        items: groupMap[day].map((f, i) => decorate(f, i, 0))
+      })),
+      noResults: sorted.length === 0,
+
+      metricTabs: ['calories', 'protein', 'carbs', 'fat'].map(m => ({
+        label: { calories: 'Calories', protein: 'Protein', carbs: 'Carbs', fat: 'Fat' }[m],
+        onTap: () => this.setState({ metric: m }),
+        color: s.metric === m ? 'var(--sk-ink)' : 'var(--sk-tab-off)',
+        weight: s.metric === m ? 700 : 400,
+        border: s.metric === m ? 'var(--sk-accent)' : 'transparent'
+      })),
+      avgValue: s.metric === 'calories' ? fmt(avg) : avg.toFixed(0) + 'g',
+      deltaLabel: (delta >= 0 ? 'Up ' : 'Down ') + Math.abs(delta).toFixed(0) + ' ' + unit + ' against the start of the week',
+      deltaColor: delta >= 0 ? 'var(--sk-sage)' : 'var(--sk-accent)',
+      gridRows: [0, 1, 2, 3].map(k => ({ y: (16 + k * 50).toFixed(0) })),
+      points,
+      linePath: points.map((p, i) => (i ? 'L' : 'M') + p.x + ' ' + p.y).join(' '),
+      prevPath, marks,
+      prevAvgLabel: s.metric === 'calories' ? fmt(prevAvg) : prevAvg.toFixed(0) + 'g',
+
+      weeklyOpen: s.weekly,
+      openWeekly: () => this.setState({ weekly: true }),
+      closeWeekly: () => this.setState({ weekly: false }),
+      weekTotal: fmt(WEEK.reduce((a, d) => a + d.calories, 0)),
+      weeklyRows: WEEK.map((d, i) => ({
+        day: d.label, kcal: fmt(d.calories),
+        pct: ((d.calories / Math.max(...WEEK.map(x => x.calories))) * 100).toFixed(0) + '%',
+        delay: (i * 70) + 'ms'
+      })),
+
+      ledgerOpen: s.ledger,
+      openLedger: () => this.setState({ ledger: true }),
+      closeLedger: () => this.setState({ ledger: false }),
+      weekdayNames: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(l => ({ label: l })),
+      ledgerDays: ledgerCells.map((c, i) => ({
+        num: c.num, value: c.value ? fmt(c.value) : '·',
+        isToday: !!c.isToday,
+        numColor: c.isToday ? 'var(--sk-accent)' : 'var(--sk-muted)',
+        weight: c.isToday ? 700 : 400,
+        valColor: c.value ? 'var(--sk-ink)' : 'var(--sk-faint)',
+        delay: (i * 8) + 'ms'
+      })),
+      ledgerTotal: fmt(ledgerSum),
+      ledgerDaysLogged: loggedDays,
+      ledgerAvg: fmt(ledgerSum / loggedDays),
+
+      celebrateOpen: !!s.celebrate,
+      celebrate: s.celebrate
+        ? { name: s.celebrate.name, kcal: fmt(s.celebrate.kcal), score: s.celebrate.score, servingSize: s.celebrate.servingSize }
+        : { name: '', kcal: '', score: '', servingSize: '' },
+      closeCelebrate: () => { clearTimeout(this._celebrate); this.setState({ celebrate: null }); },
+
+      onboardingOpen: s.obStep < 3 && !s.splash && this.props.showOnboarding !== false,
+      obStep1: s.obStep === 0, obStep2: s.obStep === 1, obStep3: s.obStep === 2,
+      obProgress: [0, 1, 2].map(i => ({ bg: i <= s.obStep ? 'var(--sk-ink)' : 'var(--sk-rule)' })),
+      obCta: s.obStep === 2 ? 'Start cooking' : 'Continue',
+      obName: s.name,
+      onObName: (e) => this.setState({ name: e.target.value }),
+      obNext: () => this.setState(st => ({ obStep: st.obStep + 1 })),
+      obSkip: () => this.setState({ obStep: 3 }),
+      splitBars: [
+        { label: 'Protein', color: 'var(--sk-sage)', grams: protein.toFixed(1) + 'g', pct: ((macroCal.protein / macroTotal) * 100).toFixed(0) + '%', delay: '150ms' },
+        { label: 'Carbohydrate', color: 'var(--sk-accent)', grams: carbs.toFixed(0) + 'g', pct: ((macroCal.carbs / macroTotal) * 100).toFixed(0) + '%', delay: '250ms' },
+        { label: 'Fat', color: 'var(--sk-muted)', grams: fat.toFixed(1) + 'g', pct: ((macroCal.fat / macroTotal) * 100).toFixed(0) + '%', delay: '350ms' }
+      ],
+      scoreBars: scoreCounts.map((c, i) => ({
+        label: String(i + 1),
+        h: Math.max(2, Math.round((c / scoreMax) * 96)) + 'px',
+        color: i + 1 >= 8 ? 'var(--sk-sage)' : i + 1 >= 6 ? 'var(--sk-accent)' : 'var(--sk-faint)',
+        delay: (i * 45) + 'ms'
+      })),
+      avgScore: avgScore.toFixed(1),
+      totalLogs: all.length,
+      trendNote: delta >= 0
+        ? 'Your intake climbs through the week and dips at the weekend. Evening bowls are doing most of the work — keep one protein-forward meal before 8pm and the curve flattens.'
+        : 'Your intake eases off through the week. Saturday is the lightest day by a wide margin; if you are training, a larger lunch would carry you better than a late snack.',
+
+      chatEmpty: s.messages.length === 0,
+      chatHasMessages: s.messages.length > 0,
+      chatTyping: s.typing,
+      chatInput: s.chatInput,
+      prompts: [
+        'How am I doing today?',
+        'Are these numbers reliable?',
+        'What should I change this week?'
+      ].map((text, i) => ({ text, delay: (150 + i * 90) + 'ms', onTap: () => this.send(text) })),
+      messages: s.messages.map(m => {
+        const isUser = m.role === 'user';
+        return {
+          content: m.content,
+          cross: isUser ? 'flex-end' : 'flex-start',
+          bg: isUser ? 'var(--sk-ink)' : 'var(--sk-surface)',
+          color: isUser ? 'var(--sk-paper)' : 'var(--sk-ink)',
+          border: isUser ? 'none' : '1px solid var(--sk-rule)',
+          meta: (isUser ? 'You · ' : 'Coach · ') + m.ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        };
+      }),
+      onChatInput: (e) => this.setState({ chatInput: e.target.value }),
+      onChatKey: (e) => { if (e.key === 'Enter') this.send(); },
+      sendChat: () => this.send(),
+      clearChat: () => this.setState({ messages: [], typing: false }),
+
+      coins: s.coins,
+      coinsEarned: s.coinsEarned,
+      earnCoins: () => this.setState(st => ({ coins: st.coins + 5, coinsEarned: st.coinsEarned + 5 })),
+      profileName: s.name || 'Minh',
+      profileStats: [
+        { value: '12', label: 'Day streak' },
+        { value: all.length, label: 'Meals logged' },
+        { value: avgScore.toFixed(1), label: 'Avg score' }
+      ],
+      settingSections: [
+        { title: 'Your diary', delay: '150ms', rows: [
+          row('Daily target', { hint: 'What an ordinary day should look like', value: fmt(s.target) + ' kcal', screen: 'target' }),
+          row('Notification settings', { hint: 'Meal reminders and weekly progress', value: remindersOn, screen: 'reminders' })
+        ] },
+        { title: 'Premium', delay: '230ms', rows: [
+          row('Upgrade to premium', { hint: 'Remove ads and unlock all features', screen: 'premium' }),
+          row('AI meal plans', { hint: 'Generate a personalised daily menu', screen: 'mealplans' })
+        ] },
+        { title: 'The app', delay: '310ms', rows: [
+          row('Dark mode', { hint: s.darkMode ? 'Ink and lamplight' : 'Switch between light and dark themes', toggle: true, on: s.darkMode, onTap: () => this.setState({ darkMode: !s.darkMode }) }),
+          row('Language', { hint: 'Select your preferred language', value: s.language, screen: 'language' })
+        ] },
+        { title: 'Data & privacy', delay: '390ms', rows: [
+          row('Cloud backup', { hint: 'Backup and restore your data', screen: 'backup' }),
+          row('Export diary', { hint: 'CSV or PDF of every logged meal', screen: 'export' }),
+          row('Clear all data', { hint: 'Delete all food history and settings', tone: 'var(--sk-accent)', screen: 'clear' })
+        ] },
+        { title: 'About', delay: '470ms', rows: [
+          row('Privacy policy', { hint: 'Read our privacy guidelines', screen: 'privacy' }),
+          row('Terms of service', { hint: 'Read our terms and conditions', screen: 'terms' }),
+          row('App version', { value: '2.1.2', plain: true })
+        ] }
+      ],
+
+      youScreenOpen: !!s.youScreen,
+      youTitle: YOU_TITLES[s.youScreen] || '',
+      closeYouScreen: () => this.setState({ youScreen: null }),
+      scrLanguage: s.youScreen === 'language',
+      scrTarget: s.youScreen === 'target',
+      scrReminders: s.youScreen === 'reminders',
+      scrPremium: s.youScreen === 'premium',
+      scrMealPlans: s.youScreen === 'mealplans',
+      scrBackup: s.youScreen === 'backup',
+      scrExport: s.youScreen === 'export',
+      scrClear: s.youScreen === 'clear',
+      scrLegal: s.youScreen === 'privacy' || s.youScreen === 'terms',
+
+      languages: LANGS.map((l, i) => ({
+        native: l[0], english: l[1], active: s.language === l[0],
+        delay: (i * 45) + 'ms', onTap: () => this.setState({ language: l[0] })
+      })),
+
+      targetValue: fmt(s.target),
+      targetSplit,
+      weekAvg: fmt(weekAvgCal),
+      targetUp: () => this.setState(st => ({ target: Math.min(4000, st.target + 50) })),
+      targetDown: () => this.setState(st => ({ target: Math.max(1200, st.target - 50) })),
+
+      reminderRows: [
+        remRow('breakfast', 'Breakfast', '07:00 · every day'),
+        remRow('lunch', 'Lunch', '12:00 · every day'),
+        remRow('dinner', 'Dinner', '18:30 · every day'),
+        remRow('weekly', 'Weekly summary', 'Sunday evening · your seven days')
+      ].map((r, i) => ({ ...r, delay: (i * 55) + 'ms' })),
+
+      plans: PLANS.map(p => {
+        const on = s.plan === p.key;
+        return {
+          ...p,
+          onTap: () => this.setState({ plan: p.key }),
+          bg: on ? 'var(--sk-ink)' : 'var(--sk-surface)',
+          border: on ? 'var(--sk-ink)' : 'var(--sk-rule)',
+          text: on ? 'var(--sk-paper)' : 'var(--sk-ink)',
+          sub: on ? 'rgba(255,255,255,.6)' : 'var(--sk-muted)',
+          dotBorder: on ? 'var(--sk-paper)' : 'var(--sk-rule)',
+          dotFill: on ? 'var(--sk-accent)' : 'transparent'
+        };
+      }),
+      selectedPlanPrice: (PLANS.find(p => p.key === s.plan) || PLANS[1]).price,
+      premiumPerks: [
+        { text: 'No banner at the bottom of the screen' },
+        { text: 'Unlimited scans, no coins to spend' },
+        { text: 'AI meal plans and shopping lists' },
+        { text: 'Export your diary any time' }
+      ],
+
+      planInputs: [
+        { label: 'Meals logged', value: all.length + ' entries' },
+        { label: 'Daily target', value: fmt(s.target) + ' kcal' },
+        { label: 'Highest scoring dishes', value: 'Gỏi cuốn, phở bò' },
+        { label: 'Usual meal times', value: '07:40 · 12:15 · 19:05' }
+      ],
+
+      autoBackupTrack: s.autoBackup ? 'var(--sk-sage)' : 'var(--sk-rule)',
+      autoBackupSide: s.autoBackup ? 'flex-end' : 'flex-start',
+      toggleAutoBackup: () => this.setState(st => ({ autoBackup: !st.autoBackup })),
+
+      exportFormats: [
+        { key: 'csv', label: 'CSV', hint: 'One row per meal, opens in a spreadsheet' },
+        { key: 'pdf', label: 'PDF', hint: 'A printed diary with photos' }
+      ].map(f => ({ ...f, active: s.exportFormat === f.key, onTap: () => this.setState({ exportFormat: f.key }) })),
+      exportRanges: [
+        { key: '7', label: 'Last 7 days' },
+        { key: '30', label: 'Last 30 days' },
+        { key: 'all', label: 'Everything' }
+      ].map(r => ({
+        ...r, count: rangeCounts[r.key] + ' meals',
+        active: s.exportRange === r.key, onTap: () => this.setState({ exportRange: r.key })
+      })),
+      exportSummary: s.exportFormat.toUpperCase() + ' · ' + ({ '7': '7 days', '30': '30 days', all: 'everything' }[s.exportRange]),
+
+      clearItems: [
+        { label: 'Logged meals', value: all.length + ' entries' },
+        { label: 'Photos', value: all.length + ' images' },
+        { label: 'Health scores and trends', value: '7 days' },
+        { label: 'Preferences', value: 'Target, language, reminders' }
+      ],
+      confirmClear: () => {
+        this.setState({ meals: [], earlier: [], youScreen: null, detailId: null, revealId: null, messages: [] });
+        this.tween(0, 700);
+      },
+
+      legalSections: LEGAL[legalKey].map((p, i) => ({
+        title: p[0], body: p[1], delay: (i * 70) + 'ms'
+      })),
+
+      sheetOpen: s.sheet, cameraOpen: s.camera, scanning: s.scanning,
+      openSheet: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      startCamera: () => this.setState({ sheet: false, camera: true }),
+      closeCamera: () => this.setState({ camera: false }),
+      capture: this.capture,
+
+      detailOpen: !!s.detailId,
+      detail: {
+        ...detail,
+        score: detail.score,
+        sourceColor: detail.source === 'Verified' ? 'var(--sk-sage)' : 'var(--sk-muted)',
+        nutrients, tags: tagsFor(detail)
+      },
+      detailCal: fmt(detail.kcal),
+      closeDetail: () => this.setState({ detailId: null }),
+      deleteDetail: () => {
+        const meals = s.meals.filter(f => f.id !== s.detailId);
+        const earlier = s.earlier.filter(f => f.id !== s.detailId);
+        this.setState({ meals, earlier, detailId: null, revealId: null });
+        this.tween(this.totalCal(meals), 700);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

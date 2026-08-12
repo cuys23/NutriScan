@@ -148,6 +148,62 @@ class ThemeProvider extends ChangeNotifier {
     ).copyWith(fontFamilyFallback: _fontFallbacks);
   }
 
+  // ── Slow Kitchen fonts ─────────────────────────────────────
+
+  /// Instrument Serif — used for editorial headings, large numbers.
+  TextStyle getSerifFont({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? height,
+    double? letterSpacing,
+    FontStyle? fontStyle,
+  }) {
+    return GoogleFonts.instrumentSerif(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      height: height,
+      letterSpacing: letterSpacing,
+      fontStyle: fontStyle,
+    ).copyWith(fontFamilyFallback: _fontFallbacks);
+  }
+
+  /// DM Sans — used for body text, labels, UI elements.
+  TextStyle getBodyFont({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? height,
+    TextDecoration? decoration,
+    double? letterSpacing,
+    FontStyle? fontStyle,
+  }) {
+    return GoogleFonts.dmSans(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      height: height,
+      decoration: decoration,
+      letterSpacing: letterSpacing,
+      fontStyle: fontStyle,
+    ).copyWith(fontFamilyFallback: _fontFallbacks);
+  }
+
+  /// SK uppercase label style — small caps with letter spacing.
+  TextStyle getSkLabel({
+    double fontSize = 12,
+    Color? color,
+    FontWeight fontWeight = FontWeight.w400,
+  }) {
+    return getBodyFont(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: fontSize * 0.14,
+    );
+  }
+
   ThemeProvider() {
     _loadThemePreference();
   }

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nutriscan/config/app_colors.dart';
-import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/providers/ads/admob_provider.dart';
 import 'package:nutriscan/providers/auth/cloud_backup_provider.dart';
-import 'package:nutriscan/providers/theme/language_provider.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
-import 'package:nutriscan/screens/auth/login_screen.dart';
 import 'package:nutriscan/screens/auth/onboarding_screen.dart';
+import 'package:nutriscan/screens/auth/login_screen.dart';
 import 'package:nutriscan/screens/main/main_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// ─────────────────────────────────────────────────────────────
+/// Slow Kitchen Splash — animated bowl draw, title fade-in,
+/// then auto-navigate after ~2.8s.
+/// ─────────────────────────────────────────────────────────────
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -21,400 +23,445 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _logoController;
-  late AnimationController _fadeController;
-  late AnimationController _loadingController;
-  late Animation<double> _logoScale;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _loadingRotation;
+  // Bowl SVG draw
+  late AnimationController _drawController;
+  late Animation<double> _bowlDraw;
+  late Animation<double> _rimDraw;
+  late Animation<double> _smileDraw;
+
+  // Title + subtitle fade-up
+  late AnimationController _titleController;
+  late Animation<double> _titleFade;
+  late Animation<Offset> _titleSlide;
+  late Animation<double> _subFade;
+  late Animation<Offset> _subSlide;
+
+  // Exit
+  late AnimationController _exitController;
+  late Animation<double> _exitFade;
+
+  // Blinking dots
+  late AnimationController _dotsController;
+
+  // Steam pillars
+  late AnimationController _steamController;
 
   @override
   void initState() {
     super.initState();
 
-    // Set system UI overlay style
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
 
-    // Initialize animation controllers with faster durations
-    _logoController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+    // ── Bowl draw (0 → 1 over 1.15s, starts at 0.1s via Interval) ──
+    _drawController = AnimationController(
+      duration: const Duration(milliseconds: 1800),
       vsync: this,
     );
 
-    _fadeController = AnimationController(
+    _bowlDraw = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _drawController,
+        curve: const Interval(0.06, 0.7, curve: Curves.easeInOut),
+      ),
+    );
+    _rimDraw = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _drawController,
+        curve: const Interval(0.53, 0.80, curve: Curves.easeOut),
+      ),
+    );
+    _smileDraw = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _drawController,
+        curve: const Interval(0.70, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    // ── Title fade-up ──
+    _titleController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
+    _titleFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _titleController, curve: Curves.easeOut),
+    );
+    _titleSlide = Tween<Offset>(
+            begin: const Offset(0, 0.15), end: Offset.zero)
+        .animate(
+      CurvedAnimation(parent: _titleController, curve: Curves.easeOut),
+    );
+    _subFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _titleController,
+        curve: const Interval(0.4, 1, curve: Curves.easeOut),
+      ),
+    );
+    _subSlide = Tween<Offset>(
+            begin: const Offset(0, 0.2), end: Offset.zero)
+        .animate(
+      CurvedAnimation(
+        parent: _titleController,
+        curve: const Interval(0.4, 1, curve: Curves.easeOut),
+      ),
+    );
 
-    _loadingController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    // ── Exit fade ──
+    _exitController = AnimationController(
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-
-    // Define animations
-    _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
+    _exitFade = Tween<double>(begin: 1, end: 0).animate(
+      CurvedAnimation(parent: _exitController, curve: Curves.easeIn),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
-    );
+    // ── Dots blink ──
+    _dotsController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat();
 
-    _loadingRotation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _loadingController, curve: Curves.linear),
-    );
+    // ── Steam ──
+    _steamController = AnimationController(
+      duration: const Duration(milliseconds: 2400),
+      vsync: this,
+    )..repeat();
 
-    // Start animations
-    _logoController.forward();
-    _fadeController.forward();
-    _loadingController.repeat();
-
-    // Navigate to appropriate screen after 3 second delay
-    Future.delayed(const Duration(seconds: 3), () async {
-      if (mounted) {
-        final prefs = await SharedPreferences.getInstance();
-        final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
-        final hasLoggedIn = prefs.getBool('has_logged_in') ?? false;
-
-        // Also check Firebase auth state
-        if (!mounted) return;
-        final cloudBackupProvider = context.read<CloudBackupProvider>();
-        final isFirebaseSignedIn = cloudBackupProvider.isSignedIn;
-
-        // Use Firebase auth state as primary source of truth
-        final isActuallyLoggedIn = isFirebaseSignedIn && hasLoggedIn;
-
-        if (mounted) {
-          // Show open ad before navigating to main app (only if onboarding is completed)
-          if (hasSeenOnboarding) {
-            if (!mounted) return;
-            final admobProvider = context.read<AdMobProvider>();
-            if (admobProvider.canShowAppOpenAd()) {
-              await admobProvider.showAppOpenAd();
-            }
-          }
-
-          if (isActuallyLoggedIn) {
-            // User is actually logged in - go directly to main screen
-            if (!mounted) return;
-            Navigator.of(context).pushReplacement(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const MainNavigation(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      return SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0.0, 0.1),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutCubic,
-                              ),
-                            ),
-                        child: FadeTransition(opacity: animation, child: child),
-                      );
-                    },
-                transitionDuration: const Duration(milliseconds: 400),
-              ),
-            );
-          } else if (!hasSeenOnboarding) {
-            // User not logged in and hasn't seen onboarding - go to onboarding
-            if (!mounted) return;
-            Navigator.of(context).pushReplacement(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const OnboardingScreen(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      return SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0.0, 0.1),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutCubic,
-                              ),
-                            ),
-                        child: FadeTransition(opacity: animation, child: child),
-                      );
-                    },
-                transitionDuration: const Duration(milliseconds: 400),
-              ),
-            );
-          } else {
-            // User has seen onboarding but not logged in - navigate to login screen
-            if (!mounted) return;
-            Navigator.of(context).pushReplacement(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const LoginScreen(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      return SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0.0, 0.1),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutCubic,
-                              ),
-                            ),
-                        child: FadeTransition(opacity: animation, child: child),
-                      );
-                    },
-                transitionDuration: const Duration(milliseconds: 400),
-              ),
-            );
-          }
-        }
-      }
+    // ── Sequence ──
+    _drawController.forward();
+    Future.delayed(const Duration(milliseconds: 1350), () {
+      if (mounted) _titleController.forward();
     });
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) _exitController.forward().then((_) => _navigate());
+    });
+  }
+
+  Future<void> _navigate() async {
+    if (!mounted) return;
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+    final hasLoggedIn = prefs.getBool('has_logged_in') ?? false;
+
+    if (!mounted) return;
+    final backup = context.read<CloudBackupProvider>();
+    final isLoggedIn = backup.isSignedIn && hasLoggedIn;
+
+    // Show open ad if applicable
+    if (hasSeenOnboarding && mounted) {
+      final admob = context.read<AdMobProvider>();
+      if (admob.canShowAppOpenAd()) {
+        await admob.showAppOpenAd();
+      }
+    }
+
+    if (!mounted) return;
+
+    final Widget target;
+    if (!hasSeenOnboarding) {
+      target = const OnboardingScreen();
+    } else if (!isLoggedIn) {
+      target = const LoginScreen();
+    } else {
+      target = const MainNavigation();
+    }
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, a2, a3) => target,
+        transitionsBuilder: (_, anim, a2, child) {
+          return FadeTransition(opacity: anim, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+    );
   }
 
   @override
   void dispose() {
-    _logoController.dispose();
-    _fadeController.dispose();
-    _loadingController.dispose();
+    _drawController.dispose();
+    _titleController.dispose();
+    _exitController.dispose();
+    _dotsController.dispose();
+    _steamController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<LanguageProvider, ThemeProvider>(
-      builder: (context, languageProvider, themeProvider, child) {
-        final currentLanguage = languageProvider.currentLanguage;
+    final tp = context.watch<ThemeProvider>();
+    final d = tp.isDarkMode;
 
-        return Scaffold(
-          body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            color: Colors.white,
+    return Scaffold(
+      body: AnimatedBuilder(
+        animation: _exitController,
+        builder: (_, child2) => FadeTransition(
+          opacity: _exitFade,
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: AppColors.skPaper(d),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo and App Name
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                const Spacer(flex: 3),
+                // ── Bowl + Steam ──
+                SizedBox(
+                  width: 180,
+                  height: 160,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      // Animated Logo
+                      // Steam pillars
+                      ..._buildSteamPillars(d),
+                      // Bowl SVG drawn
                       AnimatedBuilder(
-                        animation: _logoController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _logoScale.value,
-                            child: Container(
-                              width: 120.0,
-                              height: 120.0,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(30.0),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(30.0),
-                                child: Image.asset(
-                                  'assets/images/logo.jpg',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 30),
-
-                      // App Name
-                      AnimatedBuilder(
-                        animation: _fadeController,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: Text(
-                              AppLocalizations.getString(
-                                'calorie_tracker',
-                                currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimaryLight,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // Tagline
-                      AnimatedBuilder(
-                        animation: _fadeController,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: Text(
-                              AppLocalizations.getString(
-                                'track_nutrition_journey',
-                                currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 16,
-                                color: AppColors.textSecondaryLight,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Loading Indicator with Circle and Text
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Rotating Loading Circle
-                      AnimatedBuilder(
-                        animation: _loadingController,
-                        builder: (context, child) {
-                          return Transform.rotate(
-                            angle: _loadingRotation.value * 2 * 3.14159,
-                            // Convert to radians
-                            child: SizedBox(
-                              width: 40,
-                              height: 40,
-                              child: const CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.primary,
-                                ),
-                                strokeWidth: 3,
-                                backgroundColor: AppColors.grey200,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Loading Text
-                      AnimatedBuilder(
-                        animation: _fadeController,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: Text(
-                              AppLocalizations.getString(
-                                'loading',
-                                currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimaryLight,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // Loading Subtitle
-                      AnimatedBuilder(
-                        animation: _fadeController,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: Text(
-                              AppLocalizations.getString(
-                                'preparing_app',
-                                currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 14,
-                                color: AppColors.textSecondaryLight,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Powered by Groq AI + Version
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: AnimatedBuilder(
-                    animation: _fadeController,
-                    builder: (context, child) {
-                      return FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              AppLocalizations.getString(
-                                'powered_by_groq_ai',
-                                currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondaryLight.withValues(alpha: 0.6),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              AppLocalizations.getString(
-                                'splash_version',
-                                currentLanguage,
-                              ),
-                              style: themeProvider.getFontForCurrentLanguage(
-                                fontSize: 12,
-                                color: AppColors.textSecondaryLight.withValues(alpha: 0.4),
-                              ),
-                            ),
-                          ],
+                        animation: _drawController,
+                        builder: (_, child2) => CustomPaint(
+                          size: const Size(180, 150),
+                          painter: _BowlPainter(
+                            bowlProgress: _bowlDraw.value,
+                            rimProgress: _rimDraw.value,
+                            smileProgress: _smileDraw.value,
+                            inkColor: AppColors.skInk(d),
+                            accentColor: AppColors.skAccent(d),
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 28),
+                // ── Title ──
+                SlideTransition(
+                  position: _titleSlide,
+                  child: FadeTransition(
+                    opacity: _titleFade,
+                    child: Text(
+                      'NutriSnap',
+                      style: tp.getSerifFont(
+                          fontSize: 46, color: AppColors.skInk(d)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // ── Subtitle ──
+                SlideTransition(
+                  position: _subSlide,
+                  child: FadeTransition(
+                    opacity: _subFade,
+                    child: Text(
+                      'Eat well, one photo at a time',
+                      style: tp.getBodyFont(
+                          fontSize: 15, color: AppColors.skMuted(d)),
+                    ),
+                  ),
+                ),
+                const Spacer(flex: 2),
+                // ── Blinking dots ──
+                _buildBlinkingDots(d),
+                const SizedBox(height: 64),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // ── Steam pillars ──
+  List<Widget> _buildSteamPillars(bool d) {
+    return [
+      Positioned(
+        left: 52,
+        top: 0,
+        child: AnimatedBuilder(
+          animation: _steamController,
+          builder: (_, child2) {
+            final t = (_steamController.value * 1.0).clamp(0.0, 1.0);
+            return Opacity(
+              opacity: _steamOpacity(t, 0.0),
+              child: Transform.translate(
+                offset: Offset(0, _steamY(t, 0.0)),
+                child: Container(
+                  width: 3,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.skAccent(d),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      Positioned(
+        left: 88,
+        top: -10,
+        child: AnimatedBuilder(
+          animation: _steamController,
+          builder: (_, child2) {
+            final t = (_steamController.value * 1.0).clamp(0.0, 1.0);
+            return Opacity(
+              opacity: _steamOpacity(t, 0.15),
+              child: Transform.translate(
+                offset: Offset(0, _steamY(t, 0.15)),
+                child: Container(
+                  width: 3,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.skAccent(d),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      Positioned(
+        left: 124,
+        top: 0,
+        child: AnimatedBuilder(
+          animation: _steamController,
+          builder: (_, child2) {
+            final t = (_steamController.value * 1.0).clamp(0.0, 1.0);
+            return Opacity(
+              opacity: _steamOpacity(t, 0.3),
+              child: Transform.translate(
+                offset: Offset(0, _steamY(t, 0.3)),
+                child: Container(
+                  width: 3,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.skAccent(d),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ];
+  }
+
+  double _steamOpacity(double t, double offset) {
+    final p = (t - offset) % 1.0;
+    if (p < 0.3) return p / 0.3;
+    if (p < 0.7) return 1.0;
+    return 1.0 - ((p - 0.7) / 0.3);
+  }
+
+  double _steamY(double t, double offset) {
+    final p = (t - offset) % 1.0;
+    return -p * 20;
+  }
+
+  // ── Blinking dots ──
+  Widget _buildBlinkingDots(bool d) {
+    return AnimatedBuilder(
+      animation: _dotsController,
+      builder: (_, child2) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(3, (i) {
+            final delay = i * 0.133; // ~160ms stagger
+            final phase =
+                ((_dotsController.value - delay) % 1.0).clamp(0.0, 1.0);
+            final opacity =
+                (phase < 0.5 ? phase * 2 : 2 - phase * 2).clamp(0.2, 1.0);
+            return Container(
+              width: 6,
+              height: 6,
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.skAccent(d).withValues(alpha: opacity),
+              ),
+            );
+          }),
         );
       },
     );
   }
+}
+
+// ── Custom painter: bowl SVG drawn progressively ──
+class _BowlPainter extends CustomPainter {
+  final double bowlProgress;
+  final double rimProgress;
+  final double smileProgress;
+  final Color inkColor;
+  final Color accentColor;
+
+  _BowlPainter({
+    required this.bowlProgress,
+    required this.rimProgress,
+    required this.smileProgress,
+    required this.inkColor,
+    required this.accentColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final inkPaint = Paint()
+      ..color = inkColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    final accentPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    // Bowl body: U-shape from (20,62) curving down to (90,130) and back to (160,62)
+    if (bowlProgress > 0) {
+      final bowlPath = Path();
+      bowlPath.moveTo(20, 62);
+      // Approximate the bowl curve
+      bowlPath.cubicTo(20, 104, 55, 130, 90, 130);
+      bowlPath.cubicTo(125, 130, 160, 104, 160, 62);
+
+      final metric = bowlPath.computeMetrics().first;
+      final drawn = metric.extractPath(0, metric.length * bowlProgress);
+      canvas.drawPath(drawn, inkPaint);
+    }
+
+    // Rim: horizontal line at y=66
+    if (rimProgress > 0) {
+      final rimPath = Path();
+      rimPath.moveTo(8, 66);
+      rimPath.lineTo(172, 66);
+
+      final metric = rimPath.computeMetrics().first;
+      final drawn = metric.extractPath(0, metric.length * rimProgress);
+      canvas.drawPath(drawn, inkPaint);
+    }
+
+    // Smile arc in accent color
+    if (smileProgress > 0) {
+      final smilePath = Path();
+      smilePath.moveTo(62, 130);
+      smilePath.cubicTo(74, 139, 106, 139, 118, 130);
+
+      final metric = smilePath.computeMetrics().first;
+      final drawn = metric.extractPath(0, metric.length * smileProgress);
+      canvas.drawPath(drawn, accentPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BowlPainter old) =>
+      bowlProgress != old.bowlProgress ||
+      rimProgress != old.rimProgress ||
+      smileProgress != old.smileProgress;
 }

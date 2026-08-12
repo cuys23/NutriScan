@@ -29,6 +29,8 @@ not editing this runbook.
 
 **Independence note:** the release track below can run in parallel with `plan.md` Phases 1B–4. You do not need the Food Knowledge Base finished to submit version 1. See § 10 for the two viable launch strategies.
 
+**2026-08-12 re-verification:** the code-side P0 blockers (§ 2) are now all resolved — AdMob production IDs, delete account, legal URLs, ATT/SKAdNetwork/export compliance, automated tests. What remains is entirely Apple-account/process work (Paid Apps Agreement, App Store Connect app record + IAP products, APNs key, physical-device smoke suite, screenshots, demo account, Xcode archive+upload) — see CLAUDE.md § 6 "Who does what" for the agent/human split. The app also dropped all non-English locales this same day (English-only now), which retires two checklist items outright (§ 9.3 S15, the delete-account-translation P1 item).
+
 ---
 
 ## Table of contents
@@ -77,7 +79,7 @@ Audited 2026-08-04 against commit on `main`.
 
 | Gap | Blocking? | Section |
 |-----|-----------|---------|
-| Real AdMob App ID + ad unit IDs | **Done 2026-08-05 (iOS)** — Android still open | § 6.4 |
+| Real AdMob App ID + ad unit IDs | **Done — verified 2026-08-12.** `Info.plist` `GADApplicationIdentifier` and all 4 `_production*AdUnitId` constants in `ads_config.dart` carry real IDs, not sample IDs. Android is intentionally not configured — the app ships iOS-only (`AdsConfig.adsEnabled` gates on `Platform.isIOS`). | § 6.4 |
 | App Store Connect app record + IAP products | Yes | § 3, § 7 |
 | Public Privacy Policy / Terms **URLs** | **Done 2026-08-05** — live, see § 6.1 / P0-3 | § 6.1 |
 | App Privacy nutrition labels filled in | Yes | § 6.2 |
@@ -87,7 +89,7 @@ Audited 2026-08-04 against commit on `main`.
 | Separate staging Firebase project | No (recommended) | § 4 |
 | Automated tests | **Done 2026-08-05** — `test/` directory now exists, see `CLAUDE.md` § 5 | § 9.4 |
 | CI/CD pipeline | No (recommended) | § 8.4 |
-| Localised strings for the new delete-account keys | No (English fallback works) | § 6.6 |
+| Localised strings for the new delete-account keys | **Moot as of 2026-08-12** — the app dropped all non-English locales and language switching entirely; `app_localizations.dart` now only has `'en'`. There is no other locale to fall back from. | § 6.6 |
 
 ---
 
@@ -127,21 +129,13 @@ firebase deploy --only firestore:rules,storage
 | D5 | Sign in >5 min before deleting (stale token) | Re-auth prompt appears, deletion completes on retry |
 | D6 | Airplane mode, tap delete | Clear error message, account still intact, no partial wipe reported as success |
 
-## P0-2 — AdMob production IDs ⚠️ OPEN
+## P0-2 — AdMob production IDs ✅ RESOLVED — verified 2026-08-12
 
-`ios/Runner/Info.plist` currently carries `ca-app-pub-3940256099942544~1458002511` — Google's **public sample app ID**. Shipping it violates AdMob policy, earns nothing, and signals an unfinished build to reviewers.
+`ios/Runner/Info.plist` `GADApplicationIdentifier` is `ca-app-pub-5770727176247801~9874508638` — a real AdMob App ID, not Google's sample. All four `_production*AdUnitId` constants in `lib/config/ads_config.dart` (interstitial, open, rewarded, banner) carry real `ca-app-pub-.../...` values, confirmed non-placeholder via `_isConfigured()`.
 
-The Dart side is now fail-safe: `AdsConfig.adsEnabled` returns `false` in release builds while the production ad unit IDs are unset, so no test ads will be requested from a store build. The Info.plist App ID still needs replacing by hand.
+Android is deliberately unconfigured: the app targets iOS only (`TARGETED_DEVICE_FAMILY = 1`, no Android AdMob app was ever created), and `AdsConfig.adsEnabled` returns `false` on any non-iOS platform — so there is no Android ad surface to configure or review.
 
-**To close:**
-
-1. AdMob console → Apps → NutriScan (iOS) → App settings → copy **App ID** (`ca-app-pub-…~…`).
-2. Replace `GADApplicationIdentifier` in `ios/Runner/Info.plist`.
-3. Create four ad units (App open, Banner, Interstitial, Rewarded) → paste each **ad unit ID** (`ca-app-pub-…/…`) into the `_ios*Production*AdUnitId` constants in `lib/config/ads_config.dart`.
-4. Repeat for Android in `android/app/src/main/AndroidManifest.xml`.
-5. Confirm with `AdsConfig.configurationReport()` in a profile build.
-
-**Alternative:** ship v1.0 with `_adsEnabledByConfig = false`. This removes the entire ATT / advertising-data surface from review, and ads can be enabled in v1.1 once the AdMob account is approved. Given that AdMob account approval can take days and is a common launch delay, this is the lower-risk path.
+Remaining step is still human: confirm in the AdMob console that these ad units are approved/active (account approval, separate from the code being correct).
 
 ## P0-3 — Legal URLs must be publicly reachable ✅ RESOLVED 2026-08-05
 
@@ -170,7 +164,7 @@ See § 3 and § 7.
 
 - Separate staging Firebase project (§ 4)
 - Smoke test suite executed manually (§ 9.3)
-- Delete-account strings translated to the 14 non-English locales (§ 6.6)
+- ~~Delete-account strings translated to the 14 non-English locales~~ — moot as of 2026-08-12, app is English-only
 - Fix `lib/main.dart` debug-only Cloud Functions emulator redirect — verify it is `kDebugMode`-gated (it is) and that release builds hit production
 
 ---
@@ -552,17 +546,12 @@ Extends the suite in `plan.md`. All must pass.
 | S12 | ATT prompt on first launch | Appears once; declining breaks nothing |
 | S13 | Push notification from Firebase console | Received in foreground and background |
 | S14 | Dark mode across every screen | Legible, adequate contrast |
-| S15 | Switch language, walk the app | No raw localization keys visible |
+| S15 | ~~Switch language, walk the app~~ | **N/A as of 2026-08-12** — language switching was removed and the app is English-only; there is no other language to switch to. |
 | S16 | Cold launch, timed | Home visible in ≤ 2.5s on a mid-range device |
 
-## 9.4 Automated tests
+## 9.4 Automated tests ✅ RESOLVED 2026-08-05
 
-There is no `test/` directory. Not a blocker for v1.0, but before the app has real users, add at least:
-
-- Unit tests for nutrient scaling math (`nutrient_per_100g × grams / 100`)
-- Unit tests for `Food.toMap` / `fromMap` round-tripping
-- A migration test for the Phase 2 SQLite upgrade path
-- A widget test for the paywall rendering with mock products
+`test/` now exists: `Food.fromJson`/`toJson` round-trip, `DatabaseHelper` CRUD against real sqlite, the v1→v2 migration path, `CoinProvider` money-path logic, `AiResponseUtils.stripReasoning`, and widget tests for the Slow Kitchen home widgets. `flutter test` passes (one pre-existing, unrelated schema-version flake in `migration_test.dart` when run under parallel test-file concurrency — passes clean in isolation or with `--concurrency=1`).
 
 ## 9.5 Bake period
 
@@ -684,8 +673,8 @@ Print this. Do not submit until every box is ticked.
 - [ ] `app_version_subtitle` matches `pubspec.yaml`
 - [ ] No secrets in the Flutter tree or in git
 - [ ] Release build points at production Firebase (emulator redirect is `kDebugMode`-gated)
-- [ ] Real AdMob App ID in `Info.plist` **or** ads disabled via `_adsEnabledByConfig`
-- [ ] `AdsConfig.configurationReport()` output matches intent
+- [x] Real AdMob App ID in `Info.plist` **or** ads disabled via `_adsEnabledByConfig` — verified 2026-08-12
+- [ ] `AdsConfig.configurationReport()` output matches intent (still worth a manual profile-build check before archiving)
 
 ### Backend
 - [ ] `firestore.rules` deployed, including `allow delete` on `users/{userId}`
@@ -739,9 +728,9 @@ Ranked by likelihood given what NutriScan actually does.
 | 4 | Subscription terms not disclosed on the paywall | 3.1.2 | § 7.2 |
 | 5 | Privacy labels contradict behaviour | 5.1.1 | § 6.2 |
 | 6 | Ads with no ATT prompt | 5.1.2 | ✅ Implemented — verify on device |
-| 7 | Google sample AdMob ID shipped | AdMob policy | § 2 / P0-2 |
+| 7 | Google sample AdMob ID shipped | AdMob policy | ✅ Resolved — real AdMob App ID + ad unit IDs confirmed in code, § 2 / P0-2 |
 | 8 | Restore purchases missing or broken | 3.1.1 | § 7.3 |
-| 9 | Broken iPad layout while declaring iPad support | 2.1 / 4.0 | § 10.2 |
+| 9 | Broken iPad layout while declaring iPad support | 2.1 / 4.0 | ✅ N/A — `TARGETED_DEVICE_FAMILY = 1`, app is iPhone-only, no iPad layout to break |
 | 10 | AI produces unsafe dietary advice | 1.4.1 | Coach system prompt hardening — `plan.md` Phase 4, W4.2 |
 | 11 | Camera permission string too vague | 5.1.1 | Current strings are specific — keep them that way |
 | 12 | Placeholder or lorem-ipsum content anywhere | 2.1 | Sweep before submitting |

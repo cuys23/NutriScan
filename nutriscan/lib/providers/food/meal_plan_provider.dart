@@ -25,8 +25,17 @@ class MealPlanProvider extends ChangeNotifier {
   final DatabaseHelper _databaseHelper;
 
   MealPlan? _currentPlan;
+  MealPlan? _activePlan; // Loaded from local DB — shown on home screen.
   bool _isLoading = false;
   String? _errorMessage;
+
+  // Nothing stopped a user from spam-tapping generate/refresh; each tap fires
+  // a real Groq request (plus an internal repair-prompt retry on bad JSON),
+  // which was enough on its own to trip Groq's rate limit. Ad flows in this
+  // app already use a cooldown for the same reason (see AdsConfig) — mirror
+  // that here rather than only fixing the retry path.
+  static const Duration generateCooldown = Duration(seconds: 15);
+  DateTime? _lastGenerateAttempt;
 
   double _calorieTarget = 2000;
   String _dietStyle = 'balanced';
@@ -36,6 +45,7 @@ class MealPlanProvider extends ChangeNotifier {
   UserNutritionInsight? _lastInsight;
 
   MealPlan? get currentPlan => _currentPlan;
+  MealPlan? get activePlan => _activePlan;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   UserNutritionInsight? get lastInsight => _lastInsight;
@@ -44,6 +54,39 @@ class MealPlanProvider extends ChangeNotifier {
   String get dietStyle => _dietStyle;
   int get mealsPerDay => _mealsPerDay;
   List<String> get restrictions => List.unmodifiable(_restrictions);
+
+  /// Load the most recent active meal plan from the local database.
+  /// Call once at app startup (e.g. from HomeScreen._initializeData).
+  Future<void> loadActiveMealPlan() async {
+    try {
+      _activePlan = await _databaseHelper.getActiveMealPlan();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to load active meal plan: $e');
+    }
+  }
+
+  /// Copies the persisted active plan into [currentPlan] so
+  /// MealPlanResultScreen (which reads currentPlan) can display it.
+  /// Call before navigating to the result screen from the home card.
+  void showActivePlan() {
+    if (_activePlan != null) {
+      _currentPlan = _activePlan;
+      _errorMessage = null;
+      notifyListeners();
+    }
+  }
+
+  /// Dismiss the active meal plan from the home screen.
+  Future<void> dismissMealPlan() async {
+    _activePlan = null;
+    notifyListeners();
+    try {
+      await _databaseHelper.deactivateActiveMealPlan();
+    } catch (e) {
+      debugPrint('Failed to deactivate meal plan: $e');
+    }
+  }
 
   void setCalorieTarget(double value) {
     _calorieTarget = value.clamp(1200, 3500);
@@ -189,7 +232,33 @@ class MealPlanProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> generateMealPlan({required String languageCode}) async {
+  /// Time left before another [generateMealPlan] call is allowed, or null if
+  /// the cooldown has already elapsed.
+  Duration? get generateCooldownRemaining {
+    if (_lastGenerateAttempt == null) return null;
+    final elapsed = DateTime.now().difference(_lastGenerateAttempt!);
+    if (elapsed >= generateCooldown) return null;
+    return generateCooldown - elapsed;
+  }
+
+  /// Localized "please wait" message for a cooldown-blocked attempt — shown
+  /// as a transient snackbar by the caller rather than through
+  /// [errorMessage], so a plan already on screen doesn't get replaced by an
+  /// error state just because the user tapped refresh twice.
+  String cooldownMessage(String languageCode) =>
+      _groqService.getLocalizedErrorMessage('rate_limit', languageCode);
+
+  /// Generates a new plan. Returns false without touching any state
+  /// (loading, errorMessage, currentPlan) if still within
+  /// [generateCooldownRemaining] — callers should show [cooldownMessage]
+  /// themselves in that case. Returns true once a real attempt has run
+  /// (success or failure both surface through [errorMessage] as before).
+  Future<bool> generateMealPlan({required String languageCode}) async {
+    if (generateCooldownRemaining != null) {
+      return false;
+    }
+    _lastGenerateAttempt = DateTime.now();
+
     _setLoading(true);
     try {
       String? userContext;
@@ -209,13 +278,27 @@ class MealPlanProvider extends ChangeNotifier {
       );
 
       _currentPlan = result;
+      _activePlan = result;
       _errorMessage = null;
+
+      // Persist to local DB so it survives app restarts.
+      try {
+        await _databaseHelper.saveMealPlan(
+          result,
+          targetCalories: _calorieTarget,
+          dietStyle: _dietStyle,
+          mealsPerDay: _mealsPerDay,
+        );
+      } catch (e) {
+        debugPrint('Failed to save meal plan to DB: $e');
+      }
     } catch (error) {
       _errorMessage = error.toString();
       _currentPlan = null;
     } finally {
       _setLoading(false);
     }
+    return true;
   }
 
   void _setLoading(bool value) {

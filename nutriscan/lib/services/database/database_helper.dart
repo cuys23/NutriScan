@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:nutriscan/models/food.dart';
+import 'package:nutriscan/models/meal_plan.dart';
 import 'package:nutriscan/services/auth/cloud_backup_service.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,7 +31,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'calories.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -61,6 +64,21 @@ class DatabaseHelper {
         prompt_version TEXT
       )
     ''');
+    await _createMealPlansTable(db);
+  }
+
+  Future<void> _createMealPlansTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS meal_plans(
+        id TEXT PRIMARY KEY,
+        plan_json TEXT NOT NULL,
+        target_calories REAL NOT NULL,
+        diet_style TEXT NOT NULL,
+        meals_per_day INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1
+      )
+    ''');
   }
 
   /// v1 -> v2 (docs/plan.md Phase 2): FKB trust metadata. `source` backfills
@@ -77,11 +95,132 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE foods ADD COLUMN model_id TEXT');
       await db.execute('ALTER TABLE foods ADD COLUMN prompt_version TEXT');
     }
+    if (oldVersion < 3) {
+      await _createMealPlansTable(db);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Meal Plan persistence
+  // ---------------------------------------------------------------------------
+
+  /// Saves a meal plan to the local database. Deactivates any previously active
+  /// plan so only the latest one shows on the home screen.
+  Future<void> saveMealPlan(
+    MealPlan plan, {
+    required double targetCalories,
+    required String dietStyle,
+    required int mealsPerDay,
+  }) async {
+    final db = await database;
+    // Deactivate all existing active plans.
+    await db.update(
+      'meal_plans',
+      {'is_active': 0},
+      where: 'is_active = 1',
+    );
+    final id = DateTime.now().millisecondsSinceEpoch.toString();
+    await db.insert(
+      'meal_plans',
+      {
+        'id': id,
+        'plan_json': jsonEncode(plan.toMap()),
+        'target_calories': targetCalories,
+        'diet_style': dietStyle,
+        'meals_per_day': mealsPerDay,
+        'created_at': DateTime.now().toIso8601String(),
+        'is_active': 1,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Returns the most recent active meal plan, or null if none exists
+  /// or if the plan is older than [maxAgeDays] (default 7).
+  Future<MealPlan?> getActiveMealPlan({int maxAgeDays = 7}) async {
+    final db = await database;
+    final rows = await db.query(
+      'meal_plans',
+      where: 'is_active = 1',
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+
+    final row = rows.first;
+    final createdAt = DateTime.tryParse(row['created_at'] as String? ?? '');
+    if (createdAt != null &&
+        DateTime.now().difference(createdAt).inDays >= maxAgeDays) {
+      return null; // Expired — don't show on home screen.
+    }
+
+    try {
+      final planMap = jsonDecode(row['plan_json'] as String) as Map<String, dynamic>;
+      return MealPlan.fromMap(planMap);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Deactivates the currently active meal plan (user dismissed it).
+  Future<void> deactivateActiveMealPlan() async {
+    final db = await database;
+    await db.update(
+      'meal_plans',
+      {'is_active': 0},
+      where: 'is_active = 1',
+    );
+  }
+
+  /// Deletes every row, not just the active one. `foods` and `meal_plans`
+  /// are the only two local tables (see `_createMealPlansTable`) — this is
+  /// the meal-plan counterpart to [deleteAllFoods], for account deletion
+  /// (device-wide SQLite has no per-account scoping, so a leftover plan
+  /// would otherwise leak into whichever account signs in next on this
+  /// device).
+  Future<int> deleteAllMealPlans() async {
+    final db = await database;
+    return await db.delete('meal_plans');
   }
 
   Future<int> insertFood(Food food, {bool isPremiumUser = false}) async {
+    final result = await _insertFoodRow(food);
+
+    // Auto backup to cloud ONLY for premium users
+    if (isPremiumUser && await _cloudBackupService.isAutoBackupEnabled()) {
+      final allFoods = await getAllFoods();
+      _cloudBackupService.autoBackup(allFoods, isPremiumUser: isPremiumUser);
+    }
+
+    return result;
+  }
+
+  /// Same as [insertFood] but for several rows at once (e.g. confirming a
+  /// multi-food scan): one transaction and, for premium users, exactly one
+  /// getAllFoods() + one cloud backup upload for the whole batch instead of
+  /// one per item.
+  Future<void> insertFoods(
+    List<Food> foods, {
+    bool isPremiumUser = false,
+  }) async {
+    if (foods.isEmpty) return;
+
     final db = await database;
-    final result = await db.insert('foods', {
+    await db.transaction((txn) async {
+      for (final food in foods) {
+        await _insertFoodRow(food, executor: txn);
+      }
+    });
+
+    if (isPremiumUser && await _cloudBackupService.isAutoBackupEnabled()) {
+      final allFoods = await getAllFoods();
+      _cloudBackupService.autoBackup(allFoods, isPremiumUser: isPremiumUser);
+    }
+  }
+
+  Future<int> _insertFoodRow(Food food, {DatabaseExecutor? executor}) async {
+    final db = executor ?? await database;
+    return db.insert('foods', {
       'id': food.id,
       'name': food.name,
       'description': food.description,
@@ -103,14 +242,6 @@ class DatabaseHelper {
       'fkb_food_id': food.fkbFoodId,
       'match_score': food.matchScore,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
-
-    // Auto backup to cloud ONLY for premium users
-    if (isPremiumUser && await _cloudBackupService.isAutoBackupEnabled()) {
-      final allFoods = await getAllFoods();
-      _cloudBackupService.autoBackup(allFoods, isPremiumUser: isPremiumUser);
-    }
-
-    return result;
   }
 
   Future<List<Food>> getAllFoods() async {

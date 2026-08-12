@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nutriscan/config/ads_config.dart';
 import 'package:nutriscan/providers/payment/subscription_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdMobProvider extends ChangeNotifier {
   InterstitialAd? _interstitialAd;
@@ -17,6 +18,9 @@ class AdMobProvider extends ChangeNotifier {
   int _retryCount = 0;
   int _openAdRetryCount = 0;
   int _rewardedAdRetryCount = 0;
+  Timer? _interstitialRetryTimer;
+  Timer? _openAdRetryTimer;
+  Timer? _rewardedAdRetryTimer;
 
   DateTime? _lastInterstitialShown;
   DateTime? _lastOpenAdShown;
@@ -28,6 +32,13 @@ class AdMobProvider extends ChangeNotifier {
 
   int _rewardedAdsShownToday = 0;
   DateTime? _lastRewardedAdResetDate;
+  DateTime? _appOpenAdLoadTime;
+
+  // The daily rewarded-ad allowance is real money: kept in prefs so killing and
+  // relaunching the app doesn't reset the limit or the cooldown.
+  static const String _prefsRewardedShownToday = 'rewarded_ads_shown_today';
+  static const String _prefsRewardedResetDate = 'rewarded_ads_reset_date';
+  static const String _prefsLastRewardedShown = 'last_rewarded_ad_shown';
 
   int _scansToday = 0;
   DateTime? _lastScanResetDate;
@@ -51,9 +62,39 @@ class AdMobProvider extends ChangeNotifier {
 
   AdMobProvider() {
     if (AdsConfig.adsEnabled) {
+      _restoreRewardedAdState();
       _loadInterstitialAd();
       _loadAppOpenAd();
       _loadRewardedAd();
+    }
+  }
+
+  Future<void> _restoreRewardedAdState() async {
+    final prefs = await SharedPreferences.getInstance();
+    _rewardedAdsShownToday = prefs.getInt(_prefsRewardedShownToday) ?? 0;
+    _lastRewardedAdResetDate = _readDate(prefs, _prefsRewardedResetDate);
+    _lastRewardedAdShown = _readDate(prefs, _prefsLastRewardedShown);
+    _resetDailyCounterIfNeeded();
+    notifyListeners();
+  }
+
+  static DateTime? _readDate(SharedPreferences prefs, String key) {
+    final raw = prefs.getString(key);
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  Future<void> _persistRewardedAdState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_prefsRewardedShownToday, _rewardedAdsShownToday);
+    await prefs.setString(
+      _prefsRewardedResetDate,
+      (_lastRewardedAdResetDate ?? DateTime.now()).toIso8601String(),
+    );
+    if (_lastRewardedAdShown != null) {
+      await prefs.setString(
+        _prefsLastRewardedShown,
+        _lastRewardedAdShown!.toIso8601String(),
+      );
     }
   }
 
@@ -131,16 +172,18 @@ class AdMobProvider extends ChangeNotifier {
   }
 
   void _handleAdLoadFailure() {
-    if (_retryCount < AdsConfig.maxRetryAttempts) {
-      _retryCount++;
-      Timer(AdsConfig.retryDelay, () {
-        _loadInterstitialAd();
-      });
-    } else {
-      // Max retries reached, reset retry count and try again later
-      _retryCount = 0;
-    }
+    _interstitialRetryTimer?.cancel();
+    _interstitialRetryTimer = Timer(_retryDelayFor(_retryCount++), () {
+      _loadInterstitialAd();
+    });
   }
+
+  /// Fast retries first, then a slow one that never stops — an ad type that
+  /// gave up permanently is an ad type the user can never earn coins from
+  /// again until they restart the app.
+  static Duration _retryDelayFor(int attempt) => attempt < AdsConfig.maxRetryAttempts
+      ? AdsConfig.retryDelay
+      : AdsConfig.retryBackoffDelay;
 
   Future<void> _loadAppOpenAd() async {
     if (_isLoadingOpenAd || _isAppOpenAdLoaded) return;
@@ -158,6 +201,7 @@ class AdMobProvider extends ChangeNotifier {
             _isAppOpenAdLoaded = true;
             _isLoadingOpenAd = false;
             _openAdRetryCount = 0;
+            _appOpenAdLoadTime = DateTime.now();
             notifyListeners();
 
             // Set up ad event listeners
@@ -198,14 +242,10 @@ class AdMobProvider extends ChangeNotifier {
   }
 
   void _handleOpenAdLoadFailure() {
-    if (_openAdRetryCount < AdsConfig.maxRetryAttempts) {
-      _openAdRetryCount++;
-      Timer(AdsConfig.retryDelay, () {
-        _loadAppOpenAd();
-      });
-    } else {
-      _openAdRetryCount = 0;
-    }
+    _openAdRetryTimer?.cancel();
+    _openAdRetryTimer = Timer(_retryDelayFor(_openAdRetryCount++), () {
+      _loadAppOpenAd();
+    });
   }
 
   Future<void> _loadRewardedAd() async {
@@ -236,6 +276,7 @@ class AdMobProvider extends ChangeNotifier {
                 _isRewardedAdLoaded = false;
                 _isRewardedAdShowing = false;
                 _lastRewardedAdShown = DateTime.now();
+                _persistRewardedAdState();
                 notifyListeners();
                 _loadRewardedAd();
               },
@@ -264,14 +305,26 @@ class AdMobProvider extends ChangeNotifier {
   }
 
   void _handleRewardedAdLoadFailure() {
-    if (_rewardedAdRetryCount < AdsConfig.maxRetryAttempts) {
-      _rewardedAdRetryCount++;
-      Timer(AdsConfig.retryDelay, () {
-        _loadRewardedAd();
-      });
-    } else {
-      _rewardedAdRetryCount = 0;
+    _rewardedAdRetryTimer?.cancel();
+    _rewardedAdRetryTimer = Timer(_retryDelayFor(_rewardedAdRetryCount++), () {
+      _loadRewardedAd();
+    });
+  }
+
+  /// Google expires a cached app open ad after 4 hours; a stale one just fails
+  /// to show. Drop it and fetch a fresh one instead.
+  void _discardExpiredAppOpenAd() {
+    if (!_isAppOpenAdLoaded || _appOpenAdLoadTime == null) return;
+    if (DateTime.now().difference(_appOpenAdLoadTime!) <
+        AdsConfig.openAdMaxCacheAge) {
+      return;
     }
+
+    _appOpenAd?.dispose();
+    _appOpenAd = null;
+    _isAppOpenAdLoaded = false;
+    _appOpenAdLoadTime = null;
+    _loadAppOpenAd();
   }
 
   Future<bool> showAppOpenAd() async {
@@ -279,6 +332,8 @@ class AdMobProvider extends ChangeNotifier {
     if (!_shouldShowAds) {
       return false;
     }
+
+    _discardExpiredAppOpenAd();
 
     // Check if enough time has passed since last open ad
     if (_lastOpenAdShown != null) {
@@ -397,6 +452,7 @@ class AdMobProvider extends ChangeNotifier {
       await _rewardedAd!.show(
         onUserEarnedReward: (ad, reward) {
           _rewardedAdsShownToday++;
+          _persistRewardedAdState();
           onRewardEarned(reward.amount.toInt(), reward.type);
         },
       );
@@ -409,35 +465,25 @@ class AdMobProvider extends ChangeNotifier {
   }
 
   void _resetDailyCounterIfNeeded() {
-    if (_lastRewardedAdResetDate == null) {
-      _lastRewardedAdResetDate = DateTime.now();
+    final now = DateTime.now();
+    // Rolling 24h window, not calendar-day: a user capped out at 11:58pm
+    // should wait a genuine 24h for a fresh batch of free coins, not get one
+    // 3 minutes later just because the calendar day ticked over. This is a
+    // monetization gate (see CLAUDE.md), so keep it strict.
+    if (_lastRewardedAdResetDate != null &&
+        now.difference(_lastRewardedAdResetDate!) <
+            AdsConfig.rewardedAdDailyReset) {
       return;
     }
 
-    final now = DateTime.now();
-    final difference = now.difference(_lastRewardedAdResetDate!);
-
-    if (difference >= AdsConfig.rewardedAdDailyReset) {
-      _rewardedAdsShownToday = 0;
-      _lastRewardedAdResetDate = now;
-      notifyListeners();
-    }
+    _rewardedAdsShownToday = 0;
+    _lastRewardedAdResetDate = now;
+    _persistRewardedAdState();
+    notifyListeners();
   }
 
   void incrementActionCount() {
     notifyListeners();
-  }
-
-  Future<void> preloadNextAd() async {
-    if (!_isInterstitialAdLoaded) {
-      _loadInterstitialAd();
-    }
-  }
-
-  Future<void> preloadNextRewardedAd() async {
-    if (!_isRewardedAdLoaded) {
-      _loadRewardedAd();
-    }
   }
 
   bool canShowInterstitialAd() {
@@ -471,6 +517,8 @@ class AdMobProvider extends ChangeNotifier {
       return false;
     }
 
+    _discardExpiredAppOpenAd();
+
     // Check cooldown using dynamic cooldown
     if (_lastOpenAdShown != null) {
       final timeSinceLastAd = DateTime.now().difference(_lastOpenAdShown!);
@@ -487,12 +535,6 @@ class AdMobProvider extends ChangeNotifier {
 
     // Check if ad is loaded
     return _isAppOpenAdLoaded;
-  }
-
-  Future<void> preloadNextOpenAd() async {
-    if (!_isAppOpenAdLoaded) {
-      _loadAppOpenAd();
-    }
   }
 
   bool canShowRewardedAd(bool isLoggedIn) {
@@ -651,6 +693,9 @@ class AdMobProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _interstitialRetryTimer?.cancel();
+    _openAdRetryTimer?.cancel();
+    _rewardedAdRetryTimer?.cancel();
     _interstitialAd?.dispose();
     _appOpenAd?.dispose();
     _rewardedAd?.dispose();

@@ -43,101 +43,75 @@ class AdsConfig {
 
   /// Whether ads should actually be served.
   ///
+  /// iOS-only: this product ships on the App Store only and has no Android
+  /// AdMob app, so ads are never requested on other platforms.
+  ///
   /// FAIL-SAFE: shipping Google's sample/test ad unit IDs to the App Store is an
   /// AdMob policy violation and invalid production IDs only produce broken ad
   /// slots. So in a release build with unconfigured IDs we silently disable ads
-  /// instead of requesting them. Fill in the `_*Production*` constants below to
+  /// instead of requesting them. Fill in the `_production*` constants below to
   /// turn ads back on.
   static bool get adsEnabled {
     if (!_adsEnabledByConfig) return false;
+    if (!Platform.isIOS) return false;
     if (_isTestMode) return true;
     return hasProductionAdUnitIds;
   }
 
-  // Test Ad Unit IDs (replace with your actual ad unit IDs for production)
-  static const String _androidTestInterstitialAdUnitId =
-      'ca-app-pub-3940256099942544/1033173712';
-  static const String _iosTestInterstitialAdUnitId =
+  // Google's sample ad units, used in debug builds only.
+  static const String _testInterstitialAdUnitId =
       'ca-app-pub-3940256099942544/4411468910';
-
-  // App Open Ad test IDs - these are the correct format for app open ads
-  static const String _androidTestOpenAdUnitId =
-      'ca-app-pub-3940256099942544/9257395921';
-  static const String _iosTestOpenAdUnitId =
+  static const String _testOpenAdUnitId =
       'ca-app-pub-3940256099942544/5575463023';
-
-  // Rewarded Ad test IDs
-  static const String _androidTestRewardedAdUnitId =
-      'ca-app-pub-3940256099942544/5224354917';
-  static const String _iosTestRewardedAdUnitId =
+  static const String _testRewardedAdUnitId =
       'ca-app-pub-3940256099942544/1712485313';
-
-  // Banner Ad test IDs (Inline Adaptive)
-  static const String _androidTestBannerAdUnitId =
-      'ca-app-pub-3940256099942544/9214589741';
-  static const String _iosTestBannerAdUnitId =
+  static const String _testBannerAdUnitId =
       'ca-app-pub-3940256099942544/2435281174';
 
   // ═══════════════════════════════════════════════════════════════════
-  // PRODUCTION AD UNIT IDs — FILL THESE BEFORE SUBMITTING TO THE STORES
+  // PRODUCTION AD UNIT IDs — FILL THESE BEFORE SUBMITTING TO THE STORE
   // ═══════════════════════════════════════════════════════════════════
   //
-  // 1. AdMob console → Apps → NutriScan (iOS) → Ad units → copy each ID.
+  // 1. AdMob console → Apps → NutriSnap (iOS) → Ad units → copy each ID.
   // 2. Paste below. Format: 'ca-app-pub-<16 digits>/<10 digits>'.
-  // 3. ALSO update `GADApplicationIdentifier` in ios/Runner/Info.plist and
-  //    `com.google.android.gms.ads.APPLICATION_ID` in AndroidManifest.xml —
-  //    those are the App IDs (with `~`), not the ad unit IDs (with `/`).
+  // 3. ALSO update `GADApplicationIdentifier` in ios/Runner/Info.plist — that
+  //    is the App ID (with `~`), not an ad unit ID (with `/`).
   // 4. Verify with `AdsConfig.configurationReport()`.
   //
   // While any of these is empty, release builds run with ads disabled.
-  static const String _placeholder = '';
-
-  static const String _androidProductionInterstitialAdUnitId = _placeholder;
-  static const String _iosProductionInterstitialAdUnitId =
+  static const String _productionInterstitialAdUnitId =
       'ca-app-pub-5770727176247801/5510536452';
-  static const String _androidProductionOpenAdUnitId = _placeholder;
-  static const String _iosProductionOpenAdUnitId =
+  static const String _productionOpenAdUnitId =
       'ca-app-pub-5770727176247801/2884373116';
-  static const String _androidProductionRewardedAdUnitId = _placeholder;
-  static const String _iosProductionRewardedAdUnitId =
+  static const String _productionRewardedAdUnitId =
       'ca-app-pub-5770727176247801/8369855276';
-  static const String _androidProductionBannerAdUnitId = _placeholder;
-  static const String _iosProductionBannerAdUnitId =
+  static const String _productionBannerAdUnitId =
       'ca-app-pub-5770727176247801/6104332746';
 
-  /// AdMob **App IDs** (the `~` form). Kept here only so the release checklist
-  /// has one place to look; the values that actually matter at runtime live in
-  /// Info.plist (iOS) and AndroidManifest.xml (Android).
+  /// AdMob **App ID** (the `~` form). Kept here only so the release checklist
+  /// has one place to look; the value that actually matters at runtime lives in
+  /// Info.plist.
   static const String productionAdMobAppIdIos =
       'ca-app-pub-5770727176247801~9874508638';
-  static const String productionAdMobAppIdAndroid = _placeholder;
 
-  static const List<String> _iosProductionIds = [
-    _iosProductionInterstitialAdUnitId,
-    _iosProductionOpenAdUnitId,
-    _iosProductionRewardedAdUnitId,
-    _iosProductionBannerAdUnitId,
-  ];
-
-  static const List<String> _androidProductionIds = [
-    _androidProductionInterstitialAdUnitId,
-    _androidProductionOpenAdUnitId,
-    _androidProductionRewardedAdUnitId,
-    _androidProductionBannerAdUnitId,
+  static const List<String> _productionIds = [
+    _productionInterstitialAdUnitId,
+    _productionOpenAdUnitId,
+    _productionRewardedAdUnitId,
+    _productionBannerAdUnitId,
   ];
 
   static bool _isConfigured(String id) =>
       id.isNotEmpty && !id.contains('X') && id.startsWith('ca-app-pub-');
 
-  /// True when every production ad unit ID for the current platform is filled in
-  /// with a real value.
-  static bool get hasProductionAdUnitIds {
-    final ids = Platform.isAndroid ? _androidProductionIds : _iosProductionIds;
-    return ids.every(_isConfigured);
-  }
+  /// True when every production ad unit ID is filled in with a real value.
+  static bool get hasProductionAdUnitIds => _productionIds.every(_isConfigured);
 
   /// Human-readable status for the pre-submit checklist and debug logs.
   static String configurationReport() {
+    if (!Platform.isIOS) {
+      return 'AdsConfig: non-iOS platform — ads are DISABLED (iOS-only app).';
+    }
     if (_isTestMode) {
       return 'AdsConfig: TEST mode (debug build) — Google sample ad units in use.';
     }
@@ -146,68 +120,33 @@ class AdsConfig {
     }
     if (!hasProductionAdUnitIds) {
       return 'AdsConfig: RELEASE build with unconfigured production ad unit IDs '
-          '— ads are DISABLED. Fill the _*Production*AdUnitId constants in '
+          '— ads are DISABLED. Fill the _production*AdUnitId constants in '
           'lib/config/ads_config.dart before submitting.';
     }
     return 'AdsConfig: PRODUCTION ad units configured.';
   }
 
+  static String get interstitialAdUnitId => _isTestMode
+      ? _testInterstitialAdUnitId
+      : _productionInterstitialAdUnitId;
 
-  // Get interstitial ad unit ID based on platform
-  static String get interstitialAdUnitId {
-    if (_isTestMode) {
-      return Platform.isAndroid
-          ? _androidTestInterstitialAdUnitId
-          : _iosTestInterstitialAdUnitId;
-    } else {
-      return Platform.isAndroid
-          ? _androidProductionInterstitialAdUnitId
-          : _iosProductionInterstitialAdUnitId;
-    }
-  }
+  static String get openAdUnitId =>
+      _isTestMode ? _testOpenAdUnitId : _productionOpenAdUnitId;
 
-  // Get open ad unit ID based on platform
-  static String get openAdUnitId {
-    if (_isTestMode) {
-      return Platform.isAndroid
-          ? _androidTestOpenAdUnitId
-          : _iosTestOpenAdUnitId;
-    } else {
-      return Platform.isAndroid
-          ? _androidProductionOpenAdUnitId
-          : _iosProductionOpenAdUnitId;
-    }
-  }
+  static String get rewardedAdUnitId =>
+      _isTestMode ? _testRewardedAdUnitId : _productionRewardedAdUnitId;
 
-  // Get rewarded ad unit ID based on platform
-  static String get rewardedAdUnitId {
-    if (_isTestMode) {
-      return Platform.isAndroid
-          ? _androidTestRewardedAdUnitId
-          : _iosTestRewardedAdUnitId;
-    } else {
-      return Platform.isAndroid
-          ? _androidProductionRewardedAdUnitId
-          : _iosProductionRewardedAdUnitId;
-    }
-  }
-
-  // Get banner ad unit ID based on platform
-  static String get bannerAdUnitId {
-    if (_isTestMode) {
-      return Platform.isAndroid
-          ? _androidTestBannerAdUnitId
-          : _iosTestBannerAdUnitId;
-    } else {
-      return Platform.isAndroid
-          ? _androidProductionBannerAdUnitId
-          : _iosProductionBannerAdUnitId;
-    }
-  }
+  static String get bannerAdUnitId =>
+      _isTestMode ? _testBannerAdUnitId : _productionBannerAdUnitId;
 
   // ===== AD LOADING CONFIGURATION =====
   static const int maxRetryAttempts = 3;
   static const Duration retryDelay = Duration(seconds: 5);
+
+  // After the fast retries are exhausted (typically: the device was offline at
+  // launch) keep trying on a slow timer. Giving up entirely would leave the user
+  // with no way to earn coins for the rest of the session.
+  static const Duration retryBackoffDelay = Duration(minutes: 5);
   static const Duration adLoadTimeout = Duration(seconds: 10);
   static const Duration preloadDelay = Duration(milliseconds: 500);
 
@@ -240,6 +179,10 @@ class AdsConfig {
   static const Duration openAdLoadTimeout = Duration(seconds: 5);
   static const Duration openAdShowDelay = Duration(milliseconds: 500);
   static const Duration openAdDismissCooldown = Duration(seconds: 10);
+
+  // Google expires a cached app open ad after 4 hours; showing a stale one
+  // silently fails, so we drop and reload it past this age.
+  static const Duration openAdMaxCacheAge = Duration(hours: 4);
 
   // App open ad frequency control
   static const int maxOpenAdsPerSession = 3;

@@ -12,32 +12,22 @@ class LoginWelcomeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final tp = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
+    final d = tp.isDarkMode;
     final currentLanguage = languageProvider.currentLanguage;
 
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text:
-                AppLocalizations.getString(
-                  'welcome_to_nutriscan',
-                  currentLanguage,
-                ).replaceAll(
-                  'NutriScan',
-                  AppLocalizations.getString('nutriscan', currentLanguage),
-                ),
-          ),
-        ],
+    return Text(
+      AppLocalizations.getString(
+        'welcome_to_nutriscan',
+        currentLanguage,
+      ).replaceAll(
+        'NutriSnap',
+        AppLocalizations.getString('nutriscan', currentLanguage),
       ),
-      style: themeProvider.getFontForCurrentLanguage(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: isDarkMode
-            ? AppColors.textPrimaryDark
-            : AppColors.textPrimaryLight,
+      style: tp.getSerifFont(
+        fontSize: 30,
+        color: AppColors.skInk(d),
       ),
       textAlign: TextAlign.center,
     );
@@ -50,32 +40,23 @@ class LoginDescriptionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final tp = Provider.of<ThemeProvider>(context);
     final languageProvider = Provider.of<LanguageProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
+    final d = tp.isDarkMode;
     final currentLanguage = languageProvider.currentLanguage;
 
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text:
-                AppLocalizations.getString(
-                  'login_description',
-                  currentLanguage,
-                ).replaceAll(
-                  'Google',
-                  AppLocalizations.getString('google', currentLanguage),
-                ),
-          ),
-        ],
+    return Text(
+      AppLocalizations.getString(
+        'login_description',
+        currentLanguage,
+      ).replaceAll(
+        'Google',
+        AppLocalizations.getString('google', currentLanguage),
       ),
-      style: themeProvider.getFontForCurrentLanguage(
-        fontSize: 16,
+      style: tp.getBodyFont(
+        fontSize: 15,
         height: 1.5,
-        color: isDarkMode
-            ? AppColors.textSecondaryDark
-            : AppColors.textSecondaryLight,
+        color: AppColors.skMuted(d),
       ),
       textAlign: TextAlign.center,
     );
@@ -148,45 +129,103 @@ class GoogleSignInButton extends StatelessWidget {
   }
 }
 
-/// Reusable widget for skip button
-class SkipButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-
-  const SkipButton({super.key, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
-    final currentLanguage = languageProvider.currentLanguage;
-
-    return TextButton(
-      onPressed: onPressed,
-      child: Text(
-        AppLocalizations.getString('skip_for_now', currentLanguage),
-        style: themeProvider.getFontForCurrentLanguage(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: isDarkMode
-              ? AppColors.textSecondaryDark
-              : AppColors.textSecondaryLight,
-        ),
-      ),
-    );
-  }
-}
-
 /// Reusable widget for login screen logo
 class LoginLogo extends StatelessWidget {
   const LoginLogo({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      'assets/images/svg/login.svg',
-      height: 250,
-      fit: BoxFit.contain,
+    final tp = context.watch<ThemeProvider>();
+    final d = tp.isDarkMode;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 140,
+          height: 120,
+          child: CustomPaint(
+            size: const Size(140, 120),
+            painter: _SimpleBowlPainter(
+              inkColor: AppColors.skInk(d),
+              accentColor: AppColors.skAccent(d),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'NutriSnap',
+          style: tp.getSerifFont(
+            fontSize: 40,
+            color: AppColors.skInk(d),
+          ),
+        ),
+      ],
     );
   }
+}
+
+class _SimpleBowlPainter extends CustomPainter {
+  final Color inkColor;
+  final Color accentColor;
+
+  _SimpleBowlPainter({required this.inkColor, required this.accentColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final inkPaint = Paint()
+      ..color = inkColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+
+    final accentPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+
+    // Bowl
+    final bowlPath = Path()
+      ..moveTo(15, 45)
+      ..cubicTo(15, 80, 45, 100, 70, 100)
+      ..cubicTo(95, 100, 125, 80, 125, 45);
+    canvas.drawPath(bowlPath, inkPaint);
+
+    // Rim
+    final rimPath = Path()
+      ..moveTo(5, 48)
+      ..lineTo(135, 48);
+    canvas.drawPath(rimPath, inkPaint);
+
+    // Smile accent
+    final smilePath = Path()
+      ..moveTo(48, 100)
+      ..cubicTo(58, 107, 82, 107, 92, 100);
+    canvas.drawPath(smilePath, accentPaint);
+
+    // Steam lines
+    final steamPaint = Paint()
+      ..color = accentColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    final steam1 = Path()
+      ..moveTo(45, 38)
+      ..cubicTo(43, 28, 47, 20, 45, 12);
+    canvas.drawPath(steam1, steamPaint);
+
+    final steam2 = Path()
+      ..moveTo(70, 35)
+      ..cubicTo(68, 24, 72, 15, 70, 6);
+    canvas.drawPath(steam2, steamPaint);
+
+    final steam3 = Path()
+      ..moveTo(95, 38)
+      ..cubicTo(93, 28, 97, 20, 95, 12);
+    canvas.drawPath(steam3, steamPaint);
+  }
+
+  @override
+  bool shouldRepaint(_SimpleBowlPainter oldDelegate) => false;
 }

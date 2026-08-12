@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:iconly/iconly.dart';
 import 'package:nutriscan/config/app_colors.dart';
 import 'package:nutriscan/providers/theme/theme_provider.dart';
 import 'package:nutriscan/widgets/policy/policy_header.dart';
@@ -14,25 +12,22 @@ class TermsOfServiceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        final isDarkMode = themeProvider.isDarkMode;
+        final d = themeProvider.isDarkMode;
 
         return Scaffold(
-          backgroundColor: isDarkMode
-              ? AppColors.backgroundDark
-              : AppColors.backgroundLight,
+          backgroundColor: AppColors.skPaper(d),
           appBar: AppBar(
             title: Text(
               'Terms of Service',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.white,
+              style: themeProvider.getSerifFont(
+                fontSize: 22,
+                color: AppColors.skInk(d),
               ),
             ),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.skPaper(d),
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(IconlyLight.arrow_left, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: AppColors.skInk(d)),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
@@ -53,14 +48,14 @@ class TermsOfServiceScreen extends StatelessWidget {
                 const PolicySection(
                   title: 'Acceptance of Terms',
                   content:
-                      'By downloading, installing, or using NutriScan, you agree to comply with and be bound by these Terms of Service. If you do not agree, please do not use the application.',
+                      'By downloading, installing, or using NutriSnap, you agree to comply with and be bound by these Terms of Service. If you do not agree, please do not use the application.',
                   icon: Icons.check_circle,
                 ),
 
                 const PolicySection(
                   title: 'Medical Disclaimer',
                   content:
-                      'NutriScan is an AI-powered tool for nutritional estimation. THE RESULTS PROVIDED (CALORIES, MACRONUTRIENTS, ETC.) ARE ESTIMATIONS ONLY. This app is not a medical device and its content should not be interpreted as medical advice. Always consult a healthcare professional before making significant changes to your diet.',
+                      'NutriSnap is an AI-powered tool for nutritional estimation. THE RESULTS PROVIDED (CALORIES, MACRONUTRIENTS, ETC.) ARE ESTIMATIONS ONLY. This app is not a medical device and its content should not be interpreted as medical advice. Always consult a healthcare professional before making significant changes to your diet.',
                   icon: Icons.health_and_safety,
                 ),
 
@@ -81,14 +76,14 @@ class TermsOfServiceScreen extends StatelessWidget {
                 const PolicySection(
                   title: 'User Conduct',
                   content:
-                      'You agree to use NutriScan only for lawful purposes. You are responsible for the images and data you upload and must ensure you have the right to share them.',
+                      'You agree to use NutriSnap only for lawful purposes. You are responsible for the images and data you upload and must ensure you have the right to share them.',
                   icon: Icons.person_pin,
                 ),
 
                 const PolicySection(
                   title: 'Limitations of Liability',
                   content:
-                      'To the maximum extent permitted by law, NutriScan and its developers shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the service.',
+                      'To the maximum extent permitted by law, NutriSnap and its developers shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the service.',
                   icon: Icons.block,
                 ),
 

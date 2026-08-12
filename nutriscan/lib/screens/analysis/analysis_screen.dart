@@ -26,6 +26,12 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   String _selectedMetric = 'calories';
   bool _hasShownInterstitialOnEntry = false;
 
+  /// Cached insights future so FutureBuilder doesn't re-call the API on
+  /// every widget rebuild (which was causing 429 rate-limit errors).
+  Future<List<Map<String, dynamic>>>? _insightsFuture;
+  /// Track what the future was built for, so we invalidate on changes.
+  String? _insightsCacheKey;
+
   @override
   void initState() {
     super.initState();
@@ -139,7 +145,10 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   ) {
     return PeriodSelector(
       selectedPeriod: _selectedPeriod,
-      onPeriodChanged: (period) => setState(() => _selectedPeriod = period),
+      onPeriodChanged: (period) => setState(() {
+        _selectedPeriod = period;
+        _insightsFuture = null; // invalidate cache on period change
+      }),
     );
   }
 
@@ -301,7 +310,7 @@ class _AnalysisScreenState extends State<AnalysisScreen>
           ),
           const SizedBox(height: 24),
           FutureBuilder<List<Map<String, dynamic>>>(
-            future: _fetchInsightsFromServer(filteredFoods, languageProvider),
+            future: _getOrFetchInsights(filteredFoods, languageProvider),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return _buildLoadingState(
@@ -1795,6 +1804,22 @@ class _AnalysisScreenState extends State<AnalysisScreen>
     );
   }
 
+  // Returns a cached Future for insights, only re-fetching when the period
+  // or food list changes. This prevents FutureBuilder from firing a new API
+  // call on every widget rebuild (which was causing 429 rate-limit spam).
+  Future<List<Map<String, dynamic>>> _getOrFetchInsights(
+    List<Food> foods,
+    LanguageProvider languageProvider,
+  ) {
+    final cacheKey = '${_selectedPeriod}_${foods.length}_${languageProvider.currentLanguage}';
+    if (_insightsFuture != null && _insightsCacheKey == cacheKey) {
+      return _insightsFuture!;
+    }
+    _insightsCacheKey = cacheKey;
+    _insightsFuture = _fetchInsightsFromServer(foods, languageProvider);
+    return _insightsFuture!;
+  }
+
   // Fetch insights from server with language support, fallback to local generation
   Future<List<Map<String, dynamic>>> _fetchInsightsFromServer(
     List<Food> foods,
@@ -1824,7 +1849,9 @@ class _AnalysisScreenState extends State<AnalysisScreen>
         language: languageProvider.currentLanguage,
       );
 
-      // Convert icon strings to Icons
+      // Convert icon strings to Icons and normalise field names.
+      // The prompt asks for 'title' + 'insight', but the card widget reads
+      // 'title' + 'description', so map accordingly.
       return serverInsights.map((insight) {
         Map<String, dynamic> convertedInsight = Map.from(insight);
         convertedInsight['icon'] = _getIconFromString(
@@ -1833,6 +1860,11 @@ class _AnalysisScreenState extends State<AnalysisScreen>
         convertedInsight['color'] = _getColorFromString(
           insight['color'] ?? 'blue',
         );
+        // Normalise: prompt returns 'insight', card reads 'description'.
+        if (convertedInsight.containsKey('insight') &&
+            !convertedInsight.containsKey('description')) {
+          convertedInsight['description'] = convertedInsight['insight'];
+        }
         return convertedInsight;
       }).toList();
     } catch (e) {

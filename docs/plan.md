@@ -6,8 +6,8 @@
 **Shipping runbook:** [15_IOS_RELEASE_PLAN.md](./15_IOS_RELEASE_PLAN.md)  
 **Agent entry point:** [CLAUDE.md](../CLAUDE.md)  
 **This document:** Exhaustive phase instructions so a human or AI coding agent can implement **without guessing**.  
-**Version:** 2.1.0  
-**Last updated:** 2026-08-04  
+**Version:** 2.2.0  
+**Last updated:** 2026-08-10  
 
 ## Status at 2026-08-04
 
@@ -24,6 +24,9 @@
 | 3C — Online validation sampling | Code done + deployed 2026-08-05; V3C.1/V3C.2/V3C.4 need a staging run, see note below |
 | 4 — Plan/coach grounding | Done 2026-08-05 — executed against prod, see note below |
 | 5 → 6 | Not started |
+| 7A — Multi-food scan | Not started |
+| 7B — Quick Adjust UI | Not started |
+| 7C — Barcode + label OCR | Not started |
 
 **Phase 3A/3B — executed 2026-08-05** with a real Firebase Auth ID token from
 a dedicated `eval_test@nutriscan.com` account (V3A.2/V3B.1 pass — see
@@ -193,8 +196,14 @@ Phase 0
                                      └─ Phase 3C (online sample)
                                           └─ Phase 4 (plan/coach)
                                                └─ Phase 5 (store hardening)
-                                                    └─ Phase 6 (ops)
+                                                    └─ Phase 6 (ops, ongoing)
+                                                         └─ Phase 7A (multi-food scan)
+                                                              └─ Phase 7B (quick adjust)
+                                                         Phase 7C (barcode/OCR) ── parallel, needs only 1B/1C
 ```
+
+`docs/16_FEATURE_ROADMAP.md` is the source of truth for what comes after Phase
+7 (Phase 8+); this file only carries phases through implementation.
 
 ---
 
@@ -1140,6 +1149,251 @@ Production release (or soft launch).
 
 ---
 
+# PHASE 7A — Multi-food scan (prompt-based)
+
+## Purpose
+
+Recognize more than one food item in a single photo without a new Vision
+microservice — extend the existing vision JSON schema to return an array
+instead of one object. See `docs/16_FEATURE_ROADMAP.md` § 3 for why this beats
+a dedicated detection/segmentation service at current scale.
+
+## Depends on
+
+Phase 6 baseline (matcher stable — `match_rate`/`food_id_accuracy` already
+measured at 0.878).
+
+## Out of scope
+
+Bounding boxes / plate segmentation UI. On-device vision. Only add either if
+7A's list-review UX measurably fails (see `16_FEATURE_ROADMAP.md` § 4, Phase
+10.5 gate).
+
+## Critical insertion point
+
+Current single-item flow (`groq_service.dart` `analyzeFoodImage` →
+`food_provider.dart` `analyzeFoodImage`, see plan.md § "Quick reference" for
+exact signatures):
+
+```
+1. groq_service.analyzeFoodImage() → one JSON object
+2. food_provider checks is_food / food_name
+3. Food.fromJson(analysisResult) → one Food
+4. _resolveFoodSource(food) → matchFood → verified/estimated
+5. insertFood(); notifications; coin spend
+```
+
+**Required change:**
+
+```
+1. groq_service.analyzeFoodImage() → JSON with an "items" array
+   (backward compat: if the model returns the old single-object shape,
+   wrap it as items: [thatObject] — do not require a prompt-version bump
+   on every caller)
+2. food_provider checks is_food; if items empty → NOT_FOOD_IMAGE (unchanged)
+3. For each item: Food.fromJson(item) → _resolveFoodSource(food)
+   (this method is already single-food and needs ZERO changes — reuse as-is)
+4. Show review list (new widget) — user can deselect items before saving
+5. insertFood() once per KEPT item
+6. Side effects (notifications, coin spend) run ONCE per scan, not per item
+   — this is the one place a naive loop breaks an existing hard rule
+   (never bypass/duplicate the coin gate)
+```
+
+## Prompt schema change
+
+New target JSON (extends, does not replace, the existing single-object
+schema — see `groq_service.dart` `_getLocalizedPrompt`):
+
+```json
+{
+  "is_food": true,
+  "items": [
+    {
+      "food_name": "string",
+      "portion_grams": 0,
+      "serving_size": "string",
+      "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0, "sugar": 0, "sodium": 0,
+      "description": "string",
+      "health_score": 5,
+      "health_benefits": [],
+      "health_warnings": []
+    }
+  ]
+}
+```
+
+Cap requested/accepted items at **8** client-side — a hallucinated 20-item
+list is a UX and cost problem, not a real plate.
+
+## Files to touch
+
+| File | Change |
+|------|--------|
+| `lib/services/ai/groq_service.dart` | Prompt asks for `items[]`; parse accepts both shapes |
+| `lib/providers/food/food_provider.dart` | Loop over items; single coin spend / notification batch outside the loop |
+| `lib/widgets/scan/multi_food_review_sheet.dart` (new) | Checklist UI to keep/drop items before save |
+| `lib/config/feature_flags.dart` | Add `multiFoodScanEnabled` (Remote Config, default OFF — same pattern as `fkbMatcherEnabled`) |
+
+## Edge cases (must handle)
+
+| Case | Behavior |
+|------|----------|
+| `items` missing (old-shape response) | Treat as 1-item list — no regression |
+| `items: []` | NOT_FOOD_IMAGE path, same as today |
+| >8 items returned | Truncate to first 8, no error |
+| User deselects all items | Do not insert anything; do not spend a coin |
+| Feature flag OFF | Prompt unchanged, single-object path only (current behavior) |
+
+## Verify — Phase 7A
+
+| ID | Procedure | Pass criteria |
+|----|-----------|---------------|
+| V7A.1 | Single-food photo (e.g. banana) | Exactly 1 item, same result as pre-7A |
+| V7A.2 | Multi-item plate (rice + meat + vegetable) | 2+ items in review list |
+| V7A.3 | Deselect one item before saving | Only kept items land in DB |
+| V7A.4 | Save a 3-item scan | Coin spent exactly once (not 3×) |
+| V7A.5 | Save a 3-item scan | Daily-progress notification fires once, not per item |
+| V7A.6 | Flag OFF | Old single-item behavior unchanged (S1–S8 smoke suite still passes) |
+
+## Definition of done
+
+A photo with multiple distinct foods produces a reviewable list, each item
+independently verified/estimated via the existing unmodified `matchFood`
+path, with side effects still scoped to one scan.
+
+---
+
+# PHASE 7B — Quick Adjust UI
+
+## Purpose
+
+Let the user correct portion size right after a scan ("less rice / more
+protein") without a second AI call.
+
+## Depends on
+
+Phase 2 (`portionGrams` on `Food`), Phase 7A (list review reuses the same
+per-item card, though 7B works standalone on a single-item scan too).
+
+## Out of scope
+
+Any new server-side estimation model. This is pure client-side proportional
+scaling.
+
+## Math (no schema change needed)
+
+The scaling law already in `0.5` — `nutrient_total = nutrient_per_100g *
+grams/100` — means adjusting grams is just a ratio on the *existing* totals,
+whether the item is `verified` or `estimated`:
+
+```
+newTotal = oldTotal * (newGrams / oldGrams)
+```
+
+No need to store `nutrient_per_100g` separately; `Food.calories` etc. and
+`Food.portionGrams` already carry enough to derive it.
+
+## Files to touch
+
+| File | Change |
+|------|--------|
+| `lib/models/food.dart` | Add `Food scaleToGrams(double newGrams)` helper using the ratio above |
+| `lib/screens/analysis/analysis_screen.dart` | Slider/stepper bound to `portionGrams`; live-updates displayed macros via `scaleToGrams` |
+| `lib/services/database/database_helper.dart` | On save-after-adjust: persist new grams/macros, set `source: 'user_edited'` |
+
+## Edge cases (must handle)
+
+| Case | Behavior |
+|------|----------|
+| `portionGrams == null` (AI never estimated one) | Slider disabled; show manual grams text input instead |
+| `oldGrams <= 0` | Cannot scale — treat as manual-entry case above |
+| Item was `verified` before edit | `fkbFoodId` and `matchScore` are retained after edit for traceability, but `source` flips to `user_edited` per `0.4` |
+
+## Verify — Phase 7B
+
+| ID | Procedure | Pass criteria |
+|----|-----------|---------------|
+| V7B.1 | Drag slider to 2× original grams | Macros exactly double |
+| V7B.2 | Save after adjusting | `source == 'user_edited'`, new grams persisted |
+| V7B.3 | Adjust a `verified` item | `fkbFoodId` unchanged after save (traceable to FKB origin even though source flipped) |
+| V7B.4 | Item with `portionGrams == null` | Slider hidden/disabled; manual input shown instead; no crash |
+
+## Definition of done
+
+Any saved food's displayed macros can be corrected in-place, in real time,
+without a network call, and the log ends up correctly labeled `user_edited`.
+
+---
+
+# PHASE 7C — Barcode + Nutrition Label OCR
+
+## Purpose
+
+Alternate input path for packaged food: scan a barcode or the printed
+nutrition table instead of a dish photo.
+
+## Depends on
+
+Phase 1B (`fkbSearch`/`fkbGet`), Phase 1C (`matchFood` contract).
+
+## Out of scope
+
+Building a standalone barcode-nutrition database (e.g. mirroring
+OpenFoodFacts). MVP only checks the scanned text/barcode against existing
+`fkb_foods` aliases via the existing `matchFood`/`fkbSearch` — no new backend
+service, no new Functions callable required.
+
+## Design
+
+- On-device only: `google_mlkit_barcode_scanning` + `google_mlkit_text_recognition`
+  (no new provider API key — consistent with the "no keys in Flutter tree" rule,
+  since these run fully on-device).
+- Barcode value or OCR'd product name is passed as `food_name` into the
+  **existing** `matchFood` call (`lib/services/fkb/match_service.dart`) — same
+  contract as Phase 1C, no server change.
+- If OCR reads printed grams-per-serving, pass it as `portion_grams`; if not,
+  `portion_grams` is null → falls back to `estimated` per the existing rule in
+  `0.5`.
+- **Source-label decision:** OCR'd numbers come from the package's own printed
+  table, not from FKB matching. Per the hard rule in `CLAUDE.md` ("never label
+  a macro `verified` from raw AI/OCR output"), keep these `estimated` unless
+  they resolve through `matchFood` to a real FKB hit. Treating printed-label
+  numbers as their own trust tier would need a new `source` enum value — that
+  is a product decision requiring an ADR, out of scope here.
+
+## Files to touch
+
+| File | Change |
+|------|--------|
+| `lib/services/scan/barcode_scan_service.dart` (new) | ML Kit barcode wrapper |
+| `lib/services/scan/label_ocr_service.dart` (new) | ML Kit text recognition wrapper, extract product name + optional grams |
+| `lib/providers/food/food_provider.dart` | New method `analyzeBarcodeOrLabel(...)` that builds a `Food`-shaped map and reuses `_resolveFoodSource` + the existing `insertFood`/notification/coin tail — **do not fork a parallel save path** |
+
+## Edge cases (must handle)
+
+| Case | Behavior |
+|------|----------|
+| Barcode unreadable | Clear retry message, no crash |
+| Barcode/product not in FKB | `estimated` (if OCR gave numbers) or a distinct "not found, log manually" state — check whether a manual-entry screen already exists before building one |
+| OCR garbles numbers (non-numeric) | Treat as missing `portion_grams`; do not guess |
+
+## Verify — Phase 7C
+
+| ID | Procedure | Pass criteria |
+|----|-----------|---------------|
+| V7C.1 | Scan a barcode whose product name matches an existing `fkb_foods` alias | `verified`, scaled macros |
+| V7C.2 | Scan a barcode with no FKB match | `estimated` or "not found" UX, no crash |
+| V7C.3 | OCR a label with clear per-serving numbers | Saved as `estimated` (per source-label decision above), grams from label used |
+| V7C.4 | Coin spend on successful barcode/OCR save | Same one-coin gate as a photo scan — no bypass |
+
+## Definition of done
+
+Barcode and label OCR both terminate in the same `_resolveFoodSource` /
+`insertFood` path as photo scans; no second save pipeline exists.
+
+---
+
 # Smoke suite (mandatory after scan-related changes)
 
 Run on a staging build signed-in with test account that has coins or premium.
@@ -1181,6 +1435,11 @@ on every feature PR; that one is run before every submission.
 
 Remaining, in order:
 8. `feat(compliance): finish release checklist` — Phase 5 (remainder)
+
+After Phase 5 lands (or in parallel — nothing below touches store compliance):
+9. `feat(scan): multi-item JSON schema + review list` — Phase 7A
+10. `feat(scan): quick-adjust grams slider` — Phase 7B (depends on 7A's review card, but the math needs no schema change)
+11. `feat(scan): barcode + label OCR entry point` — Phase 7C (parallel with 9/10, only needs 1B/1C)
 
 ~~`test: nutrient scaling + Food round-trip + migration path` — closes the "no `test/` directory" debt~~ **done 2026-08-05** (see `CLAUDE.md` § 5)
 
@@ -1225,5 +1484,6 @@ Extend these; do not replace call chains ad hoc.
 | 1.0.0 | 2026-08-03 | Initial plan + verify tables |
 | 2.0.0 | 2026-08-03 | Agent-detailed contracts, insertion points, edge cases, ticket order |
 | 2.1.0 | 2026-08-04 | Status table added; Phase 5 expanded with the iOS technical-compliance items it previously omitted and marked with what shipped; V5.7/V5.8 added; smoke suite cross-referenced to the release runbook; ticket order updated |
+| 2.2.0 | 2026-08-10 | Phase 7A–7C added (multi-food scan, quick adjust, barcode/OCR) per `docs/16_FEATURE_ROADMAP.md`; voice log dropped from scope — off-focus for a scan-first app; all three extend the existing single scan pipeline, no new services; status table, dependency graph, and ticket order updated |
 
-**End of plan.md v2.1.0**
+**End of plan.md v2.2.0**

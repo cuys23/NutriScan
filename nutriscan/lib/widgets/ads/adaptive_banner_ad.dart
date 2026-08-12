@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nutriscan/config/ads_config.dart';
@@ -15,6 +17,8 @@ class _AdaptiveBannerAdState extends State<AdaptiveBannerAd> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
   bool _isLoadingAd = false;
+  int _retryCount = 0;
+  Timer? _retryTimer;
 
   @override
   void didChangeDependencies() {
@@ -47,11 +51,19 @@ class _AdaptiveBannerAdState extends State<AdaptiveBannerAd> {
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
+            _bannerAd = null;
+            _isLoadingAd = false;
             if (mounted) {
-              setState(() {
-                _isAdLoaded = false;
-                _isLoadingAd = false;
-              });
+              setState(() => _isAdLoaded = false);
+              // Without this the slot stays empty for the whole screen's life:
+              // didChangeDependencies won't fire again to retry.
+              if (_retryCount < AdsConfig.maxRetryAttempts) {
+                _retryCount++;
+                _retryTimer?.cancel();
+                _retryTimer = Timer(AdsConfig.retryDelay, () {
+                  if (mounted) _loadBannerAd();
+                });
+              }
             }
           },
         ),
@@ -65,6 +77,7 @@ class _AdaptiveBannerAdState extends State<AdaptiveBannerAd> {
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
     _bannerAd?.dispose();
     super.dispose();
   }

@@ -7,73 +7,53 @@ class PolicyHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
   final IconData icon;
-  final Color? gradientStartColor;
-  final Color? gradientEndColor;
-  final double? iconSize;
-  final EdgeInsets? padding;
-  final EdgeInsets? margin;
 
   const PolicyHeader({
     super.key,
     required this.title,
     this.subtitle,
     required this.icon,
-    this.gradientStartColor,
-    this.gradientEndColor,
-    this.iconSize,
-    this.padding,
-    this.margin,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        final iconSizeValue = iconSize ?? 48.0;
+    final tp = context.watch<ThemeProvider>();
+    final d = tp.isDarkMode;
 
-        return Container(
-          width: double.infinity,
-          margin: margin ?? const EdgeInsets.symmetric(vertical: 16),
-          padding: padding ?? const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.skSurface(d),
+        border: Border.all(color: AppColors.skRule(d)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 40, color: AppColors.skAccent(d)),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: tp.getSerifFont(
+              fontSize: 26,
+              color: AppColors.skInk(d),
+            ),
+            textAlign: TextAlign.center,
           ),
-          child: Column(
-            children: [
-              Icon(icon, size: iconSizeValue, color: Colors.white),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: themeProvider.getFontForCurrentLanguage(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
+          if (subtitle != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              subtitle!,
+              style: tp.getBodyFont(
+                fontSize: 13,
+                color: AppColors.skMuted(d),
               ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  subtitle!,
-                  style: themeProvider.getFontForCurrentLanguage(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.8),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ],
-          ),
-        );
-      },
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

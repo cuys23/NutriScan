@@ -5,6 +5,7 @@ import 'package:nutriscan/config/app_localizations.dart';
 import 'package:nutriscan/config/exports/providers.dart';
 import 'package:nutriscan/config/exports/screens.dart';
 import 'package:nutriscan/config/exports/widgets.dart';
+import 'package:nutriscan/widgets/common/sk_snackbar.dart';
 import 'package:nutriscan/utils/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -110,18 +111,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onTap: null,
         ),
         const SizedBox(height: 12),
-        SettingsCard(
-          icon: Icons.language,
-          title: AppLocalizations.getString('language', currentLanguage),
-          subtitle: AppLocalizations.getString(
-            'language_subtitle',
-            currentLanguage,
-          ),
-          color: Colors.blue,
-          trailing: const LanguageDropdown(),
-          onTap: null,
-        ),
-        const SizedBox(height: 12),
+        // Language switching is disabled — English is the app's only language.
+        // SettingsCard(
+        //   icon: Icons.language,
+        //   title: AppLocalizations.getString('language', currentLanguage),
+        //   subtitle: AppLocalizations.getString(
+        //     'language_subtitle',
+        //     currentLanguage,
+        //   ),
+        //   color: Colors.blue,
+        //   trailing: const LanguageDropdown(),
+        //   onTap: null,
+        // ),
+        // const SizedBox(height: 12),
         SettingsCard(
           icon: Icons.notifications,
           title: AppLocalizations.getString(
@@ -504,15 +506,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await context.read<CoinProvider>().reloadCoins();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.getString(
-            'delete_account_success',
-            currentLanguage,
-          ),
-        ),
-        backgroundColor: Colors.green[600],
+    SkSnackBar.success(
+      context,
+      message: AppLocalizations.getString(
+        'delete_account_success',
+        currentLanguage,
       ),
     );
   }
